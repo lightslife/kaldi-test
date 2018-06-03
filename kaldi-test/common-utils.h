@@ -19,13 +19,13 @@
 #ifndef KALDI_UTIL_COMMON_UTILS_H_
 #define KALDI_UTIL_COMMON_UTILS_H_
 
-#include "base/kaldi-common.h"
-#include "util/parse-options.h"
-#include "util/kaldi-io.h"
-#include "util/simple-io-funcs.h"
-#include "util/kaldi-holder.h"
-#include "util/kaldi-table.h"
-#include "util/table-types.h"
-#include "util/text-utils.h"
+#include "kaldi-common.h"
+#include "parse-options.h"
+#include "kaldi-io.h"
+#include "simple-io-funcs.h"
+#include "kaldi-holder.h"
+#include "kaldi-table.h"
+#include "table-types.h"
+#include "text-utils.h"
 
 #endif  // KALDI_UTIL_COMMON_UTILS_H_

@@ -159,12 +159,120 @@
     <ClInclude Include="cblas-function.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="am-nnet-simple.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="decodable-online-looped.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="decodable-simple-looped.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-am-decodable-simple.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-analyze.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-compile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-compile-looped.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-compile-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-component-itf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-computation.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-computation-graph.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-compute.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-descriptor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-general-component.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-graph.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-nnet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-normalize-component.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-optimize.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-optimize-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-parse.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-simple-component.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nnet-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="simple-io-funcs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="simple-options.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="table-types.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-array.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-array-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-matrixdim.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-matrix-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-matrix-lib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-rand.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-vector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cu-value.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="kaldi-test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="io-funcs.cc">
@@ -234,6 +342,99 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="cblas-function.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="asr-test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="am-nnet-simple.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="decodable-online-looped.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="decodable-simple-looped.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-parse.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-utils.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-simple-component.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-optimize-utils.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-optimize.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-normalize-component.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-nnet.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-graph.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-general-component.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-descriptor.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-compute.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-computation-graph.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-computation.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-component-itf.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-compile-utils.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-compile-looped.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-am-decodable-simple.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-analyze.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-common.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-compile.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="simple-io-funcs.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="simple-options.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cu-array.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cu-math.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cu-matrix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cu-rand.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cu-vector.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

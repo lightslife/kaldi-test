@@ -21,7 +21,7 @@
 
 #ifndef KALDI_ITF_DECODABLE_ITF_H_
 #define KALDI_ITF_DECODABLE_ITF_H_ 1
-#include "base/kaldi-common.h"
+#include "kaldi-common.h"
 
 namespace kaldi {
 /// @ingroup Interfaces
