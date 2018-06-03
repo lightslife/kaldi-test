@@ -24,12 +24,216 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="io-funcs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="io-funcs-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-error.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-types.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hmm-topology.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="transition-model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="text-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="decodable-itf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="online-feature-itf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="options-itf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="basic-filebuf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="common-utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="const-integer-set.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="const-integer-set-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-io.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-io-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="parse-options.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-holder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-holder-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-pipebuf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-table.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-table-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-matrix-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-vector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-vector-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix-common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="srfft.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix-functions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix-functions-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix-lib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="optimization.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="packed-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sp-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tp-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kaldi-semaphore.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="compressed-matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cblas-function.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="kaldi-test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="io-funcs.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-error.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-math.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-utils.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="hmm-topology.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="transition-model.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="text-utils.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-io.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="parse-options.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-matrix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-vector.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="srfft.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix-functions.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="optimization.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="packed-matrix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="qr.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="sparse-matrix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tp-matrix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-semaphore.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="compressed-matrix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-holder.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kaldi-table.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cblas-function.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
