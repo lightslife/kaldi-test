@@ -28,7 +28,7 @@
 
 #include "nnet-common.h"
 #include "nnet-component-itf.h"
-#include "natural-gradient-online.h"
+//#include "natural-gradient-online.h"
 #include <iostream>
 
 namespace kaldi {

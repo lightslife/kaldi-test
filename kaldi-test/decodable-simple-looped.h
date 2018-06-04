@@ -22,7 +22,7 @@
 
 #include <vector>
 #include "kaldi-common.h"
-#include "am-diag-gmm.h"
+//#include "am-diag-gmm.h"
 #include "transition-model.h"
 #include "decodable-itf.h"
 #include "nnet-optimize.h"

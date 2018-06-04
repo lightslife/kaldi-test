@@ -297,22 +297,22 @@ void ComputeNnetComputationEpochs(const Nnet &nnet,
     }
   }
 }
-
-bool GraphHasCycles(const std::vector<std::vector<int32> > &graph) {
-  std::vector<std::vector<int32> > sccs;
-  FindSccs(graph, &sccs);
-  for (size_t i = 0; i < sccs.size(); i++) {
-    if (sccs[i].size() > 1)
-      return true;
-  }
-  // the next code checks for links from a state to itself.
-  int32 num_nodes = graph.size();
-  for (size_t i = 0; i < num_nodes; i++)
-    for (std::vector<int32>::const_iterator iter = graph[i].begin(),
-             end = graph[i].end(); iter != end; ++iter)
-      if (*iter == i) return true;
-  return false;
-}
+//
+//bool GraphHasCycles(const std::vector<std::vector<int32> > &graph) {
+//  std::vector<std::vector<int32> > sccs;
+//  FindSccs(graph, &sccs);
+//  for (size_t i = 0; i < sccs.size(); i++) {
+//    if (sccs[i].size() > 1)
+//      return true;
+//  }
+//  // the next code checks for links from a state to itself.
+//  int32 num_nodes = graph.size();
+//  for (size_t i = 0; i < num_nodes; i++)
+//    for (std::vector<int32>::const_iterator iter = graph[i].begin(),
+//             end = graph[i].end(); iter != end; ++iter)
+//      if (*iter == i) return true;
+//  return false;
+//}
 
 } // namespace nnet3
 } // namespace kaldi

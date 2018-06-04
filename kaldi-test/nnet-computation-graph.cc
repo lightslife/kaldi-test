@@ -25,7 +25,7 @@
 namespace kaldi {
 namespace nnet3 {
 
-
+//
 int32 ComputationGraph::GetCindexId(const Cindex &cindex,
                                     bool input, bool *is_new) {
   typedef unordered_map<Cindex, int32, CindexHasher> map_type;
@@ -54,7 +54,7 @@ int32 ComputationGraph::GetCindexId(const Cindex &cindex) const {
     return iter->second;
 }
 
-
+//
 void ComputationGraph::Renumber(int32 start_cindex_id,
                                 const std::vector<bool> &keep) {
   int32 old_num_cindex_ids = cindexes.size();
@@ -171,59 +171,59 @@ void ComputationGraphBuilder::ExplainWhyNotComputable(
   os << "\n";
   KALDI_LOG << os.str();
 }
-
-
-void ComputationGraph::Print(std::ostream &os,
-                             const std::vector<std::string> &node_names) {
-  int32 max_cindexes_per_line = 50, max_dependencies = 5,
-      num_cindexes = cindexes.size();
-
-  std::vector<std::pair<Cindex, std::vector<Cindex> > > pairs;
-  pairs.reserve(num_cindexes);
-  for (int32 cindex_id = 0; cindex_id < num_cindexes; cindex_id++) {
-    int32 size = dependencies[cindex_id].size();
-    std::vector<Cindex> deps(size);
-    for (size_t i = 0; i < size; i++)
-      deps[i] = cindexes[dependencies[cindex_id][i]];
-    std::sort(deps.begin(), deps.end());
-    pairs.push_back(std::pair<Cindex, std::vector<Cindex> >(cindexes[cindex_id],
-                                                            deps));
-  }
-  std::sort(pairs.begin(), pairs.end());
-  int32 cur_start = 0;
-  for (int32 i = 0; i < num_cindexes; i++) {
-    if (pairs[i].first.first != pairs[cur_start].first.first) {
-      cur_start = i;
-      os << "\n";
-    }
-    if (i - cur_start < max_cindexes_per_line) {
-      os << "[ ";
-      PrintCindex(os, pairs[i].first, node_names);
-      if (! is_input[GetCindexId(pairs[i].first)]) {
-        // only print out dependences for cindexes that
-        // were not provided as inputs.
-        os << " -> ";
-        for (int32 j = 0; j < pairs[i].second.size(); j++) {
-          if (j < max_dependencies) {
-            PrintCindex(os, pairs[i].second[j], node_names);
-            if (j + 1 < pairs[i].second.size())
-              os << ", ";
-          } else if (j == max_dependencies) {
-            os << "...";
-          }
-        }
-      }
-      os << " ] ";
-    } else if (i - cur_start == max_cindexes_per_line) {
-      os << "...";
-    }
-  }
-  os << "\n";
-
-}
-
-
-// inline
+//
+//
+//void ComputationGraph::Print(std::ostream &os,
+//                             const std::vector<std::string> &node_names) {
+//  int32 max_cindexes_per_line = 50, max_dependencies = 5,
+//      num_cindexes = cindexes.size();
+//
+//  std::vector<std::pair<Cindex, std::vector<Cindex> > > pairs;
+//  pairs.reserve(num_cindexes);
+//  for (int32 cindex_id = 0; cindex_id < num_cindexes; cindex_id++) {
+//    int32 size = dependencies[cindex_id].size();
+//    std::vector<Cindex> deps(size);
+//    for (size_t i = 0; i < size; i++)
+//      deps[i] = cindexes[dependencies[cindex_id][i]];
+//    std::sort(deps.begin(), deps.end());
+//    pairs.push_back(std::pair<Cindex, std::vector<Cindex> >(cindexes[cindex_id],
+//                                                            deps));
+//  }
+//  std::sort(pairs.begin(), pairs.end());
+//  int32 cur_start = 0;
+//  for (int32 i = 0; i < num_cindexes; i++) {
+//    if (pairs[i].first.first != pairs[cur_start].first.first) {
+//      cur_start = i;
+//      os << "\n";
+//    }
+//    if (i - cur_start < max_cindexes_per_line) {
+//      os << "[ ";
+//      PrintCindex(os, pairs[i].first, node_names);
+//      if (! is_input[GetCindexId(pairs[i].first)]) {
+//        // only print out dependences for cindexes that
+//        // were not provided as inputs.
+//        os << " -> ";
+//        for (int32 j = 0; j < pairs[i].second.size(); j++) {
+//          if (j < max_dependencies) {
+//            PrintCindex(os, pairs[i].second[j], node_names);
+//            if (j + 1 < pairs[i].second.size())
+//              os << ", ";
+//          } else if (j == max_dependencies) {
+//            os << "...";
+//          }
+//        }
+//      }
+//      os << " ] ";
+//    } else if (i - cur_start == max_cindexes_per_line) {
+//      os << "...";
+//    }
+//  }
+//  os << "\n";
+//
+//}
+//
+//
+//// inline
 void ComputationGraphBuilder::AddCindexId(int32 cindex_id,
                                           bool is_input,
                                           bool is_output) {
@@ -247,7 +247,7 @@ void ComputationGraphBuilder::AddCindexId(int32 cindex_id,
   usable_count_.push_back(is_output ? 1 : 0);
 }
 
-
+//
 void ComputationGraphBuilder::AddInputs() {
   int32 num_added = 0;
   for (int32 i = 0; i < request_->inputs.size(); i++) {
@@ -295,7 +295,7 @@ void ComputationGraphBuilder::AddOutputs() {
   KALDI_ASSERT(current_queue_.empty());
   current_queue_.swap(next_queue_);
 }
-
+//
 bool ComputationGraphBuilder::AllOutputsAreComputable() const {
   char is_computable_char = static_cast<char>(kComputable);
   std::vector<char>::const_iterator iter = computable_info_.begin(),
@@ -326,8 +326,8 @@ std::ostream& operator << (std::ostream &os,
   return os;
 }
 
-
-// Prints logging info to explain why all outputs are not computable.
+//
+//// Prints logging info to explain why all outputs are not computable.
 void ComputationGraphBuilder::ExplainWhyAllOutputsNotComputable() const {
   std::vector<int32> outputs_not_computable;
   int32 num_outputs_total = 0;
@@ -631,8 +631,8 @@ void ComputationGraphBuilder::Prune() {
   KALDI_ASSERT(computable_queue_.empty());
   graph_->segment_ends.push_back(new_num_cindex_ids);
 }
-
-// Add cindex_ids that this cindex_id depends on.
+//
+//// Add cindex_ids that this cindex_id depends on.
 void ComputationGraphBuilder::AddDependencies(int32 cindex_id) {
   if (static_cast<int32>(graph_->dependencies.size()) <= cindex_id) {
     graph_->dependencies.resize(2 * cindex_id + 1);
@@ -799,30 +799,30 @@ ComputationGraphBuilder::ComputeComputableInfo(int32 cindex_id)
   }
 }
 
-void ComputationGraphBuilder::GetComputableInfo(
-    std::vector<std::vector<bool> > *computable) const {
-  KALDI_ASSERT(!graph_->cindexes.empty() &&
-               "You need to call this after Compute()!");
-  KALDI_ASSERT(!computable_info_.empty() &&
-               "You need to call this before Prune()!");
-  computable->clear();
-  computable->resize(request_->outputs.size());
-  for (size_t i = 0; i < request_->outputs.size(); i++) {
-    const IoSpecification &output = request_->outputs[i];
-    int32 n = nnet_.GetNodeIndex(output.name);
-    KALDI_ASSERT(n != -1);
-    int32 size = output.indexes.size();
-    std::vector<bool> &this_vec = (*computable)[i];
-    this_vec.resize(size);
-    for (size_t j = 0; j < size; j++) {
-      Cindex cindex(n, output.indexes[j]);
-      int32 cindex_id = graph_->GetCindexId(cindex);
-      KALDI_ASSERT(cindex_id != -1);
-      this_vec[j] = (computable_info_[cindex_id] == kComputable);
-    }
-  }
-}
-
+//void ComputationGraphBuilder::GetComputableInfo(
+//    std::vector<std::vector<bool> > *computable) const {
+//  KALDI_ASSERT(!graph_->cindexes.empty() &&
+//               "You need to call this after Compute()!");
+//  KALDI_ASSERT(!computable_info_.empty() &&
+//               "You need to call this before Prune()!");
+//  computable->clear();
+//  computable->resize(request_->outputs.size());
+//  for (size_t i = 0; i < request_->outputs.size(); i++) {
+//    const IoSpecification &output = request_->outputs[i];
+//    int32 n = nnet_.GetNodeIndex(output.name);
+//    KALDI_ASSERT(n != -1);
+//    int32 size = output.indexes.size();
+//    std::vector<bool> &this_vec = (*computable)[i];
+//    this_vec.resize(size);
+//    for (size_t j = 0; j < size; j++) {
+//      Cindex cindex(n, output.indexes[j]);
+//      int32 cindex_id = graph_->GetCindexId(cindex);
+//      KALDI_ASSERT(cindex_id != -1);
+//      this_vec[j] = (computable_info_[cindex_id] == kComputable);
+//    }
+//  }
+//}
+//
 
 void ComputationGraphBuilder::UpdateComputableInfo(int32 cindex_id) {
   // if the current computable_info_ for cindex_id value is not kUnknown, this
@@ -862,22 +862,22 @@ void ComputationGraphBuilder::UpdateComputableInfo(int32 cindex_id) {
     }
   }
 }
-
-void ComputationGraphBuilder::SetAsWillNotCompute(int32 cindex_id) {
-  KALDI_ASSERT(usable_count_[cindex_id] == 0);
-  computable_info_[cindex_id] = kWillNotCompute;
-  std::vector<int32>::const_iterator iter = depend_on_this_[cindex_id].begin(),
-      end = depend_on_this_[cindex_id].end();
-  for (; iter != end; ++iter) {
-    int32 other_cindex_id = *iter;
-    if (computable_info_[other_cindex_id] == kUnknown &&
-        !computable_queued_[other_cindex_id]) {
-      computable_queue_.push_back(other_cindex_id);
-      computable_queued_[other_cindex_id] = true;
-    }
-  }
-}
-
+//
+//void ComputationGraphBuilder::SetAsWillNotCompute(int32 cindex_id) {
+//  KALDI_ASSERT(usable_count_[cindex_id] == 0);
+//  computable_info_[cindex_id] = kWillNotCompute;
+//  std::vector<int32>::const_iterator iter = depend_on_this_[cindex_id].begin(),
+//      end = depend_on_this_[cindex_id].end();
+//  for (; iter != end; ++iter) {
+//    int32 other_cindex_id = *iter;
+//    if (computable_info_[other_cindex_id] == kUnknown &&
+//        !computable_queued_[other_cindex_id]) {
+//      computable_queue_.push_back(other_cindex_id);
+//      computable_queued_[other_cindex_id] = true;
+//    }
+//  }
+//}
+//
 
 void ComputationGraphBuilder::UpdateAllComputableInfo() {
   while (!computable_queue_.empty()) {
@@ -919,7 +919,7 @@ void ComputationGraphBuilder::DecrementUsableCount(int32 cindex_id) {
     }
   }
 }
-
+//
 
 void ComputationGraphBuilder::BuildGraphOneIter() {
   while (!current_queue_.empty()) {
@@ -980,9 +980,9 @@ void ComputationGraphBuilder::ComputeRequiredArray(
                    (usable_count_[c] == 0)));
 
 }
-
-
-// make our own namespace for helper functions of ComputeComputationGraph.
+//
+//
+//// make our own namespace for helper functions of ComputeComputationGraph.
 namespace computation_graph {
 
 
@@ -1272,58 +1272,58 @@ static int32 SumVectorSizes(const std::vector<std::vector<std::vector<int32> > >
 }
 
 
-/*
-  this function is called from ComputeComputationPhases; it handles the part of
-  the computation from one epoch (this code was broken out to avoid that
-  function being super-long).  Note: the phases are a numbered grouping of
-  cindexes that say in what order we compute things, i.e. we first compute
-  all the cindexes for phase 0, then for phase 1, and so on.
-
-   @param [in] nnet       The neural net this computation is for
-   @param [in] graph      The computation graph we're computing the phases for.
-
-   @param [in] this_epoch The sorted list of the cindex_ids for this epoch; note,
-                          cindex_ids are indexes into the array graph.cindexes.
-                          Roughly speaking, this is a list of the cindex_ids that
-                          correspond to one "layer" of the neural network, in
-                          things like LSTMs, or for one part of one layer (the
-                          affine component, the nonlinearity, or the splicing),
-                          in things like TDNNs.
-  @param [in] dependencies_subset  A subset of 'graph.dependencies' corresponding
-                          just to dependencies within the same epoch (not specifically
-                          this epoch; for all epochs).  In general, for a cindex_id c
-                          dependencies[c] is a list of other cindex_ids d1, d2,
-                          such that in order to compute c we must first compute
-                          d1, d2 and so on (plus d1, d2, etc. must be from the
-                          same epoch as c).
-  @param [in] depends_on_subset  The graph-transpose of dependencies_subset;
-                          for cindex_id c, depends_on_subset[c] is the list
-                          of cindex_ids that directly depend on cindex_id c,
-                          so c must be computed before them.
-  @param [in] epoch_is_trivial  A bool that's true if this epoch is trivial
-                          (meaning it consists of just one component)... this
-                          enables a faster code path in this common case.
-  @param [in,out] phase_indexes  This vector, to some elements of which this
-                          function writes each time it is called, maps from
-                          cindex_id to the 'phase index'.  A phase index is a
-                          number identifying the phases [like coarse steps] of
-                          the computation, with zero for the first phase, one
-                          for the second, etc.  We work out how many phase
-                          indexes have been used already by previous epochs,
-                          from phases->size().  Actually, phase_indexes is
-                          really just a temporary variable used by this
-                          function, that we allocate outside this function for
-                          efficiency.  It is initialized to -1 outside this
-                          function; different invocations of this function work
-                          with different non-overlapping elements of the vector.
-                          @param [in,out] phases This is the output of this
-                          function.  Each time we add a new phase, we append a
-                          vector to *phases.  E.g. (*phases)[0] is the sorted
-                          list of cindexes in the first phase of the
-                          computation... and so on.  Note, this function is
-                          called multiple times, and each time we add one or
-                          more phases to this vector, so its size grows.
-*/
+///*
+//  this function is called from ComputeComputationPhases; it handles the part of
+//  the computation from one epoch (this code was broken out to avoid that
+//  function being super-long).  Note: the phases are a numbered grouping of
+//  cindexes that say in what order we compute things, i.e. we first compute
+//  all the cindexes for phase 0, then for phase 1, and so on.
+//
+//   @param [in] nnet       The neural net this computation is for
+//   @param [in] graph      The computation graph we're computing the phases for.
+//
+//   @param [in] this_epoch The sorted list of the cindex_ids for this epoch; note,
+//                          cindex_ids are indexes into the array graph.cindexes.
+//                          Roughly speaking, this is a list of the cindex_ids that
+//                          correspond to one "layer" of the neural network, in
+//                          things like LSTMs, or for one part of one layer (the
+//                          affine component, the nonlinearity, or the splicing),
+//                          in things like TDNNs.
+//  @param [in] dependencies_subset  A subset of 'graph.dependencies' corresponding
+//                          just to dependencies within the same epoch (not specifically
+//                          this epoch; for all epochs).  In general, for a cindex_id c
+//                          dependencies[c] is a list of other cindex_ids d1, d2,
+//                          such that in order to compute c we must first compute
+//                          d1, d2 and so on (plus d1, d2, etc. must be from the
+//                          same epoch as c).
+//  @param [in] depends_on_subset  The graph-transpose of dependencies_subset;
+//                          for cindex_id c, depends_on_subset[c] is the list
+//                          of cindex_ids that directly depend on cindex_id c,
+//                          so c must be computed before them.
+//  @param [in] epoch_is_trivial  A bool that's true if this epoch is trivial
+//                          (meaning it consists of just one component)... this
+//                          enables a faster code path in this common case.
+//  @param [in,out] phase_indexes  This vector, to some elements of which this
+//                          function writes each time it is called, maps from
+//                          cindex_id to the 'phase index'.  A phase index is a
+//                          number identifying the phases [like coarse steps] of
+//                          the computation, with zero for the first phase, one
+//                          for the second, etc.  We work out how many phase
+//                          indexes have been used already by previous epochs,
+//                          from phases->size().  Actually, phase_indexes is
+//                          really just a temporary variable used by this
+//                          function, that we allocate outside this function for
+//                          efficiency.  It is initialized to -1 outside this
+//                          function; different invocations of this function work
+//                          with different non-overlapping elements of the vector.
+//                          @param [in,out] phases This is the output of this
+//                          function.  Each time we add a new phase, we append a
+//                          vector to *phases.  E.g. (*phases)[0] is the sorted
+//                          list of cindexes in the first phase of the
+//                          computation... and so on.  Note, this function is
+//                          called multiple times, and each time we add one or
+//                          more phases to this vector, so its size grows.
+//*/
 static inline void ComputeComputationPhasesForEpoch(
     const Nnet &nnet,
     const ComputationGraph &graph,
@@ -1551,7 +1551,7 @@ ComputationStepsComputer::ComputationStepsComputer(
   locations_->reserve(num_cindexes + num_cindexes / 10);
   locations_->resize(num_cindexes, std::pair<int32,int32>(-1, -1));
 }
-
+//
 void ComputationStepsComputer::ComputeForSegment(
     const ComputationRequest &request,
     const std::vector<std::vector<int32> > &phases) {
@@ -1564,7 +1564,7 @@ void ComputationStepsComputer::ComputeForSegment(
     }
   }
 }
-
+//
 void ComputationStepsComputer::ProcessInputOrOutputStep(
     const ComputationRequest &request,
     bool is_output,
@@ -1604,7 +1604,7 @@ void ComputationStepsComputer::ProcessInputOrOutputStep(
     KALDI_ASSERT(cindex_id >= 0 && (*locations_)[cindex_id].first == step_index);
   }
 }
-
+//
 int32 ComputationStepsComputer::AddStep(const std::vector<Cindex> &cindexes,
                                         bool add_if_absent) {
   // note: we can't assert that cindexes is nonempty, because it's possible for
@@ -1917,7 +1917,7 @@ void ComputationStepsComputer::ProcessDimRangeSubPhase(
     AddStep(cindexes, add_if_absent);
   }
 }
-
+//
 void ComputationStepsComputer::ProcessSubPhase(
     const ComputationRequest &request,
     const std::vector<Cindex> &sub_phase) {
@@ -1942,8 +1942,8 @@ void ComputationStepsComputer::ProcessSubPhase(
     KALDI_ERR << "Unknown node type.";
   }
 }
-
-
+//
+//
 void ComputationStepsComputer::Check() const {
   int32 num_cindexes = graph_->cindexes.size();
   KALDI_ASSERT(locations_->size() == num_cindexes);

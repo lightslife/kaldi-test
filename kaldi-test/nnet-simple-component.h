@@ -28,7 +28,7 @@
 
 #include "nnet-common.h"
 #include "nnet-component-itf.h"
-#include "natural-gradient-online.h"
+//#include "natural-gradient-online.h"
 #include <iostream>
 
 namespace kaldi {
@@ -646,7 +646,7 @@ class NaturalGradientRepeatedAffineComponent: public RepeatedAffineComponent {
   // Instead of using the individual data-points, for efficiency reasons we use
   // the distribution of per-minibatch summed derivatives over each dimension of
   // the output space, as the source for the Fisher matrix.
-  OnlineNaturalGradient preconditioner_in_;
+  //OnlineNaturalGradient preconditioner_in_;
 };
 
 class SoftmaxComponent: public NonlinearComponent {
@@ -820,10 +820,10 @@ class NaturalGradientAffineComponent: public AffineComponent {
   // disallow assignment operator.
   NaturalGradientAffineComponent &operator= (
       const NaturalGradientAffineComponent&);
-
+/*
   OnlineNaturalGradient preconditioner_in_;
 
-  OnlineNaturalGradient preconditioner_out_;
+  OnlineNaturalGradient preconditioner_out_;*/
 
   virtual void Update(
       const std::string &debug_info,
@@ -952,8 +952,8 @@ class LinearComponent: public UpdatableComponent {
   BaseFloat orthonormal_constraint_;
   // If true (and if no this->is_gradient_), use natural gradient updates.
   bool use_natural_gradient_;
-  OnlineNaturalGradient preconditioner_in_;
-  OnlineNaturalGradient preconditioner_out_;
+  //OnlineNaturalGradient preconditioner_in_;
+  //OnlineNaturalGradient preconditioner_out_;
 };
 
 
@@ -1609,7 +1609,7 @@ class PerElementOffsetComponent: public UpdatableComponent {
   // successive blocks of the input).
   int32 dim_;
   bool use_natural_gradient_;
-  OnlineNaturalGradient preconditioner_;
+  //OnlineNaturalGradient preconditioner_;
 };
 
 
@@ -1675,7 +1675,7 @@ class ConstantFunctionComponent: public UpdatableComponent {
   bool is_updatable_;
   // if true, and if updatable, do natural-gradient update.
   bool use_natural_gradient_;
-  OnlineNaturalGradient preconditioner_;
+  //OnlineNaturalGradient preconditioner_;
 
   const ConstantFunctionComponent &operator
   = (const ConstantFunctionComponent &other); // Disallow.
@@ -1741,7 +1741,7 @@ class NaturalGradientPerElementScaleComponent: public PerElementScaleComponent {
   // preconditioner.
   // The preconditioner stores its own configuration values; we write and read
   // these, but not the preconditioner object itself.
-  OnlineNaturalGradient preconditioner_;
+  //OnlineNaturalGradient preconditioner_;
 
   // Override of the parent-class Update() function, called only
   // if this->is_gradient_ = false; this implements the natural
@@ -1882,8 +1882,8 @@ class ScaleAndOffsetComponent: public UpdatableComponent {
   CuVector<BaseFloat> scales_;
   CuVector<BaseFloat> offsets_;
   bool use_natural_gradient_;
-  OnlineNaturalGradient scale_preconditioner_;
-  OnlineNaturalGradient offset_preconditioner_;
+  //OnlineNaturalGradient scale_preconditioner_;
+  //OnlineNaturalGradient offset_preconditioner_;
 };
 
 
@@ -2284,7 +2284,7 @@ class LstmNonlinearityComponent: public UpdatableComponent {
   // of dimension C].
   // The preconditioner stores its own configuration values; we write and read
   // these, but not the preconditioner object itself.
-  OnlineNaturalGradient preconditioner_;
+  //OnlineNaturalGradient preconditioner_;
 
   const LstmNonlinearityComponent &operator
       = (const LstmNonlinearityComponent &other); // Disallow.

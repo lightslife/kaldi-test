@@ -184,7 +184,7 @@ void SetBatchnormTestMode(bool test_mode, Nnet *nnet);
 /// ZeroComponentStats(), then recomputes them with the supplied egs.  It
 /// affects batch-norm, for instance.  See also the version of RecomputeStats
 /// declared in nnet-chain-diagnostics.h.
-void RecomputeStats(const std::vector<NnetExample> &egs, Nnet *nnet);
+//void RecomputeStats(const std::vector<NnetExample> &egs, Nnet *nnet);
 
 
 
@@ -494,8 +494,8 @@ void ConstrainOrthonormal(Nnet *nnet);
                         check that this is the same as if we called it with
                         'exhaustive=true'.
  */
-int32 GetNumNvalues(const std::vector<NnetIo> &io_vec,
-                    bool exhaustive);
+//int32 GetNumNvalues(const std::vector<NnetIo> &io_vec,
+//                    bool exhaustive);
 
 
 } // namespace nnet3

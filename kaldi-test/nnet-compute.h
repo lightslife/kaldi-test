@@ -100,8 +100,8 @@ class NnetComputer {
   /// This convenience function calls AcceptInput() in turn on all the inputs in
   /// the training example.  It needs "nnet" only in order to distinguish inputs
   /// from outputs.
-  void AcceptInputs(const Nnet &nnet,
-                    const std::vector<NnetIo> &io);
+  //void AcceptInputs(const Nnet &nnet,
+  //                  const std::vector<NnetIo> &io);
 
 
   /// This does either the forward or backward computation, depending
@@ -170,7 +170,7 @@ class NnetComputer {
   // compress a matrix m we set compressed_matrices_[m] to a non-NULL value and
   // resize matrices_[m] to empty; and when we uncompress it, the reverse
   // happens.
-  std::vector<CuCompressedMatrixBase*> compressed_matrices_;
+  //std::vector<CuCompressedMatrixBase*> compressed_matrices_;
 
 
   // executes the command in computation_.commands[program_counter_].

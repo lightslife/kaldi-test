@@ -148,6 +148,7 @@
     <ClInclude Include="cu-array-inl.h" />
     <ClInclude Include="cu-array.h" />
     <ClInclude Include="cu-common.h" />
+    <ClInclude Include="cu-compressed-matrix.h" />
     <ClInclude Include="cu-math.h" />
     <ClInclude Include="cu-matrix-inl.h" />
     <ClInclude Include="cu-matrix-lib.h" />

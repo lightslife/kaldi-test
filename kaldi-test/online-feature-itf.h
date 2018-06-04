@@ -19,8 +19,8 @@
 
 #ifndef KALDI_ITF_ONLINE_FEATURE_ITF_H_
 #define KALDI_ITF_ONLINE_FEATURE_ITF_H_ 1
-#include "base/kaldi-common.h"
-#include "matrix/matrix-lib.h"
+#include "kaldi-common.h"
+#include "matrix-lib.h"
 
 namespace kaldi {
 /// @ingroup Interfaces

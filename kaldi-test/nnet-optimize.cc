@@ -26,129 +26,129 @@
 
 namespace kaldi {
 namespace nnet3 {
-
-void NnetOptimizeOptions::Read(std::istream &is, bool binary) {
-  ExpectToken(is, binary, "<NnetOptimizeOptions>");
-  ExpectToken(is, binary, "<Optimize>");
-  ReadBasicType(is, binary, &optimize);
-  ExpectToken(is, binary, "<ConsolidateModelUpdate>");
-  ReadBasicType(is, binary, &consolidate_model_update);
-  ExpectToken(is, binary, "<PropagateInPlace>");
-  ReadBasicType(is, binary, &propagate_in_place);
-  ExpectToken(is, binary, "<BackpropInPlace>");
-  ReadBasicType(is, binary, &backprop_in_place);
-  if (PeekToken(is, binary) == 'O') {
-    ExpectToken(is, binary, "<OptimizeRowOps>");
-    ReadBasicType(is, binary, &optimize_row_ops);
-  }
-  if (PeekToken(is, binary) == 'S') {
-    ExpectToken(is, binary, "<SplitRowOps>");
-    ReadBasicType(is, binary, &split_row_ops);
-  }
-  if (PeekToken(is, binary) == 'E') {
-    ExpectToken(is, binary, "<ExtendMatrices>");
-    ReadBasicType(is, binary, &extend_matrices);
-  }
-  ExpectToken(is, binary, "<ConvertAddition>");
-  ReadBasicType(is, binary, &convert_addition);
-  ExpectToken(is, binary, "<RemoveAssignments>");
-  ReadBasicType(is, binary, &remove_assignments);
-  ExpectToken(is, binary, "<AllowLeftMerge>");
-  ReadBasicType(is, binary, &allow_left_merge);
-  ExpectToken(is, binary, "<AllowRightMerge>");
-  ReadBasicType(is, binary, &allow_right_merge);
-  ExpectToken(is, binary, "<InitializeUndefined>");
-  ReadBasicType(is, binary, &initialize_undefined);
-  ExpectToken(is, binary, "<MoveSizingCommands>");
-  ReadBasicType(is, binary, &move_sizing_commands);
-  ExpectToken(is, binary, "<AllocateFromOther>");
-  ReadBasicType(is, binary, &allocate_from_other);
-  ExpectToken(is, binary, "<MinDerivTime>");
-  ReadBasicType(is, binary, &min_deriv_time);
-  ExpectToken(is, binary, "<MaxDerivTime>");
-  ReadBasicType(is, binary, &max_deriv_time);
-  if (PeekToken(is, binary) == 'M') {
-    ExpectToken(is, binary, "<MaxDerivTimeRelative>");
-    ReadBasicType(is, binary, &max_deriv_time_relative);
-  }
-  if (PeekToken(is, binary) == 'S') {
-    ExpectToken(is, binary, "<SnipRowOps>");
-    ReadBasicType(is, binary, &snip_row_ops);
-  }
-  if (PeekToken(is, binary) == 'M') {
-    ExpectToken(is, binary, "<MemoryCompressionLevel>");
-    ReadBasicType(is, binary, &memory_compression_level);
-  }
-  ExpectToken(is, binary, "</NnetOptimizeOptions>");
-}
-
-void NnetOptimizeOptions::Write(std::ostream &os, bool binary) const {
-  WriteToken(os, binary, "<NnetOptimizeOptions>");
-  WriteToken(os, binary, "<Optimize>");
-  WriteBasicType(os, binary, optimize);
-  WriteToken(os, binary, "<ConsolidateModelUpdate>");
-  WriteBasicType(os, binary, consolidate_model_update);
-  WriteToken(os, binary, "<PropagateInPlace>");
-  WriteBasicType(os, binary, propagate_in_place);
-  WriteToken(os, binary, "<BackpropInPlace>");
-  WriteBasicType(os, binary, backprop_in_place);
-  WriteToken(os, binary, "<OptimizeRowOps>");
-  WriteBasicType(os, binary, optimize_row_ops);
-  WriteToken(os, binary, "<SplitRowOps>");
-  WriteBasicType(os, binary, split_row_ops);
-  WriteToken(os, binary, "<ExtendMatrices>");
-  WriteBasicType(os, binary, extend_matrices);
-  WriteToken(os, binary, "<ConvertAddition>");
-  WriteBasicType(os, binary, convert_addition);
-  WriteToken(os, binary, "<RemoveAssignments>");
-  WriteBasicType(os, binary, remove_assignments);
-  WriteToken(os, binary, "<AllowLeftMerge>");
-  WriteBasicType(os, binary, allow_left_merge);
-  WriteToken(os, binary, "<AllowRightMerge>");
-  WriteBasicType(os, binary, allow_right_merge);
-  WriteToken(os, binary, "<InitializeUndefined>");
-  WriteBasicType(os, binary, initialize_undefined);
-  WriteToken(os, binary, "<MoveSizingCommands>");
-  WriteBasicType(os, binary, move_sizing_commands);
-  WriteToken(os, binary, "<AllocateFromOther>");
-  WriteBasicType(os, binary, allocate_from_other);
-  WriteToken(os, binary, "<MinDerivTime>");
-  WriteBasicType(os, binary, min_deriv_time);
-  WriteToken(os, binary, "<MaxDerivTime>");
-  WriteBasicType(os, binary, max_deriv_time);
-  WriteToken(os, binary, "<MaxDerivTimeRelative>");
-  WriteBasicType(os, binary, max_deriv_time_relative);
-  WriteToken(os, binary, "<SnipRowOps>");
-  WriteBasicType(os, binary, snip_row_ops);
-  WriteToken(os, binary, "<MemoryCompressionLevel>");
-  WriteBasicType(os, binary, memory_compression_level);
-  WriteToken(os, binary, "</NnetOptimizeOptions>");
-}
-
-bool NnetOptimizeOptions::operator == (const NnetOptimizeOptions &other) const {
-  return (other.optimize == optimize &&
-          other.consolidate_model_update == consolidate_model_update &&
-          other.propagate_in_place == propagate_in_place &&
-          other.backprop_in_place == backprop_in_place &&
-          other.optimize_row_ops == optimize_row_ops &&
-          other.split_row_ops == split_row_ops &&
-          other.convert_addition == convert_addition &&
-          other.remove_assignments == remove_assignments &&
-          other.allow_left_merge == allow_left_merge &&
-          other.allow_right_merge == allow_right_merge &&
-          other.initialize_undefined == initialize_undefined &&
-          other.move_sizing_commands == move_sizing_commands &&
-          other.allocate_from_other == allocate_from_other &&
-          other.min_deriv_time == min_deriv_time &&
-          other.max_deriv_time == max_deriv_time &&
-          other.max_deriv_time_relative == max_deriv_time_relative &&
-          other.snip_row_ops == snip_row_ops &&
-          other.memory_compression_level == memory_compression_level);
-}
-
-// move commands that resize and zero matrices to as late/early as possible.
-// (however, keep input and output commands where they were; it creates other
-// headaches if we move those).
+//
+//void NnetOptimizeOptions::Read(std::istream &is, bool binary) {
+//  ExpectToken(is, binary, "<NnetOptimizeOptions>");
+//  ExpectToken(is, binary, "<Optimize>");
+//  ReadBasicType(is, binary, &optimize);
+//  ExpectToken(is, binary, "<ConsolidateModelUpdate>");
+//  ReadBasicType(is, binary, &consolidate_model_update);
+//  ExpectToken(is, binary, "<PropagateInPlace>");
+//  ReadBasicType(is, binary, &propagate_in_place);
+//  ExpectToken(is, binary, "<BackpropInPlace>");
+//  ReadBasicType(is, binary, &backprop_in_place);
+//  if (PeekToken(is, binary) == 'O') {
+//    ExpectToken(is, binary, "<OptimizeRowOps>");
+//    ReadBasicType(is, binary, &optimize_row_ops);
+//  }
+//  if (PeekToken(is, binary) == 'S') {
+//    ExpectToken(is, binary, "<SplitRowOps>");
+//    ReadBasicType(is, binary, &split_row_ops);
+//  }
+//  if (PeekToken(is, binary) == 'E') {
+//    ExpectToken(is, binary, "<ExtendMatrices>");
+//    ReadBasicType(is, binary, &extend_matrices);
+//  }
+//  ExpectToken(is, binary, "<ConvertAddition>");
+//  ReadBasicType(is, binary, &convert_addition);
+//  ExpectToken(is, binary, "<RemoveAssignments>");
+//  ReadBasicType(is, binary, &remove_assignments);
+//  ExpectToken(is, binary, "<AllowLeftMerge>");
+//  ReadBasicType(is, binary, &allow_left_merge);
+//  ExpectToken(is, binary, "<AllowRightMerge>");
+//  ReadBasicType(is, binary, &allow_right_merge);
+//  ExpectToken(is, binary, "<InitializeUndefined>");
+//  ReadBasicType(is, binary, &initialize_undefined);
+//  ExpectToken(is, binary, "<MoveSizingCommands>");
+//  ReadBasicType(is, binary, &move_sizing_commands);
+//  ExpectToken(is, binary, "<AllocateFromOther>");
+//  ReadBasicType(is, binary, &allocate_from_other);
+//  ExpectToken(is, binary, "<MinDerivTime>");
+//  ReadBasicType(is, binary, &min_deriv_time);
+//  ExpectToken(is, binary, "<MaxDerivTime>");
+//  ReadBasicType(is, binary, &max_deriv_time);
+//  if (PeekToken(is, binary) == 'M') {
+//    ExpectToken(is, binary, "<MaxDerivTimeRelative>");
+//    ReadBasicType(is, binary, &max_deriv_time_relative);
+//  }
+//  if (PeekToken(is, binary) == 'S') {
+//    ExpectToken(is, binary, "<SnipRowOps>");
+//    ReadBasicType(is, binary, &snip_row_ops);
+//  }
+//  if (PeekToken(is, binary) == 'M') {
+//    ExpectToken(is, binary, "<MemoryCompressionLevel>");
+//    ReadBasicType(is, binary, &memory_compression_level);
+//  }
+//  ExpectToken(is, binary, "</NnetOptimizeOptions>");
+//}
+//
+//void NnetOptimizeOptions::Write(std::ostream &os, bool binary) const {
+//  WriteToken(os, binary, "<NnetOptimizeOptions>");
+//  WriteToken(os, binary, "<Optimize>");
+//  WriteBasicType(os, binary, optimize);
+//  WriteToken(os, binary, "<ConsolidateModelUpdate>");
+//  WriteBasicType(os, binary, consolidate_model_update);
+//  WriteToken(os, binary, "<PropagateInPlace>");
+//  WriteBasicType(os, binary, propagate_in_place);
+//  WriteToken(os, binary, "<BackpropInPlace>");
+//  WriteBasicType(os, binary, backprop_in_place);
+//  WriteToken(os, binary, "<OptimizeRowOps>");
+//  WriteBasicType(os, binary, optimize_row_ops);
+//  WriteToken(os, binary, "<SplitRowOps>");
+//  WriteBasicType(os, binary, split_row_ops);
+//  WriteToken(os, binary, "<ExtendMatrices>");
+//  WriteBasicType(os, binary, extend_matrices);
+//  WriteToken(os, binary, "<ConvertAddition>");
+//  WriteBasicType(os, binary, convert_addition);
+//  WriteToken(os, binary, "<RemoveAssignments>");
+//  WriteBasicType(os, binary, remove_assignments);
+//  WriteToken(os, binary, "<AllowLeftMerge>");
+//  WriteBasicType(os, binary, allow_left_merge);
+//  WriteToken(os, binary, "<AllowRightMerge>");
+//  WriteBasicType(os, binary, allow_right_merge);
+//  WriteToken(os, binary, "<InitializeUndefined>");
+//  WriteBasicType(os, binary, initialize_undefined);
+//  WriteToken(os, binary, "<MoveSizingCommands>");
+//  WriteBasicType(os, binary, move_sizing_commands);
+//  WriteToken(os, binary, "<AllocateFromOther>");
+//  WriteBasicType(os, binary, allocate_from_other);
+//  WriteToken(os, binary, "<MinDerivTime>");
+//  WriteBasicType(os, binary, min_deriv_time);
+//  WriteToken(os, binary, "<MaxDerivTime>");
+//  WriteBasicType(os, binary, max_deriv_time);
+//  WriteToken(os, binary, "<MaxDerivTimeRelative>");
+//  WriteBasicType(os, binary, max_deriv_time_relative);
+//  WriteToken(os, binary, "<SnipRowOps>");
+//  WriteBasicType(os, binary, snip_row_ops);
+//  WriteToken(os, binary, "<MemoryCompressionLevel>");
+//  WriteBasicType(os, binary, memory_compression_level);
+//  WriteToken(os, binary, "</NnetOptimizeOptions>");
+//}
+//
+//bool NnetOptimizeOptions::operator == (const NnetOptimizeOptions &other) const {
+//  return (other.optimize == optimize &&
+//          other.consolidate_model_update == consolidate_model_update &&
+//          other.propagate_in_place == propagate_in_place &&
+//          other.backprop_in_place == backprop_in_place &&
+//          other.optimize_row_ops == optimize_row_ops &&
+//          other.split_row_ops == split_row_ops &&
+//          other.convert_addition == convert_addition &&
+//          other.remove_assignments == remove_assignments &&
+//          other.allow_left_merge == allow_left_merge &&
+//          other.allow_right_merge == allow_right_merge &&
+//          other.initialize_undefined == initialize_undefined &&
+//          other.move_sizing_commands == move_sizing_commands &&
+//          other.allocate_from_other == allocate_from_other &&
+//          other.min_deriv_time == min_deriv_time &&
+//          other.max_deriv_time == max_deriv_time &&
+//          other.max_deriv_time_relative == max_deriv_time_relative &&
+//          other.snip_row_ops == snip_row_ops &&
+//          other.memory_compression_level == memory_compression_level);
+//}
+//
+//// move commands that resize and zero matrices to as late/early as possible.
+//// (however, keep input and output commands where they were; it creates other
+//// headaches if we move those).
 void MoveSizingCommands(const Nnet &nnet, NnetComputation *computation) {
   ComputationVariables variables;
   variables.Init(*computation);
@@ -256,9 +256,9 @@ void MoveSizingCommands(const Nnet &nnet, NnetComputation *computation) {
   }
   computation->commands = reordered_commands;
 }
-
-// This function removes commands of type kSetConst (with alpha=0.0), where
-// possible.
+//
+//// This function removes commands of type kSetConst (with alpha=0.0), where
+//// possible.
 void RemoveUnnecessaryZeroing(const Nnet &nnet,
                               NnetComputation *computation) {
   Analyzer a;
@@ -312,19 +312,19 @@ void RemoveUnnecessaryZeroing(const Nnet &nnet,
     }
   }
 }
-
-/*
-  This function is called from RemoveUnnecessaryAllocation.  The input is two
-  sorted, unique lists, of (deallocation-commands, allocation-commands)
-  e.g. (d1, d2, d3.. ), (a1, a2, a3..); and to the output is *appended* a list
-  of pairs (d, a).  Each output pair must satisfy the property that d < a, and
-  no member of the input lists may appear more than once in the output pairs
-  (although it's OK for input a and d values not to appear in any output pairs).
-
-  The goal of the implementation is to output as many pairs as possible, and
-  secondarily for the pairs to be as close as possible to each other (to avoid
-  wasting too much memory).  I'm not sure if this implementation achieves that.
-*/
+//
+///*
+//  This function is called from RemoveUnnecessaryAllocation.  The input is two
+//  sorted, unique lists, of (deallocation-commands, allocation-commands)
+//  e.g. (d1, d2, d3.. ), (a1, a2, a3..); and to the output is *appended* a list
+//  of pairs (d, a).  Each output pair must satisfy the property that d < a, and
+//  no member of the input lists may appear more than once in the output pairs
+//  (although it's OK for input a and d values not to appear in any output pairs).
+//
+//  The goal of the implementation is to output as many pairs as possible, and
+//  secondarily for the pairs to be as close as possible to each other (to avoid
+//  wasting too much memory).  I'm not sure if this implementation achieves that.
+//*/
 static void ComputeCommandPairs(
     const std::pair<std::vector<int32>, std::vector<int32> > &lists,
     std::vector<std::pair<int32,int32> > *pairs) {
@@ -412,7 +412,7 @@ void RemoveUnnecessaryAllocation(const Nnet &nnet,
   RemoveNoOps(computation);
   FixGotoLabel(computation);
 }
-
+//
 
 void VariableMergingOptimization(const NnetOptimizeOptions &config,
                                  const Nnet &nnet,
@@ -426,7 +426,7 @@ void VariableMergingOptimization(const NnetOptimizeOptions &config,
   }
 }
 
-
+//
 void ConvertAdditionToAssignment(const Nnet &nnet,
                                  NnetComputation *computation) {
   Analyzer analyzer;
@@ -616,13 +616,13 @@ void Optimize(const NnetOptimizeOptions &config,
     FixGotoLabel(computation);
 
 
-  if (config.memory_compression_level > 0 &&
-      !config.optimize_looped_computation) {
-    OptimizeMemoryCompression(nnet, config.memory_compression_level,
-                              computation);
-    if (GetVerboseLevel() >= 3)
-      CheckComputation(nnet, *computation, false);
-  }
+  //if (config.memory_compression_level > 0 &&
+  //    !config.optimize_looped_computation) {
+  //  OptimizeMemoryCompression(nnet, config.memory_compression_level,
+  //                            computation);
+  //  if (GetVerboseLevel() >= 3)
+  //    CheckComputation(nnet, *computation, false);
+  //}
 
   if (GetVerboseLevel() >= 3) {
     CheckComputation(nnet, *computation, false);
@@ -630,56 +630,56 @@ void Optimize(const NnetOptimizeOptions &config,
               << GetMaxMemoryUse(*computation);
   }
 }
-
-
-CachingOptimizingCompiler::CachingOptimizingCompiler(
-    const Nnet &nnet,
-    const CachingOptimizingCompilerOptions config):
-    nnet_(nnet), config_(config),
-    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
-    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
-    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
-    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
-
-CachingOptimizingCompiler::CachingOptimizingCompiler(
-    const Nnet &nnet,
-    const NnetOptimizeOptions &opt_config,
-    const CachingOptimizingCompilerOptions config):
-    nnet_(nnet), config_(config), opt_config_(opt_config),
-    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
-    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
-    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
-    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
-
-
-void CachingOptimizingCompiler::ReadCache(std::istream &is, bool binary) {
-  {
-    Timer timer;
-    NnetOptimizeOptions opt_config_cached;
-    opt_config_cached.Read(is, binary);
-    // we won't read cached computations if any optimize option has been changed.
-    if (!(opt_config_ == opt_config_cached))
-      return;
-    cache_.Read(is, binary);
-    seconds_taken_io_ += timer.Elapsed();
-  }
-  if (GetVerboseLevel() >= 2) {
-    Timer timer;
-    cache_.Check(nnet_);
-    seconds_taken_check_ += timer.Elapsed();
-    // we consider the check time part of the total time...  this is very
-    // arbitrary but it only affects printed times-taken.
-    seconds_taken_total_ += timer.Elapsed();
-  }
-
-}
-
-void CachingOptimizingCompiler::WriteCache(std::ostream &os, bool binary) {
-  Timer timer;
-  opt_config_.Write(os, binary);
-  cache_.Write(os, binary);
-  seconds_taken_io_ += timer.Elapsed();
-}
+//
+//
+//CachingOptimizingCompiler::CachingOptimizingCompiler(
+//    const Nnet &nnet,
+//    const CachingOptimizingCompilerOptions config):
+//    nnet_(nnet), config_(config),
+//    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
+//    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
+//    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
+//    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
+//
+//CachingOptimizingCompiler::CachingOptimizingCompiler(
+//    const Nnet &nnet,
+//    const NnetOptimizeOptions &opt_config,
+//    const CachingOptimizingCompilerOptions config):
+//    nnet_(nnet), config_(config), opt_config_(opt_config),
+//    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
+//    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
+//    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
+//    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
+//
+//
+//void CachingOptimizingCompiler::ReadCache(std::istream &is, bool binary) {
+//  {
+//    Timer timer;
+//    NnetOptimizeOptions opt_config_cached;
+//    opt_config_cached.Read(is, binary);
+//    // we won't read cached computations if any optimize option has been changed.
+//    if (!(opt_config_ == opt_config_cached))
+//      return;
+//    cache_.Read(is, binary);
+//    seconds_taken_io_ += timer.Elapsed();
+//  }
+//  if (GetVerboseLevel() >= 2) {
+//    Timer timer;
+//    cache_.Check(nnet_);
+//    seconds_taken_check_ += timer.Elapsed();
+//    // we consider the check time part of the total time...  this is very
+//    // arbitrary but it only affects printed times-taken.
+//    seconds_taken_total_ += timer.Elapsed();
+//  }
+//
+//}
+//
+//void CachingOptimizingCompiler::WriteCache(std::ostream &os, bool binary) {
+//  Timer timer;
+//  opt_config_.Write(os, binary);
+//  cache_.Write(os, binary);
+//  seconds_taken_io_ += timer.Elapsed();
+//}
 
 CachingOptimizingCompiler::~CachingOptimizingCompiler() {
   if (seconds_taken_total_ > 0.0 || seconds_taken_io_ > 0.0) {
@@ -701,7 +701,7 @@ CachingOptimizingCompiler::~CachingOptimizingCompiler() {
     // computation-requests, and calling RequestIsDecomposable().
   }
 }
-
+//
 std::shared_ptr<const NnetComputation> CachingOptimizingCompiler::Compile(
     const ComputationRequest  &in_request) {
   Timer timer;
@@ -832,12 +832,12 @@ const NnetComputation *CachingOptimizingCompiler::CompileViaShortcut(
   return ans;
 }
 
-
-
-/// Split the computation up into segments bounded by kNoOperationMarker.  For
-/// each segment, a pair of command-indexes (start, end) is output to the vector
-/// 'segments', so the commands in the segment (not including
-/// kNoOperationMarker) are numbered from start ... end - 1.
+//
+//
+///// Split the computation up into segments bounded by kNoOperationMarker.  For
+///// each segment, a pair of command-indexes (start, end) is output to the vector
+///// 'segments', so the commands in the segment (not including
+///// kNoOperationMarker) are numbered from start ... end - 1.
 static void SplitComputationIntoSegments(
     const NnetComputation &computation,
     std::vector<std::pair<int32, int32> > *segments) {
@@ -853,7 +853,7 @@ static void SplitComputationIntoSegments(
   }
   segments->push_back(std::pair<int32, int32>(cur_start, num_commands));
 }
-
+//
 
 void ConsolidateIoOperations(const Nnet &nnet,
                              NnetComputation *computation) {

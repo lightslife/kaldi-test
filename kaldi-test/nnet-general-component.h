@@ -22,7 +22,7 @@
 
 #include "nnet-common.h"
 #include "nnet-component-itf.h"
-#include "natural-gradient-online.h"
+//#include "natural-gradient-online.h"
 #include <iostream>
 
 namespace kaldi {
@@ -687,7 +687,7 @@ class ConstantComponent: public UpdatableComponent {
   bool is_updatable_;
   // if true, and if updatable, do natural-gradient update.
   bool use_natural_gradient_;
-  OnlineNaturalGradient preconditioner_;
+  //OnlineNaturalGradient preconditioner_;
 
   const ConstantComponent &operator
   = (const ConstantComponent &other); // Disallow.

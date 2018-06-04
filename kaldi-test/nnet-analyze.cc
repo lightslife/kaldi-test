@@ -18,10 +18,10 @@
 // limitations under the License.
 #include "stdafx.h"
 #include "nnet-analyze.h"
-
+#include "cu-compressed-matrix.h"
 namespace kaldi {
 namespace nnet3 {
-
+//
 void ComputationVariables::ComputeSplitPoints(
     const NnetComputation &computation) {
   // note, these numbers are only valid if you include the empty zero-indexed
@@ -77,59 +77,59 @@ int32 ComputationVariables::FindIndexOf(const std::vector<int32> &vec, int32 i) 
   KALDI_ASSERT(*iter == i);
   return iter - vec.begin();
 }
-
-void ComputationVariables::ComputeVariablesForSubmatrix(
-    const NnetComputation &computation) {
-  // note, these numbers are only valid if you include the empty zero-indexed
-  // matrix/submatrix as a matrix.
-  int32 num_submatrices = computation.submatrices.size();
-
-  variables_for_submatrix_.resize(num_submatrices);
-
-  submatrix_is_whole_matrix_.resize(num_submatrices, false);
-  submatrix_to_matrix_.resize(num_submatrices);
-  submatrix_to_matrix_[0] = 0;
-
-  for (int32 submatrix_index = 1;
-       submatrix_index < num_submatrices;
-       submatrix_index++) {
-    const NnetComputation::SubMatrixInfo &s =
-        computation.submatrices[submatrix_index];
-    int32 matrix_index = s.matrix_index;
-    submatrix_to_matrix_[submatrix_index] = matrix_index;
-    int32 start_col = s.col_offset, end_col = start_col + s.num_cols,
-        start_row = s.row_offset, end_row = start_row + s.num_rows;
-    int32 row_start = FindIndexOf(row_split_points_[matrix_index], start_row),
-        row_end = FindIndexOf(row_split_points_[matrix_index], end_row),
-        col_start = FindIndexOf(column_split_points_[matrix_index], start_col),
-        col_end = FindIndexOf(column_split_points_[matrix_index], end_col),
-        num_column_variables = column_split_points_[matrix_index].size() - 1,
-        num_row_variables = row_split_points_[matrix_index].size() - 1,
-        matrix_start_variable = matrix_to_variable_index_[matrix_index];
-    KALDI_ASSERT(row_end > row_start && col_end > col_start &&
-                 col_end <= num_column_variables);
-    std::vector<int32> &variables = variables_for_submatrix_[submatrix_index];
-    for (int32 r = row_start; r < row_end; r++)
-      for (int32 c = col_start; c < col_end; c++)
-        variables.push_back(matrix_start_variable + r*num_column_variables + c);
-    if (row_start == 0 && row_end == num_row_variables &&
-        col_start == 0 && col_end == num_column_variables)
-      submatrix_is_whole_matrix_[submatrix_index] = true;
-  }
-}
-
-void ComputationVariables::ComputeVariableToMatrix() {
-  variable_to_matrix_.clear();
-  variable_to_matrix_.resize(NumVariables());
-  int32 num_matrices = matrix_to_variable_index_.size() - 1;
-  for (int32 matrix_index = 1; matrix_index < num_matrices; matrix_index++) {
-    int32 start_variable = matrix_to_variable_index_[matrix_index],
-        end_variable = matrix_to_variable_index_[matrix_index + 1];
-    for (int32 i = start_variable; i < end_variable; i++)
-      variable_to_matrix_[i] = matrix_index;
-  }
-}
-
+//
+//void ComputationVariables::ComputeVariablesForSubmatrix(
+//    const NnetComputation &computation) {
+//  // note, these numbers are only valid if you include the empty zero-indexed
+//  // matrix/submatrix as a matrix.
+//  int32 num_submatrices = computation.submatrices.size();
+//
+//  variables_for_submatrix_.resize(num_submatrices);
+//
+//  submatrix_is_whole_matrix_.resize(num_submatrices, false);
+//  submatrix_to_matrix_.resize(num_submatrices);
+//  submatrix_to_matrix_[0] = 0;
+//
+//  for (int32 submatrix_index = 1;
+//       submatrix_index < num_submatrices;
+//       submatrix_index++) {
+//    const NnetComputation::SubMatrixInfo &s =
+//        computation.submatrices[submatrix_index];
+//    int32 matrix_index = s.matrix_index;
+//    submatrix_to_matrix_[submatrix_index] = matrix_index;
+//    int32 start_col = s.col_offset, end_col = start_col + s.num_cols,
+//        start_row = s.row_offset, end_row = start_row + s.num_rows;
+//    int32 row_start = FindIndexOf(row_split_points_[matrix_index], start_row),
+//        row_end = FindIndexOf(row_split_points_[matrix_index], end_row),
+//        col_start = FindIndexOf(column_split_points_[matrix_index], start_col),
+//        col_end = FindIndexOf(column_split_points_[matrix_index], end_col),
+//        num_column_variables = column_split_points_[matrix_index].size() - 1,
+//        num_row_variables = row_split_points_[matrix_index].size() - 1,
+//        matrix_start_variable = matrix_to_variable_index_[matrix_index];
+//    KALDI_ASSERT(row_end > row_start && col_end > col_start &&
+//                 col_end <= num_column_variables);
+//    std::vector<int32> &variables = variables_for_submatrix_[submatrix_index];
+//    for (int32 r = row_start; r < row_end; r++)
+//      for (int32 c = col_start; c < col_end; c++)
+//        variables.push_back(matrix_start_variable + r*num_column_variables + c);
+//    if (row_start == 0 && row_end == num_row_variables &&
+//        col_start == 0 && col_end == num_column_variables)
+//      submatrix_is_whole_matrix_[submatrix_index] = true;
+//  }
+//}
+//
+//void ComputationVariables::ComputeVariableToMatrix() {
+//  variable_to_matrix_.clear();
+//  variable_to_matrix_.resize(NumVariables());
+//  int32 num_matrices = matrix_to_variable_index_.size() - 1;
+//  for (int32 matrix_index = 1; matrix_index < num_matrices; matrix_index++) {
+//    int32 start_variable = matrix_to_variable_index_[matrix_index],
+//        end_variable = matrix_to_variable_index_[matrix_index + 1];
+//    for (int32 i = start_variable; i < end_variable; i++)
+//      variable_to_matrix_[i] = matrix_index;
+//  }
+//}
+//
 void ComputationVariables::Init(const NnetComputation &computation) {
   // don't call this twice on the same object..
   KALDI_ASSERT(row_split_points_.empty());
@@ -137,11 +137,11 @@ void ComputationVariables::Init(const NnetComputation &computation) {
   ComputeVariablesForSubmatrix(computation);
   ComputeVariableToMatrix();
 }
-
-int32 ComputationVariables::GetMatrixForVariable(int32 variable) const {
-  KALDI_ASSERT(static_cast<size_t>(variable) < variable_to_matrix_.size());
-  return variable_to_matrix_[variable];
-}
+//
+//int32 ComputationVariables::GetMatrixForVariable(int32 variable) const {
+//  KALDI_ASSERT(static_cast<size_t>(variable) < variable_to_matrix_.size());
+//  return variable_to_matrix_[variable];
+//}
 
 void ComputationVariables::AppendVariablesForSubmatrix(
     int32 submatrix_index,
@@ -204,63 +204,63 @@ void ComputationVariables::RecordAccessForSubmatrix(
       ca->matrices_read.push_back(matrix_index);
   }
 }
-
-std::string ComputationVariables::DescribeVariable(int32 variable) const {
-  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
-  int32 matrix_index = variable_to_matrix_[variable],
-      offset = variable - matrix_to_variable_index_[matrix_index],
-      num_column_variables = column_split_points_[matrix_index].size() - 1,
-      num_row_variables = row_split_points_[matrix_index].size() - 1,
-      column_variable = offset % num_column_variables,
-      row_variable = offset / num_column_variables;
-  KALDI_ASSERT(column_variable >= 0 && row_variable >= 0 &&
-               row_variable < num_row_variables &&
-               column_variable < num_column_variables);
-  std::ostringstream os;
-  os << 'm' << matrix_index;
-  if (num_row_variables != 1 || num_column_variables != 1) {
-    os << '(';
-    if (num_row_variables == 1) {
-      os << ':';
-    } else {
-      os << row_split_points_[matrix_index][row_variable] << ':'
-         << row_split_points_[matrix_index][row_variable+1] - 1;
-    }
-    os << ',';
-    if (num_column_variables == 1) {
-      os << ':';
-    } else {
-      os << column_split_points_[matrix_index][column_variable] << ':'
-         << column_split_points_[matrix_index][column_variable+1] - 1;
-    }
-    os << ')';
-  }
-  return os.str();
-}
-
-NnetComputation::SubMatrixInfo ComputationVariables::VariableInfo(
-    int32 variable) const {
-  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
-  int32 matrix_index = variable_to_matrix_[variable],
-      offset = variable - matrix_to_variable_index_[matrix_index],
-      num_column_variables = column_split_points_[matrix_index].size() - 1,
-      column_variable = offset % num_column_variables,
-      row_variable = offset / num_column_variables;
-  int32 row_offset = row_split_points_[matrix_index][row_variable],
-      num_rows = row_split_points_[matrix_index][row_variable+1] - row_offset,
-      col_offset = column_split_points_[matrix_index][column_variable],
-      num_cols = column_split_points_[matrix_index][column_variable+1] -
-                  col_offset;
-  return NnetComputation::SubMatrixInfo(matrix_index, row_offset, num_rows,
-                                        col_offset, num_cols);
-}
-
-
-/// given a vector of pairs from computation.indexes_multi_indexes
-/// containing paris (submatrix-index, row-index), this function outputs
-/// to "submatrix_indexes" all (unique) submatrix indexes that appear;
-/// and it outputs to "contains_null_marker" true if the pair (-1, -1)
-/// appears anywhere in indexes_multi, and false otherwise.
+//
+//std::string ComputationVariables::DescribeVariable(int32 variable) const {
+//  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
+//  int32 matrix_index = variable_to_matrix_[variable],
+//      offset = variable - matrix_to_variable_index_[matrix_index],
+//      num_column_variables = column_split_points_[matrix_index].size() - 1,
+//      num_row_variables = row_split_points_[matrix_index].size() - 1,
+//      column_variable = offset % num_column_variables,
+//      row_variable = offset / num_column_variables;
+//  KALDI_ASSERT(column_variable >= 0 && row_variable >= 0 &&
+//               row_variable < num_row_variables &&
+//               column_variable < num_column_variables);
+//  std::ostringstream os;
+//  os << 'm' << matrix_index;
+//  if (num_row_variables != 1 || num_column_variables != 1) {
+//    os << '(';
+//    if (num_row_variables == 1) {
+//      os << ':';
+//    } else {
+//      os << row_split_points_[matrix_index][row_variable] << ':'
+//         << row_split_points_[matrix_index][row_variable+1] - 1;
+//    }
+//    os << ',';
+//    if (num_column_variables == 1) {
+//      os << ':';
+//    } else {
+//      os << column_split_points_[matrix_index][column_variable] << ':'
+//         << column_split_points_[matrix_index][column_variable+1] - 1;
+//    }
+//    os << ')';
+//  }
+//  return os.str();
+//}
+//
+//NnetComputation::SubMatrixInfo ComputationVariables::VariableInfo(
+//    int32 variable) const {
+//  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
+//  int32 matrix_index = variable_to_matrix_[variable],
+//      offset = variable - matrix_to_variable_index_[matrix_index],
+//      num_column_variables = column_split_points_[matrix_index].size() - 1,
+//      column_variable = offset % num_column_variables,
+//      row_variable = offset / num_column_variables;
+//  int32 row_offset = row_split_points_[matrix_index][row_variable],
+//      num_rows = row_split_points_[matrix_index][row_variable+1] - row_offset,
+//      col_offset = column_split_points_[matrix_index][column_variable],
+//      num_cols = column_split_points_[matrix_index][column_variable+1] -
+//                  col_offset;
+//  return NnetComputation::SubMatrixInfo(matrix_index, row_offset, num_rows,
+//                                        col_offset, num_cols);
+//}
+//
+//
+///// given a vector of pairs from computation.indexes_multi_indexes
+///// containing paris (submatrix-index, row-index), this function outputs
+///// to "submatrix_indexes" all (unique) submatrix indexes that appear;
+///// and it outputs to "contains_null_marker" true if the pair (-1, -1)
+///// appears anywhere in indexes_multi, and false otherwise.
 static void IndexesMultiToSubmatrixIndexes(
     const std::vector<std::pair<int32, int32> > &indexes_multi,
     std::vector<int32> *submatrix_indexes) {
@@ -279,8 +279,8 @@ static void IndexesMultiToSubmatrixIndexes(
 }
 
 
-
-
+//
+//
 void ComputeCommandAttributes(
     const Nnet &nnet,
     const NnetComputation &computation,
@@ -567,7 +567,7 @@ void ComputeMatrixAccesses(
   }
 }
 
-
+//
 ComputationChecker::ComputationChecker(
     const CheckComputationOptions &config,
     const Nnet &nnet,
@@ -575,7 +575,7 @@ ComputationChecker::ComputationChecker(
     config_(config), nnet_(nnet), computation_(computation) { }
 
 
-
+//
 void ComputationChecker::Check() {
   CheckComputationIndexes();
   a_.Init(nnet_, computation_);
@@ -586,15 +586,15 @@ void ComputationChecker::Check() {
   if (config_.check_rewrite)
     CheckComputationRewrite();
 }
-
-
-/**
-   Checks for the situation where a read-only operation on a variable is
-   followed by an operation that writes to the variable.  This should never
-   occur prior to optimization, but after certain optimization we in effect
-   "re-use" variables by doing things like propagate and backprop in-place, so
-   this check shouldn't be performed after optimization.
-*/
+//
+//
+///**
+//   Checks for the situation where a read-only operation on a variable is
+//   followed by an operation that writes to the variable.  This should never
+//   occur prior to optimization, but after certain optimization we in effect
+//   "re-use" variables by doing things like propagate and backprop in-place, so
+//   this check shouldn't be performed after optimization.
+//*/
 void ComputationChecker::CheckComputationRewrite() const {
   int32 num_variables = a_.variable_accesses.size();
   for (int32 v = 0; v < num_variables; v++) {
@@ -628,11 +628,11 @@ void ComputationChecker::CheckComputationRewrite() const {
     }
   }
 }
-
-
-/**
-   Checks for the situation where a variable is read before being written.
-*/
+//
+//
+///**
+//   Checks for the situation where a variable is read before being written.
+//*/
 void ComputationChecker::CheckComputationUndefined() const {
   // the variable 'min_proportion' needs to be <= the min_proportion_ value in
   // class MatrixExtender, otherwise this code could spuriously reject a
@@ -671,14 +671,14 @@ void ComputationChecker::CheckComputationUndefined() const {
   }
 }
 
-
-/**
-   Checks that we never use variables before they are allocated or after they
-   are deallocated, and some other checks that can be done from the
-   MatrixAccesses.
-*/
+//
+///**
+//   Checks that we never use variables before they are allocated or after they
+//   are deallocated, and some other checks that can be done from the
+//   MatrixAccesses.
+//*/
 static bool computation_checker_warned_unused_input = false;
-
+//
 void ComputationChecker::CheckComputationMatrixAccesses() const {
   int32 num_matrices = a_.matrix_accesses.size();
 
@@ -783,11 +783,11 @@ void ComputationChecker::CheckComputationCompression() const {
   }
 }
 
-/**
-   This very basic check just makes sure that all indexes in the commands are
-   within range, that dimensions agree with the request, that row/column dimensions
-   agree with component dimensions.
-*/
+///**
+//   This very basic check just makes sure that all indexes in the commands are
+//   within range, that dimensions agree with the request, that row/column dimensions
+//   agree with component dimensions.
+//*/
 void ComputationChecker::CheckComputationIndexes() const {
   int32 num_commands = computation_.commands.size(),
       num_submatrices = computation_.submatrices.size();
@@ -1090,31 +1090,31 @@ void ComputationChecker::CheckComputationIndexes() const {
               << " but never consumed.";
   }
 }
-
-void ComputationChecker::CheckComputationDebugInfo() const {
-  if (computation_.matrix_debug_info.empty()) return;
-  if (computation_.matrix_debug_info.size() !=
-      computation_.matrices.size())
-    KALDI_ERR << "Debug info has wrong size";
-  for (size_t i = 1; i < computation_.matrix_debug_info.size(); i++) {
-    if (computation_.matrix_debug_info[i].cindexes.size() !=
-        static_cast<size_t>(computation_.matrices[i].num_rows))
-      KALDI_ERR << "Debug info for matrix m" << i
-                << " has wrong num-rows.";
-    std::vector<Cindex>::const_iterator
-        iter = computation_.matrix_debug_info[i].cindexes.begin(),
-        end = computation_.matrix_debug_info[i].cindexes.end();
-    for (; iter != end; ++iter) {
-      if (iter->second.n < 0) {
-        KALDI_ERR << "Negative n index in debug info";
-      }
-    }
-  }
-}
-
-
-// note: 'computation' is not a reference, it's copied so that we
-// can modify it internally.
+//
+//void ComputationChecker::CheckComputationDebugInfo() const {
+//  if (computation_.matrix_debug_info.empty()) return;
+//  if (computation_.matrix_debug_info.size() !=
+//      computation_.matrices.size())
+//    KALDI_ERR << "Debug info has wrong size";
+//  for (size_t i = 1; i < computation_.matrix_debug_info.size(); i++) {
+//    if (computation_.matrix_debug_info[i].cindexes.size() !=
+//        static_cast<size_t>(computation_.matrices[i].num_rows))
+//      KALDI_ERR << "Debug info for matrix m" << i
+//                << " has wrong num-rows.";
+//    std::vector<Cindex>::const_iterator
+//        iter = computation_.matrix_debug_info[i].cindexes.begin(),
+//        end = computation_.matrix_debug_info[i].cindexes.end();
+//    for (; iter != end; ++iter) {
+//      if (iter->second.n < 0) {
+//        KALDI_ERR << "Negative n index in debug info";
+//      }
+//    }
+//  }
+//}
+//
+//
+//// note: 'computation' is not a reference, it's copied so that we
+//// can modify it internally.
 static void CheckComputationOnline(const Nnet &nnet,
                                    NnetComputation computation,
                                    bool check_rewrite) {
@@ -1141,7 +1141,7 @@ static void CheckComputationOnline(const Nnet &nnet,
   ComputationChecker checker(opts, nnet, computation);
   checker.Check();
 }
-
+//
 void CheckComputation(const Nnet &nnet,
                       const NnetComputation &computation,
                       bool check_rewrite) {
@@ -1162,7 +1162,7 @@ void CheckComputation(const Nnet &nnet,
         "(actual error message is above computation)";
   }
 }
-
+//
 void ComputeMatrixToSubmatrix(
     const NnetComputation &computation,
     std::vector<std::vector<int32> > *mat_to_submat) {
@@ -1204,25 +1204,25 @@ int32 ComputationAnalysis::FirstNontrivialAccess(int32 s) const {
   }
   return ans;
 }
-
-
-int32 ComputationAnalysis::FirstAccess(int32 s) const {
-  KALDI_ASSERT(static_cast<size_t>(s) < computation_.submatrices.size() && s>0);
-  int32 ans = computation_.commands.size();
-  std::vector<int32> variable_indexes;
-  analyzer_.variables.AppendVariablesForSubmatrix(s, &variable_indexes);
-  std::vector<int32>::const_iterator iter = variable_indexes.begin(),
-          end = variable_indexes.end();
-  for (; iter != end; ++iter) {
-    int32 v = *iter;
-    const std::vector<Access> &accesses = analyzer_.variable_accesses[v];
-    if (!accesses.empty())
-      ans = std::min(ans, accesses[0].command_index);
-  }
-  return ans;
-}
-
-
+//
+//
+//int32 ComputationAnalysis::FirstAccess(int32 s) const {
+//  KALDI_ASSERT(static_cast<size_t>(s) < computation_.submatrices.size() && s>0);
+//  int32 ans = computation_.commands.size();
+//  std::vector<int32> variable_indexes;
+//  analyzer_.variables.AppendVariablesForSubmatrix(s, &variable_indexes);
+//  std::vector<int32>::const_iterator iter = variable_indexes.begin(),
+//          end = variable_indexes.end();
+//  for (; iter != end; ++iter) {
+//    int32 v = *iter;
+//    const std::vector<Access> &accesses = analyzer_.variable_accesses[v];
+//    if (!accesses.empty())
+//      ans = std::min(ans, accesses[0].command_index);
+//  }
+//  return ans;
+//}
+//
+//
 int32 ComputationAnalysis::FirstNontrivialMatrixAccess(int32 m) const {
   KALDI_ASSERT(static_cast<size_t>(m) < computation_.matrices.size() && m > 0);
   int32 ans = computation_.commands.size();
@@ -1244,23 +1244,23 @@ int32 ComputationAnalysis::FirstNontrivialMatrixAccess(int32 m) const {
   return ans;
 }
 
-
-int32 ComputationAnalysis::LastMatrixAccess(int32 m) const {
-  KALDI_ASSERT(static_cast<size_t>(m) < computation_.matrices.size() && m > 0);
-  int32 ans = -1;
-  const std::vector<Access> &accesses =
-      analyzer_.matrix_accesses[m].accesses;
-  std::vector<Access>::const_reverse_iterator access_iter = accesses.rbegin(),
-      access_end = accesses.rend();
-  for (; access_iter != access_end; ++access_iter) {
-    int32 command_index = access_iter->command_index;
-    ans = std::max(ans, command_index);
-    break;  // break from access_iter loop (an optimization)
-  }
-  return ans;
-}
-
-
+//
+//int32 ComputationAnalysis::LastMatrixAccess(int32 m) const {
+//  KALDI_ASSERT(static_cast<size_t>(m) < computation_.matrices.size() && m > 0);
+//  int32 ans = -1;
+//  const std::vector<Access> &accesses =
+//      analyzer_.matrix_accesses[m].accesses;
+//  std::vector<Access>::const_reverse_iterator access_iter = accesses.rbegin(),
+//      access_end = accesses.rend();
+//  for (; access_iter != access_end; ++access_iter) {
+//    int32 command_index = access_iter->command_index;
+//    ans = std::max(ans, command_index);
+//    break;  // break from access_iter loop (an optimization)
+//  }
+//  return ans;
+//}
+//
+//
 int32 ComputationAnalysis::LastAccess(int32 s) const {
   KALDI_ASSERT(static_cast<size_t>(s) < computation_.submatrices.size() && s>0);
   int32 ans = -1;
@@ -1286,8 +1286,8 @@ int32 ComputationAnalysis::LastAccess(int32 s) const {
   }
   return ans;
 }
-
-
+//
+//
 int32 ComputationAnalysis::LastWriteAccess(int32 s) const {
   KALDI_ASSERT(static_cast<size_t>(s) < computation_.submatrices.size() && s>0);
   int32 matrix_index = computation_.submatrices[s].matrix_index;
@@ -1346,78 +1346,78 @@ int32 ComputationAnalysis::DataInvalidatedCommand(int32 c, int32 s) const {
   }
   return ans;
 }
-
-void PrintMatrixAccesses(std::ostream &os,
-                         const std::vector<MatrixAccesses> &matrix_accesses) {
-  int32 num_matrices = matrix_accesses.size();
-  for (int32 m = 1; m < num_matrices; m++) {
-    const MatrixAccesses &a = matrix_accesses[m];
-    os << "m" << m << ": init-command=" << a.allocate_command
-       << ", destroy-command=" << a.deallocate_command
-       << ", accesses=";
-    std::vector<Access>::const_iterator iter = a.accesses.begin(),
-        end = a.accesses.end();
-    for (; iter != end; ++iter)
-      os << 'c' << iter->command_index << "("
-         << (iter->access_type == kReadAccess ? "r" :
-             (iter->access_type == kWriteAccess ? "w" : "rw")) << ") ";
-    os << "\n";
-  }
-}
-
-void PrintCommandAttributes(std::ostream &os,
-                            const std::vector<CommandAttributes> &attributes) {
-  int32 num_commands = attributes.size();
-  for (int32 c = 0; c < num_commands; c++) {
-    const CommandAttributes &this_attr = attributes[c];
-    os << "c" << c << ": ";
-    if (!this_attr.variables_read.empty()) {
-      os << "r(";
-      std::vector<int32>::const_iterator iter = this_attr.variables_read.begin(),
-          end = this_attr.variables_read.end();
-      for (; iter != end; ++iter) {
-        os << "v" << *iter;
-        if (iter+1 != end) os << ",";
-      }
-      os << ") ";
-    }
-    if (!this_attr.variables_written.empty()) {
-      os << "w(";
-      std::vector<int32>::const_iterator
-          iter = this_attr.variables_written.begin(),
-          end = this_attr.variables_written.end();
-      for (; iter != end; ++iter) {
-        os << "v" << *iter;
-        if (iter+1 != end) os << ",";
-      }
-      os << ") ";
-    }
-    if (!this_attr.matrices_read.empty()) {
-      os << "r(";
-      std::vector<int32>::const_iterator iter = this_attr.matrices_read.begin(),
-          end = this_attr.matrices_read.end();
-      for (; iter != end; ++iter) {
-        os << "m" << *iter;
-        if (iter+1 != end) os << ",";
-      }
-      os << ") ";
-    }
-    if (!this_attr.matrices_written.empty()) {
-      os << "w(";
-      std::vector<int32>::const_iterator
-          iter = this_attr.matrices_written.begin(),
-          end = this_attr.matrices_written.end();
-      for (; iter != end; ++iter) {
-        os << "m" << *iter;
-        if (iter+1 != end) os << ",";
-      }
-      os << ")";
-    }
-    os << "\n";
-  }
-}
-
-
+//
+//void PrintMatrixAccesses(std::ostream &os,
+//                         const std::vector<MatrixAccesses> &matrix_accesses) {
+//  int32 num_matrices = matrix_accesses.size();
+//  for (int32 m = 1; m < num_matrices; m++) {
+//    const MatrixAccesses &a = matrix_accesses[m];
+//    os << "m" << m << ": init-command=" << a.allocate_command
+//       << ", destroy-command=" << a.deallocate_command
+//       << ", accesses=";
+//    std::vector<Access>::const_iterator iter = a.accesses.begin(),
+//        end = a.accesses.end();
+//    for (; iter != end; ++iter)
+//      os << 'c' << iter->command_index << "("
+//         << (iter->access_type == kReadAccess ? "r" :
+//             (iter->access_type == kWriteAccess ? "w" : "rw")) << ") ";
+//    os << "\n";
+//  }
+//}
+//
+//void PrintCommandAttributes(std::ostream &os,
+//                            const std::vector<CommandAttributes> &attributes) {
+//  int32 num_commands = attributes.size();
+//  for (int32 c = 0; c < num_commands; c++) {
+//    const CommandAttributes &this_attr = attributes[c];
+//    os << "c" << c << ": ";
+//    if (!this_attr.variables_read.empty()) {
+//      os << "r(";
+//      std::vector<int32>::const_iterator iter = this_attr.variables_read.begin(),
+//          end = this_attr.variables_read.end();
+//      for (; iter != end; ++iter) {
+//        os << "v" << *iter;
+//        if (iter+1 != end) os << ",";
+//      }
+//      os << ") ";
+//    }
+//    if (!this_attr.variables_written.empty()) {
+//      os << "w(";
+//      std::vector<int32>::const_iterator
+//          iter = this_attr.variables_written.begin(),
+//          end = this_attr.variables_written.end();
+//      for (; iter != end; ++iter) {
+//        os << "v" << *iter;
+//        if (iter+1 != end) os << ",";
+//      }
+//      os << ") ";
+//    }
+//    if (!this_attr.matrices_read.empty()) {
+//      os << "r(";
+//      std::vector<int32>::const_iterator iter = this_attr.matrices_read.begin(),
+//          end = this_attr.matrices_read.end();
+//      for (; iter != end; ++iter) {
+//        os << "m" << *iter;
+//        if (iter+1 != end) os << ",";
+//      }
+//      os << ") ";
+//    }
+//    if (!this_attr.matrices_written.empty()) {
+//      os << "w(";
+//      std::vector<int32>::const_iterator
+//          iter = this_attr.matrices_written.begin(),
+//          end = this_attr.matrices_written.end();
+//      for (; iter != end; ++iter) {
+//        os << "m" << *iter;
+//        if (iter+1 != end) os << ",";
+//      }
+//      os << ")";
+//    }
+//    os << "\n";
+//  }
+//}
+//
+//
 void Analyzer::Init(const Nnet &nnet, const NnetComputation &computation) {
   variables.Init(computation);
   ComputeCommandAttributes(nnet, computation, variables, &command_attributes);
@@ -1425,7 +1425,7 @@ void Analyzer::Init(const Nnet &nnet, const NnetComputation &computation) {
   ComputeMatrixAccesses(nnet, computation, variables, command_attributes,
                         &matrix_accesses);
 }
-
+//
 void GetCommandsOfType(const NnetComputation &computation,
                        CommandType t,
                        std::vector<int32> *command_indexes) {

@@ -79,7 +79,7 @@ BaseFloat NnetComputer::ParameterStddev(const Component &c) {
                "Attempting to get parameter stddev of non-updatable component");
   return std::sqrt(uc->DotProduct(*uc) / uc->NumParameters());
 }
-
+//
 void NnetComputer::DebugBeforeExecute(int32 command,
                                       CommandDebugInfo *info) {
   {
@@ -160,7 +160,7 @@ void NnetComputer::DebugAfterExecute(int32 command,
   KALDI_LOG << os.str();
 }
 
-
+//
 void NnetComputer::SaveMemo(int32 memo_index,
                             const Component &c, void *memo) {
   if (memo_index <= 0) {
@@ -443,17 +443,17 @@ void NnetComputer::ExecuteCommand() {
     KALDI_ERR << "Error running command " << command_strings_[program_counter_];
   }
 }
-
-CuSubMatrix<BaseFloat> NnetComputer::GetSubMatrix(int32 submatrix_index) {
-  KALDI_PARANOID_ASSERT(static_cast<size_t>(submatrix_index) <
-                        computation_.submatrices.size());
-  const NnetComputation::SubMatrixInfo &info =
-      computation_.submatrices[submatrix_index];
-  const CuMatrix<BaseFloat> &mat = matrices_[info.matrix_index];
-  return CuSubMatrix<BaseFloat>(
-      mat, info.row_offset, info.num_rows, info.col_offset, info.num_cols);
-}
-
+//
+//CuSubMatrix<BaseFloat> NnetComputer::GetSubMatrix(int32 submatrix_index) {
+//  KALDI_PARANOID_ASSERT(static_cast<size_t>(submatrix_index) <
+//                        computation_.submatrices.size());
+//  const NnetComputation::SubMatrixInfo &info =
+//      computation_.submatrices[submatrix_index];
+//  const CuMatrix<BaseFloat> &mat = matrices_[info.matrix_index];
+//  return CuSubMatrix<BaseFloat>(
+//      mat, info.row_offset, info.num_rows, info.col_offset, info.num_cols);
+//}
+//
 void NnetComputer::GetPointers(int32 indexes_multi_index,
                                int32 num_cols,
                                CuArray<BaseFloat*> *pointers) {
@@ -577,7 +577,7 @@ const CuMatrixBase<BaseFloat> &NnetComputer::GetOutput(
   KALDI_ASSERT(matrices_[matrix_index].NumRows() != 0);
   return matrices_[matrix_index];
 }
-
+//
 
 void NnetComputer::GetOutputDestructive(const std::string &node_name,
                                         CuMatrix<BaseFloat> *output) {
@@ -654,31 +654,31 @@ int32 NnetComputer::GetIoMatrixIndex(const std::string &node_name, bool is_outpu
   return 0;  // Suppress compiler warnings; this line will never be reached.
 }
 
-
-void NnetComputer::AcceptInputs(const Nnet &nnet,
-                                const std::vector<NnetIo> &io_vec) {
-  for (size_t i = 0; i < io_vec.size(); i++) {
-    const NnetIo &io = io_vec[i];
-    int32 node_index = nnet.GetNodeIndex(io.name);
-    if (node_index == -1)
-      KALDI_ERR << "No node named '" << io.name << "' in nnet.";
-    if (nnet.IsInputNode(node_index)) {
-      CuMatrix<BaseFloat> cu_input(io.features.NumRows(),
-                                   io.features.NumCols(),
-                                   kUndefined);
-      cu_input.CopyFromGeneralMat(io.features);
-      this->AcceptInput(io.name, &cu_input);
-    }
-  }
-}
-
+//
+//void NnetComputer::AcceptInputs(const Nnet &nnet,
+//                                const std::vector<NnetIo> &io_vec) {
+//  for (size_t i = 0; i < io_vec.size(); i++) {
+//    const NnetIo &io = io_vec[i];
+//    int32 node_index = nnet.GetNodeIndex(io.name);
+//    if (node_index == -1)
+//      KALDI_ERR << "No node named '" << io.name << "' in nnet.";
+//    if (nnet.IsInputNode(node_index)) {
+//      CuMatrix<BaseFloat> cu_input(io.features.NumRows(),
+//                                   io.features.NumCols(),
+//                                   kUndefined);
+//      cu_input.CopyFromGeneralMat(io.features);
+//      this->AcceptInput(io.name, &cu_input);
+//    }
+//  }
+//}
+//
 NnetComputer::~NnetComputer() {
   // Delete any pointers that are present in compressed_matrices_.  Actually
   // they should all already have been deallocated and set to NULL if the
   // compuation was run to completion; we do this in case someone ran
   // the forward propagation but not the backprop.
-  for (size_t i = 0; i < compressed_matrices_.size(); i++)
-    delete compressed_matrices_[i];
+//  for (size_t i = 0; i < compressed_matrices_.size(); i++)
+//    delete compressed_matrices_[i];
 }
 
 } // namespace nnet3
