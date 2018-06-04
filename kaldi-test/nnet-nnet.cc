@@ -29,27 +29,27 @@
 
 namespace kaldi {
 namespace nnet3 {
-//
-//// returns dimension that this node outputs.
-//int32 NetworkNode::Dim(const Nnet &nnet) const {
-//  int32 ans;
-//  switch (node_type) {
-//    case kInput: case kDimRange:
-//      ans = dim;
-//      break;
-//    case kDescriptor:
-//      ans = descriptor.Dim(nnet);
-//      break;
-//    case kComponent:
-//      ans = nnet.GetComponent(u.component_index)->OutputDim();
-//      break;
-//    default:
-//      ans = 0;  // suppress compiler warning
-//      KALDI_ERR << "Invalid node type.";
-//  }
-//  KALDI_ASSERT(ans > 0);
-//  return ans;
-//}
+
+// returns dimension that this node outputs.
+int32 NetworkNode::Dim(const Nnet &nnet) const {
+  int32 ans;
+  switch (node_type) {
+    case kInput: case kDimRange:
+      ans = dim;
+      break;
+    case kDescriptor:
+      ans = descriptor.Dim(nnet);
+      break;
+    case kComponent:
+      ans = nnet.GetComponent(u.component_index)->OutputDim();
+      break;
+    default:
+      ans = 0;  // suppress compiler warning
+      KALDI_ERR << "Invalid node type.";
+  }
+  KALDI_ASSERT(ans > 0);
+  return ans;
+}
 //
 //void Nnet::SetNodeName(int32 node_index, const std::string &new_name) {
 //  if (!(static_cast<size_t>(node_index) < nodes_.size()))

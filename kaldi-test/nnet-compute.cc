@@ -443,17 +443,17 @@ void NnetComputer::ExecuteCommand() {
     KALDI_ERR << "Error running command " << command_strings_[program_counter_];
   }
 }
-//
-//CuSubMatrix<BaseFloat> NnetComputer::GetSubMatrix(int32 submatrix_index) {
-//  KALDI_PARANOID_ASSERT(static_cast<size_t>(submatrix_index) <
-//                        computation_.submatrices.size());
-//  const NnetComputation::SubMatrixInfo &info =
-//      computation_.submatrices[submatrix_index];
-//  const CuMatrix<BaseFloat> &mat = matrices_[info.matrix_index];
-//  return CuSubMatrix<BaseFloat>(
-//      mat, info.row_offset, info.num_rows, info.col_offset, info.num_cols);
-//}
-//
+
+CuSubMatrix<BaseFloat> NnetComputer::GetSubMatrix(int32 submatrix_index) {
+  KALDI_PARANOID_ASSERT(static_cast<size_t>(submatrix_index) <
+                        computation_.submatrices.size());
+  const NnetComputation::SubMatrixInfo &info =
+      computation_.submatrices[submatrix_index];
+  const CuMatrix<BaseFloat> &mat = matrices_[info.matrix_index];
+  return CuSubMatrix<BaseFloat>(
+      mat, info.row_offset, info.num_rows, info.col_offset, info.num_cols);
+}
+
 void NnetComputer::GetPointers(int32 indexes_multi_index,
                                int32 num_cols,
                                CuArray<BaseFloat*> *pointers) {

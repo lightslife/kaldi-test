@@ -375,66 +375,66 @@ void SplitLocations(
 //   "location_vector" are either i or -1, then output i to first_value and the
 //   .second elements into "second_values", and return true.  Otherwise return
 //   false and the outputs are don't-cares. */
-//bool ConvertToIndexes(
-//    const std::vector<std::pair<int32, int32> > &location_vector,
-//    int32 *first_value,
-//    std::vector<int32> *second_values)  {
-//  *first_value = -1;
-//  second_values->clear();
-//  second_values->reserve(location_vector.size());
-//  std::vector<std::pair<int32, int32> >::const_iterator iter;
-//  for (iter = location_vector.begin(); iter < location_vector.end(); ++iter)  {
-//    if (iter->first != -1) {
-//      if (*first_value == -1)
-//        *first_value = iter->first;
-//      if (iter->first != *first_value)
-//        return false;
-//      second_values->push_back(iter->second);
-//    } else  {
-//      second_values->push_back(-1);
-//    }
-//  }
-//  return true;
-//}
+bool ConvertToIndexes(
+    const std::vector<std::pair<int32, int32> > &location_vector,
+    int32 *first_value,
+    std::vector<int32> *second_values)  {
+  *first_value = -1;
+  second_values->clear();
+  second_values->reserve(location_vector.size());
+  std::vector<std::pair<int32, int32> >::const_iterator iter;
+  for (iter = location_vector.begin(); iter < location_vector.end(); ++iter)  {
+    if (iter->first != -1) {
+      if (*first_value == -1)
+        *first_value = iter->first;
+      if (iter->first != *first_value)
+        return false;
+      second_values->push_back(iter->second);
+    } else  {
+      second_values->push_back(-1);
+    }
+  }
+  return true;
+}
 //
-//
-//// see declaration in header for documentation
-//void EnsureContiguousProperty(
-//    const std::vector<int32> &indexes,
-//    std::vector<std::vector<int32> > *indexes_out) {
-//  indexes_out->clear();
-//  indexes_out->reserve(3);
-//  if (indexes.empty()) return;
-//  int32 max_value = *std::max_element(indexes.begin(), indexes.end());
-//  if (max_value == -1) return;
-//  std::vector<int32> num_segments_seen(max_value + 1, 0);
-//  int32 dim = indexes.size(), num_output_vectors = 0;
-//  for (int32 i = 0; i < dim;) {
-//    // note, we increment i within the loop.
-//    if (indexes[i] == -1) {
-//      i++;
-//      continue;
-//    }
-//    int32 value = indexes[i], start_index = i;
-//    for (; i < dim && indexes[i] == value; i++);
-//    int32 end_index = i;  // one past the end.
-//    // the input 'indexes' contains a sequence of possibly-repeated instances of
-//    // the value 'value', starting at index 'start_index', with 'end_index' as
-//    // one past the end.
-//    int32 this_num_segments_seen = num_segments_seen[value]++;
-//    if (this_num_segments_seen >= num_output_vectors) {  // we have nowhere to
-//                                                         // put it.
-//      indexes_out->resize(++num_output_vectors);
-//      indexes_out->back().resize(dim, -1);  // fill newly added vector with -1's.
-//    }
-//    std::vector<int32> &this_out_vec((*indexes_out)[this_num_segments_seen]);
-//    std::vector<int32>::iterator iter = this_out_vec.begin() + start_index,
-//        end = this_out_vec.begin() + end_index;
-//    // Fill the appropriate range of the output vector with 'value'
-//    for (; iter != end; ++iter) *iter = value;
-//  }
-//}
-//
+
+// see declaration in header for documentation
+void EnsureContiguousProperty(
+    const std::vector<int32> &indexes,
+    std::vector<std::vector<int32> > *indexes_out) {
+  indexes_out->clear();
+  indexes_out->reserve(3);
+  if (indexes.empty()) return;
+  int32 max_value = *std::max_element(indexes.begin(), indexes.end());
+  if (max_value == -1) return;
+  std::vector<int32> num_segments_seen(max_value + 1, 0);
+  int32 dim = indexes.size(), num_output_vectors = 0;
+  for (int32 i = 0; i < dim;) {
+    // note, we increment i within the loop.
+    if (indexes[i] == -1) {
+      i++;
+      continue;
+    }
+    int32 value = indexes[i], start_index = i;
+    for (; i < dim && indexes[i] == value; i++);
+    int32 end_index = i;  // one past the end.
+    // the input 'indexes' contains a sequence of possibly-repeated instances of
+    // the value 'value', starting at index 'start_index', with 'end_index' as
+    // one past the end.
+    int32 this_num_segments_seen = num_segments_seen[value]++;
+    if (this_num_segments_seen >= num_output_vectors) {  // we have nowhere to
+                                                         // put it.
+      indexes_out->resize(++num_output_vectors);
+      indexes_out->back().resize(dim, -1);  // fill newly added vector with -1's.
+    }
+    std::vector<int32> &this_out_vec((*indexes_out)[this_num_segments_seen]);
+    std::vector<int32>::iterator iter = this_out_vec.begin() + start_index,
+        end = this_out_vec.begin() + end_index;
+    // Fill the appropriate range of the output vector with 'value'
+    for (; iter != end; ++iter) *iter = value;
+  }
+}
+
 //
 //
 ///**
@@ -554,52 +554,52 @@ void SplitLocationsBackward(
 //// so, it also outputs to "reverse_indexes" the begin and end of these ranges,
 //// so that indexes[j] == i for all j such that (*reverse_indexes)[i].first <= j
 //// && j < (*reverse_indexes)[i].second.
-//bool HasContiguousProperty(
-//    const std::vector<int32> &indexes,
-//    std::vector<std::pair<int32, int32> > *reverse_indexes) {
-//  reverse_indexes->clear();
-//  int32 num_indexes = indexes.size();
-//  if (num_indexes == 0)
-//    return true;
-//  int32 num_input_indexes =
-//      *std::max_element(indexes.begin(), indexes.end()) + 1;
-//  KALDI_ASSERT(num_input_indexes >= 0);
-//  if (num_input_indexes == 0) {
-//    // we don't really expect this input, filled with -1's.
-//    KALDI_WARN << "HasContiguousProperty called on vector of -1's.";
-//    return true;
-//  }
-//  reverse_indexes->resize(num_input_indexes,
-//                          std::pair<int32,int32>(-1, -1));
-//  // set each pair's "first" to the min index of all elements
-//  // of "indexes" with that value, and the "second" to the
-//  // max plus one.
-//  for (int32 i = 0; i < num_indexes; i++) {
-//    int32 j = indexes[i];
-//    if (j == -1) continue;
-//    KALDI_ASSERT(j >= 0);
-//    std::pair<int32, int32> &pair = (*reverse_indexes)[j];
-//    if (pair.first == -1) {
-//      pair.first = i;
-//      pair.second = i + 1;
-//    } else {
-//      pair.first = std::min(pair.first, i);
-//      pair.second = std::max(pair.second, i + 1);
-//    }
-//  }
-//  // check that the contiguous property holds.
-//  for (int32 i = 0; i < num_input_indexes; i++) {
-//    std::pair<int32, int32> pair = (*reverse_indexes)[i];
-//    if (pair.first != -1) {
-//      for (int32 j = pair.first; j < pair.second; j++)
-//        if (indexes[j] != i)
-//          return false;
-//    }
-//  }
-//  return true;
-//}
-//
-//
+bool HasContiguousProperty(
+    const std::vector<int32> &indexes,
+    std::vector<std::pair<int32, int32> > *reverse_indexes) {
+  reverse_indexes->clear();
+  int32 num_indexes = indexes.size();
+  if (num_indexes == 0)
+    return true;
+  int32 num_input_indexes =
+      *std::max_element(indexes.begin(), indexes.end()) + 1;
+  KALDI_ASSERT(num_input_indexes >= 0);
+  if (num_input_indexes == 0) {
+    // we don't really expect this input, filled with -1's.
+    KALDI_WARN << "HasContiguousProperty called on vector of -1's.";
+    return true;
+  }
+  reverse_indexes->resize(num_input_indexes,
+                          std::pair<int32,int32>(-1, -1));
+  // set each pair's "first" to the min index of all elements
+  // of "indexes" with that value, and the "second" to the
+  // max plus one.
+  for (int32 i = 0; i < num_indexes; i++) {
+    int32 j = indexes[i];
+    if (j == -1) continue;
+    KALDI_ASSERT(j >= 0);
+    std::pair<int32, int32> &pair = (*reverse_indexes)[j];
+    if (pair.first == -1) {
+      pair.first = i;
+      pair.second = i + 1;
+    } else {
+      pair.first = std::min(pair.first, i);
+      pair.second = std::max(pair.second, i + 1);
+    }
+  }
+  // check that the contiguous property holds.
+  for (int32 i = 0; i < num_input_indexes; i++) {
+    std::pair<int32, int32> pair = (*reverse_indexes)[i];
+    if (pair.first != -1) {
+      for (int32 j = pair.first; j < pair.second; j++)
+        if (indexes[j] != i)
+          return false;
+    }
+  }
+  return true;
+}
+
+
 //// see comment in header.
 //void GetNxList(const std::vector<Index> &indexes,
 //               std::vector<std::pair<int32, int32> > *pairs) {

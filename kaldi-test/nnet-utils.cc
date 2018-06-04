@@ -41,14 +41,14 @@ namespace nnet3 {
 //  return ans;
 //}
 //
-//int32 NumInputNodes(const Nnet &nnet) {
-//  int32 ans = 0;
-//  for (int32 n = 0; n < nnet.NumNodes(); n++)
-//    if (nnet.IsInputNode(n))
-//      ans++;
-//  return ans;
-//}
-//
+int32 NumInputNodes(const Nnet &nnet) {
+  int32 ans = 0;
+  for (int32 n = 0; n < nnet.NumNodes(); n++)
+    if (nnet.IsInputNode(n))
+      ans++;
+  return ans;
+}
+
 //
 bool IsSimpleNnet(const Nnet &nnet) {
   // check that we have an output node and called "output".
@@ -69,20 +69,20 @@ bool IsSimpleNnet(const Nnet &nnet) {
       nnet.IsInputNode(nnet.GetNodeIndex("ivector"));
 }
 
-//void EvaluateComputationRequest(
-//    const Nnet &nnet,
-//    const ComputationRequest &request,
-//    std::vector<std::vector<bool> > *is_computable) {
-//  ComputationGraph graph;
-//  ComputationGraphBuilder builder(nnet, &graph);
-//  builder.Compute(request);
-//  builder.GetComputableInfo(is_computable);
-//  if (GetVerboseLevel() >= 4) {
-//    std::ostringstream graph_pretty;
-//    graph.Print(graph_pretty, nnet.GetNodeNames());
-//    KALDI_VLOG(4) << "Graph is " << graph_pretty.str();
-//  }
-//}
+void EvaluateComputationRequest(
+    const Nnet &nnet,
+    const ComputationRequest &request,
+    std::vector<std::vector<bool> > *is_computable) {
+  ComputationGraph graph;
+  ComputationGraphBuilder builder(nnet, &graph);
+  builder.Compute(request);
+  builder.GetComputableInfo(is_computable);
+  if (GetVerboseLevel() >= 4) {
+    std::ostringstream graph_pretty;
+    graph.Print(graph_pretty, nnet.GetNodeNames());
+    KALDI_VLOG(4) << "Graph is " << graph_pretty.str();
+  }
+}
 //
 //// this non-exported function is used in ComputeSimpleNnetContext
 //// to compute the left and right context of the nnet for a particular

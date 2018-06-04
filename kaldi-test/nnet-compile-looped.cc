@@ -68,159 +68,159 @@ namespace nnet3 {
 //  }
 //}
 //
+
+int32 GetChunkSize(const Nnet &nnet,
+                   int32 frame_subsampling_factor,
+                   int32 advised_chunk_size) {
+  int32 modulus = nnet.Modulus();
+  KALDI_ASSERT(modulus > 0 && frame_subsampling_factor > 0 &&
+               advised_chunk_size > 0);
+  int32 chunk_size = advised_chunk_size;
+  while (1) {
+    if (chunk_size % modulus == 0 &&
+        chunk_size % frame_subsampling_factor == 0)
+      return chunk_size;
+    chunk_size++;
+  }
+}
+
+
+/// Mod(m, n), defined for integers m and n where n > 0, returns
+/// the modulus m % n, defined as the integer 0 <= i < n
+/// such that i and m are congruent modulo n; for instance,
+/// Mod(13, 10) = 3.
+/// This is like the % operation in C/C++, except that it always returns a
+/// positive value even for negative m; in 99% of cases where it makes a
+/// difference, this is what you want.  In the C/C++ standard, the sign of a % b
+/// for negative a is not specified (except by relation with the division '/'
+/// operator), but in practice it would be <= 0 for almost all implementations.
+template<class I> I  Mod(I m, I n) {
+  I ans = m % n;
+  if (ans < 0) ans += n;
+  return ans;
+}
+
+
+static void CreateComputationRequestInternal(
+    int32 begin_input_t, int32 end_input_t,
+    int32 begin_output_t, int32 end_output_t,
+    int32 num_sequences,
+    int32 frame_subsampling_factor,
+    const std::set<int32> &ivector_times,
+    ComputationRequest *request) {
+  request->inputs.reserve(2);
+  request->inputs.clear();
+  request->inputs.resize(1 + (ivector_times.empty() ? 0 : 1));
+  request->inputs[0].name = "input";
+  request->inputs[0].has_deriv = false;
+  request->outputs.clear();
+  request->outputs.resize(1);
+  request->outputs[0].name = "output";
+  request->outputs[0].has_deriv = false;
+  if (!ivector_times.empty()) {
+    request->inputs[1].name = "ivector";
+    request->inputs[1].has_deriv = false;
+  }
+
+  // in the computation request the 'n' indexes (the sequence/utterance indexes)
+  // have the larger stride than 't', although this is opposite to the way it's
+  // done inside the computation.  This is for user convenience where it may be
+  // easier to deal with submatrixes per sequence.
+  for (int32 n = 0; n < num_sequences; n++) {
+    int32 x = 0;
+    for (int32 t = begin_input_t; t < end_input_t; t++) {
+      request->inputs[0].indexes.push_back(Index(n, t, x));
+    }
+    for (int32 t = begin_output_t;
+         t < end_output_t;
+         t += frame_subsampling_factor)
+      request->outputs[0].indexes.push_back(Index(n, t, x));
+  }
+  if (!ivector_times.empty()) {
+    request->inputs.resize(2);
+    request->inputs[1].name = "ivector";
+    request->inputs[1].has_deriv = false;
+    for (int32 n = 0; n < num_sequences; n++) {
+      // note: std::sets store things in sorted order.
+      for (std::set<int32>::const_iterator iter = ivector_times.begin();
+           iter != ivector_times.end(); ++iter) {
+        int32 t = *iter, x = 0;
+        request->inputs[1].indexes.push_back(Index(n, t, x));
+      }
+    }
+  }
+}
 //
-//int32 GetChunkSize(const Nnet &nnet,
-//                   int32 frame_subsampling_factor,
-//                   int32 advised_chunk_size) {
-//  int32 modulus = nnet.Modulus();
-//  KALDI_ASSERT(modulus > 0 && frame_subsampling_factor > 0 &&
-//               advised_chunk_size > 0);
-//  int32 chunk_size = advised_chunk_size;
-//  while (1) {
-//    if (chunk_size % modulus == 0 &&
-//        chunk_size % frame_subsampling_factor == 0)
-//      return chunk_size;
-//    chunk_size++;
-//  }
-//}
-//
-//
-///// Mod(m, n), defined for integers m and n where n > 0, returns
-///// the modulus m % n, defined as the integer 0 <= i < n
-///// such that i and m are congruent modulo n; for instance,
-///// Mod(13, 10) = 3.
-///// This is like the % operation in C/C++, except that it always returns a
-///// positive value even for negative m; in 99% of cases where it makes a
-///// difference, this is what you want.  In the C/C++ standard, the sign of a % b
-///// for negative a is not specified (except by relation with the division '/'
-///// operator), but in practice it would be <= 0 for almost all implementations.
-//template<class I> I  Mod(I m, I n) {
-//  I ans = m % n;
-//  if (ans < 0) ans += n;
-//  return ans;
-//}
-//
-//
-//static void CreateComputationRequestInternal(
-//    int32 begin_input_t, int32 end_input_t,
-//    int32 begin_output_t, int32 end_output_t,
-//    int32 num_sequences,
-//    int32 frame_subsampling_factor,
-//    const std::set<int32> &ivector_times,
-//    ComputationRequest *request) {
-//  request->inputs.reserve(2);
-//  request->inputs.clear();
-//  request->inputs.resize(1 + (ivector_times.empty() ? 0 : 1));
-//  request->inputs[0].name = "input";
-//  request->inputs[0].has_deriv = false;
-//  request->outputs.clear();
-//  request->outputs.resize(1);
-//  request->outputs[0].name = "output";
-//  request->outputs[0].has_deriv = false;
-//  if (!ivector_times.empty()) {
-//    request->inputs[1].name = "ivector";
-//    request->inputs[1].has_deriv = false;
-//  }
-//
-//  // in the computation request the 'n' indexes (the sequence/utterance indexes)
-//  // have the larger stride than 't', although this is opposite to the way it's
-//  // done inside the computation.  This is for user convenience where it may be
-//  // easier to deal with submatrixes per sequence.
-//  for (int32 n = 0; n < num_sequences; n++) {
-//    int32 x = 0;
-//    for (int32 t = begin_input_t; t < end_input_t; t++) {
-//      request->inputs[0].indexes.push_back(Index(n, t, x));
-//    }
-//    for (int32 t = begin_output_t;
-//         t < end_output_t;
-//         t += frame_subsampling_factor)
-//      request->outputs[0].indexes.push_back(Index(n, t, x));
-//  }
-//  if (!ivector_times.empty()) {
-//    request->inputs.resize(2);
-//    request->inputs[1].name = "ivector";
-//    request->inputs[1].has_deriv = false;
-//    for (int32 n = 0; n < num_sequences; n++) {
-//      // note: std::sets store things in sorted order.
-//      for (std::set<int32>::const_iterator iter = ivector_times.begin();
-//           iter != ivector_times.end(); ++iter) {
-//        int32 t = *iter, x = 0;
-//        request->inputs[1].indexes.push_back(Index(n, t, x));
-//      }
-//    }
-//  }
-//}
-//
-//
-//void CreateLoopedComputationRequest(const Nnet &nnet,
-//                                    int32 chunk_size,
-//                                    int32 frame_subsampling_factor,
-//                                    int32 ivector_period,
-//                                    int32 left_context_begin,
-//                                    int32 right_context,
-//                                    int32 num_sequences,
-//                                    ComputationRequest *request1,
-//                                    ComputationRequest *request2,
-//                                    ComputationRequest *request3) {
-//  bool has_ivector = (nnet.InputDim("ivector") > 0);
-//  KALDI_ASSERT(chunk_size % frame_subsampling_factor == 0 &&
-//               chunk_size % nnet.Modulus() == 0 &&
-//               chunk_size % ivector_period == 0);
-//  KALDI_ASSERT(left_context_begin >= 0 && right_context >= 0);
-//  // note, 'end' is one past the last one.
-//  int32 chunk1_input_begin_t = - left_context_begin,
-//      chunk1_input_end_t = chunk_size + right_context,
-//      chunk2_input_begin_t = chunk1_input_end_t,
-//      chunk2_input_end_t = chunk2_input_begin_t + chunk_size,
-//      chunk3_input_begin_t = chunk2_input_end_t,
-//      chunk3_input_end_t = chunk3_input_begin_t + chunk_size;
-//
-//
-//  // work out the times at which i-vectors are required.
-//  std::set<int32> ivector_times1, ivector_times2, ivector_times3;
-//  if (has_ivector) {
-//    for (int32 t = chunk1_input_begin_t; t < chunk1_input_end_t; t++) {
-//      int32 ivector_t = t - Mod(t, ivector_period);
-//      ivector_times1.insert(ivector_t);
-//    }
-//    for (int32 t = chunk2_input_begin_t; t < chunk2_input_end_t; t++) {
-//      int32 ivector_t = t - Mod(t, ivector_period);
-//      if (ivector_times2.count(ivector_t) == 0 &&
-//	  ivector_times1.count(ivector_t) == 0)
-//        ivector_times2.insert(ivector_t);
-//    }
-//    for (int32 t = chunk3_input_begin_t; t < chunk3_input_end_t; t++) {
-//      int32 ivector_t = t - Mod(t, ivector_period);
-//      if (ivector_times3.count(ivector_t) == 0 &&
-//          ivector_times2.count(ivector_t) == 0 &&
-//	  ivector_times1.count(ivector_t) == 0)
-//        ivector_times3.insert(ivector_t);
-//    }
-//  }
-//
-//  CreateComputationRequestInternal(
-//      chunk1_input_begin_t, chunk1_input_end_t,
-//      0, chunk_size,
-//      num_sequences, frame_subsampling_factor,
-//      ivector_times1,
-//      request1);
-//
-//  CreateComputationRequestInternal(
-//      chunk2_input_begin_t, chunk2_input_end_t,
-//      chunk_size, chunk_size * 2,
-//      num_sequences, frame_subsampling_factor,
-//      ivector_times2,
-//      request2);
-//
-//  CreateComputationRequestInternal(
-//      chunk3_input_begin_t, chunk3_input_end_t,
-//      chunk_size * 2, chunk_size * 3,
-//      num_sequences, frame_subsampling_factor,
-//      ivector_times3,
-//      request3);
-//
-//}
-//
+
+void CreateLoopedComputationRequest(const Nnet &nnet,
+                                    int32 chunk_size,
+                                    int32 frame_subsampling_factor,
+                                    int32 ivector_period,
+                                    int32 left_context_begin,
+                                    int32 right_context,
+                                    int32 num_sequences,
+                                    ComputationRequest *request1,
+                                    ComputationRequest *request2,
+                                    ComputationRequest *request3) {
+  bool has_ivector = (nnet.InputDim("ivector") > 0);
+  KALDI_ASSERT(chunk_size % frame_subsampling_factor == 0 &&
+               chunk_size % nnet.Modulus() == 0 &&
+               chunk_size % ivector_period == 0);
+  KALDI_ASSERT(left_context_begin >= 0 && right_context >= 0);
+  // note, 'end' is one past the last one.
+  int32 chunk1_input_begin_t = - left_context_begin,
+      chunk1_input_end_t = chunk_size + right_context,
+      chunk2_input_begin_t = chunk1_input_end_t,
+      chunk2_input_end_t = chunk2_input_begin_t + chunk_size,
+      chunk3_input_begin_t = chunk2_input_end_t,
+      chunk3_input_end_t = chunk3_input_begin_t + chunk_size;
+
+
+  // work out the times at which i-vectors are required.
+  std::set<int32> ivector_times1, ivector_times2, ivector_times3;
+  if (has_ivector) {
+    for (int32 t = chunk1_input_begin_t; t < chunk1_input_end_t; t++) {
+      int32 ivector_t = t - Mod(t, ivector_period);
+      ivector_times1.insert(ivector_t);
+    }
+    for (int32 t = chunk2_input_begin_t; t < chunk2_input_end_t; t++) {
+      int32 ivector_t = t - Mod(t, ivector_period);
+      if (ivector_times2.count(ivector_t) == 0 &&
+	  ivector_times1.count(ivector_t) == 0)
+        ivector_times2.insert(ivector_t);
+    }
+    for (int32 t = chunk3_input_begin_t; t < chunk3_input_end_t; t++) {
+      int32 ivector_t = t - Mod(t, ivector_period);
+      if (ivector_times3.count(ivector_t) == 0 &&
+          ivector_times2.count(ivector_t) == 0 &&
+	  ivector_times1.count(ivector_t) == 0)
+        ivector_times3.insert(ivector_t);
+    }
+  }
+
+  CreateComputationRequestInternal(
+      chunk1_input_begin_t, chunk1_input_end_t,
+      0, chunk_size,
+      num_sequences, frame_subsampling_factor,
+      ivector_times1,
+      request1);
+
+  CreateComputationRequestInternal(
+      chunk2_input_begin_t, chunk2_input_end_t,
+      chunk_size, chunk_size * 2,
+      num_sequences, frame_subsampling_factor,
+      ivector_times2,
+      request2);
+
+  CreateComputationRequestInternal(
+      chunk3_input_begin_t, chunk3_input_end_t,
+      chunk_size * 2, chunk_size * 3,
+      num_sequences, frame_subsampling_factor,
+      ivector_times3,
+      request3);
+
+}
+
 //
 //
 //void AddTimeOffsetToComputationRequest(int32 t_offset,

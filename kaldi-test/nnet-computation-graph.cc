@@ -172,55 +172,55 @@ void ComputationGraphBuilder::ExplainWhyNotComputable(
   KALDI_LOG << os.str();
 }
 //
-//
-//void ComputationGraph::Print(std::ostream &os,
-//                             const std::vector<std::string> &node_names) {
-//  int32 max_cindexes_per_line = 50, max_dependencies = 5,
-//      num_cindexes = cindexes.size();
-//
-//  std::vector<std::pair<Cindex, std::vector<Cindex> > > pairs;
-//  pairs.reserve(num_cindexes);
-//  for (int32 cindex_id = 0; cindex_id < num_cindexes; cindex_id++) {
-//    int32 size = dependencies[cindex_id].size();
-//    std::vector<Cindex> deps(size);
-//    for (size_t i = 0; i < size; i++)
-//      deps[i] = cindexes[dependencies[cindex_id][i]];
-//    std::sort(deps.begin(), deps.end());
-//    pairs.push_back(std::pair<Cindex, std::vector<Cindex> >(cindexes[cindex_id],
-//                                                            deps));
-//  }
-//  std::sort(pairs.begin(), pairs.end());
-//  int32 cur_start = 0;
-//  for (int32 i = 0; i < num_cindexes; i++) {
-//    if (pairs[i].first.first != pairs[cur_start].first.first) {
-//      cur_start = i;
-//      os << "\n";
-//    }
-//    if (i - cur_start < max_cindexes_per_line) {
-//      os << "[ ";
-//      PrintCindex(os, pairs[i].first, node_names);
-//      if (! is_input[GetCindexId(pairs[i].first)]) {
-//        // only print out dependences for cindexes that
-//        // were not provided as inputs.
-//        os << " -> ";
-//        for (int32 j = 0; j < pairs[i].second.size(); j++) {
-//          if (j < max_dependencies) {
-//            PrintCindex(os, pairs[i].second[j], node_names);
-//            if (j + 1 < pairs[i].second.size())
-//              os << ", ";
-//          } else if (j == max_dependencies) {
-//            os << "...";
-//          }
-//        }
-//      }
-//      os << " ] ";
-//    } else if (i - cur_start == max_cindexes_per_line) {
-//      os << "...";
-//    }
-//  }
-//  os << "\n";
-//
-//}
+
+void ComputationGraph::Print(std::ostream &os,
+                             const std::vector<std::string> &node_names) {
+  int32 max_cindexes_per_line = 50, max_dependencies = 5,
+      num_cindexes = cindexes.size();
+
+  std::vector<std::pair<Cindex, std::vector<Cindex> > > pairs;
+  pairs.reserve(num_cindexes);
+  for (int32 cindex_id = 0; cindex_id < num_cindexes; cindex_id++) {
+    int32 size = dependencies[cindex_id].size();
+    std::vector<Cindex> deps(size);
+    for (size_t i = 0; i < size; i++)
+      deps[i] = cindexes[dependencies[cindex_id][i]];
+    std::sort(deps.begin(), deps.end());
+    pairs.push_back(std::pair<Cindex, std::vector<Cindex> >(cindexes[cindex_id],
+                                                            deps));
+  }
+  std::sort(pairs.begin(), pairs.end());
+  int32 cur_start = 0;
+  for (int32 i = 0; i < num_cindexes; i++) {
+    if (pairs[i].first.first != pairs[cur_start].first.first) {
+      cur_start = i;
+      os << "\n";
+    }
+    if (i - cur_start < max_cindexes_per_line) {
+      os << "[ ";
+      PrintCindex(os, pairs[i].first, node_names);
+      if (! is_input[GetCindexId(pairs[i].first)]) {
+        // only print out dependences for cindexes that
+        // were not provided as inputs.
+        os << " -> ";
+        for (int32 j = 0; j < pairs[i].second.size(); j++) {
+          if (j < max_dependencies) {
+            PrintCindex(os, pairs[i].second[j], node_names);
+            if (j + 1 < pairs[i].second.size())
+              os << ", ";
+          } else if (j == max_dependencies) {
+            os << "...";
+          }
+        }
+      }
+      os << " ] ";
+    } else if (i - cur_start == max_cindexes_per_line) {
+      os << "...";
+    }
+  }
+  os << "\n";
+
+}
 //
 //
 //// inline
@@ -799,29 +799,29 @@ ComputationGraphBuilder::ComputeComputableInfo(int32 cindex_id)
   }
 }
 
-//void ComputationGraphBuilder::GetComputableInfo(
-//    std::vector<std::vector<bool> > *computable) const {
-//  KALDI_ASSERT(!graph_->cindexes.empty() &&
-//               "You need to call this after Compute()!");
-//  KALDI_ASSERT(!computable_info_.empty() &&
-//               "You need to call this before Prune()!");
-//  computable->clear();
-//  computable->resize(request_->outputs.size());
-//  for (size_t i = 0; i < request_->outputs.size(); i++) {
-//    const IoSpecification &output = request_->outputs[i];
-//    int32 n = nnet_.GetNodeIndex(output.name);
-//    KALDI_ASSERT(n != -1);
-//    int32 size = output.indexes.size();
-//    std::vector<bool> &this_vec = (*computable)[i];
-//    this_vec.resize(size);
-//    for (size_t j = 0; j < size; j++) {
-//      Cindex cindex(n, output.indexes[j]);
-//      int32 cindex_id = graph_->GetCindexId(cindex);
-//      KALDI_ASSERT(cindex_id != -1);
-//      this_vec[j] = (computable_info_[cindex_id] == kComputable);
-//    }
-//  }
-//}
+void ComputationGraphBuilder::GetComputableInfo(
+    std::vector<std::vector<bool> > *computable) const {
+  KALDI_ASSERT(!graph_->cindexes.empty() &&
+               "You need to call this after Compute()!");
+  KALDI_ASSERT(!computable_info_.empty() &&
+               "You need to call this before Prune()!");
+  computable->clear();
+  computable->resize(request_->outputs.size());
+  for (size_t i = 0; i < request_->outputs.size(); i++) {
+    const IoSpecification &output = request_->outputs[i];
+    int32 n = nnet_.GetNodeIndex(output.name);
+    KALDI_ASSERT(n != -1);
+    int32 size = output.indexes.size();
+    std::vector<bool> &this_vec = (*computable)[i];
+    this_vec.resize(size);
+    for (size_t j = 0; j < size; j++) {
+      Cindex cindex(n, output.indexes[j]);
+      int32 cindex_id = graph_->GetCindexId(cindex);
+      KALDI_ASSERT(cindex_id != -1);
+      this_vec[j] = (computable_info_[cindex_id] == kComputable);
+    }
+  }
+}
 //
 
 void ComputationGraphBuilder::UpdateComputableInfo(int32 cindex_id) {
@@ -862,22 +862,22 @@ void ComputationGraphBuilder::UpdateComputableInfo(int32 cindex_id) {
     }
   }
 }
-//
-//void ComputationGraphBuilder::SetAsWillNotCompute(int32 cindex_id) {
-//  KALDI_ASSERT(usable_count_[cindex_id] == 0);
-//  computable_info_[cindex_id] = kWillNotCompute;
-//  std::vector<int32>::const_iterator iter = depend_on_this_[cindex_id].begin(),
-//      end = depend_on_this_[cindex_id].end();
-//  for (; iter != end; ++iter) {
-//    int32 other_cindex_id = *iter;
-//    if (computable_info_[other_cindex_id] == kUnknown &&
-//        !computable_queued_[other_cindex_id]) {
-//      computable_queue_.push_back(other_cindex_id);
-//      computable_queued_[other_cindex_id] = true;
-//    }
-//  }
-//}
-//
+
+void ComputationGraphBuilder::SetAsWillNotCompute(int32 cindex_id) {
+  KALDI_ASSERT(usable_count_[cindex_id] == 0);
+  computable_info_[cindex_id] = kWillNotCompute;
+  std::vector<int32>::const_iterator iter = depend_on_this_[cindex_id].begin(),
+      end = depend_on_this_[cindex_id].end();
+  for (; iter != end; ++iter) {
+    int32 other_cindex_id = *iter;
+    if (computable_info_[other_cindex_id] == kUnknown &&
+        !computable_queued_[other_cindex_id]) {
+      computable_queue_.push_back(other_cindex_id);
+      computable_queued_[other_cindex_id] = true;
+    }
+  }
+}
+
 
 void ComputationGraphBuilder::UpdateAllComputableInfo() {
   while (!computable_queue_.empty()) {

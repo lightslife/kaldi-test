@@ -82,23 +82,23 @@ NnetComputation::~NnetComputation() {
     delete component_precomputed_indexes[i].data;
 }
 
-//void NnetComputation::ComputeCudaIndexes() {
-//  indexes_cuda.resize(indexes.size());
-//
-//  for (size_t i = 0; i < indexes.size(); i++)
-//    indexes_cuda[i].CopyFromVec(indexes[i]);
-//
-//  KALDI_ASSERT(sizeof(Int32Pair) == sizeof(std::pair<int32,int32>));
-//  indexes_ranges_cuda.resize(indexes_ranges.size());
-//  for (int32 i = 0; i < indexes_ranges.size(); i++) {
-//    const std::vector<std::pair<int32,int32> > *input = &(indexes_ranges[i]);
-//    const std::vector<Int32Pair> *input_cast =
-//        reinterpret_cast<const std::vector<Int32Pair> *>(input);
-//    // note: the indexes for CUDA use can't very easily use STL types due to
-//    // the interface of CUDA being plain C.
-//    indexes_ranges_cuda[i].CopyFromVec(*input_cast);
-//  }
-//}
+void NnetComputation::ComputeCudaIndexes() {
+  indexes_cuda.resize(indexes.size());
+
+  for (size_t i = 0; i < indexes.size(); i++)
+    indexes_cuda[i].CopyFromVec(indexes[i]);
+
+  KALDI_ASSERT(sizeof(Int32Pair) == sizeof(std::pair<int32,int32>));
+  indexes_ranges_cuda.resize(indexes_ranges.size());
+  for (int32 i = 0; i < indexes_ranges.size(); i++) {
+    const std::vector<std::pair<int32,int32> > *input = &(indexes_ranges[i]);
+    const std::vector<Int32Pair> *input_cast =
+        reinterpret_cast<const std::vector<Int32Pair> *>(input);
+    // note: the indexes for CUDA use can't very easily use STL types due to
+    // the interface of CUDA being plain C.
+    indexes_ranges_cuda[i].CopyFromVec(*input_cast);
+  }
+}
 //
 int32 NnetComputation::NewSubMatrix(int32 base_submatrix,
                                     int32 row_offset, int32 num_rows,
