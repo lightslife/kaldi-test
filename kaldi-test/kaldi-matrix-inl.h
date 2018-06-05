@@ -39,7 +39,7 @@ void MatrixBase<double>::AddVecVec(const double alpha, const VectorBase<double> 
 
 template<typename Real>
 inline std::ostream & operator << (std::ostream & os, const MatrixBase<Real> & M) {
-  M.Write(os, false);
+  //M.Write(os, false);
   return os;
 }
 

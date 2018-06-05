@@ -119,7 +119,7 @@ class Nnet {
   // it.  It will die with error if something went wrong.
   // Also see the function ReadEditConfig() in nnet-utils.h (it's made a
   // non-member because it doesn't need special access).
-  void ReadConfig(std::istream &config_file);
+  //void ReadConfig(std::istream &config_file);
 
   int32 NumComponents() const { return components_.size(); }
 
@@ -271,8 +271,8 @@ class Nnet {
   // If you provide include_dim=true, it also adds extra information about
   // node dimensions which is useful for a human reader but won't be
   // accepted as the config-file format.
-  void GetConfigLines(bool include_dim,
-                      std::vector<std::string> *config_lines) const;
+  //void GetConfigLines(bool include_dim,
+  //                    std::vector<std::string> *config_lines) const;
 
  private:
 
@@ -283,7 +283,7 @@ class Nnet {
   // kComponentInput.  If include_dim=false, it appears in the same format as it
   // would appear in a line of a config-file; if include_dim=true, we also
   // include dimension information that would not be provided in a config file.
-  std::string GetAsConfigLine(int32 node_index, bool include_dim) const;
+  //std::string GetAsConfigLine(int32 node_index, bool include_dim) const;
 
 
   // This function is used when reading config files; it exists in order to

@@ -997,13 +997,13 @@ void IoSpecification::Print(std::ostream &os) const {
   PrintIndexes(os, indexes);
   os << "\n";
 }
-//
-//void IoSpecification::Swap(IoSpecification *other) {
-//  name.swap(other->name);
-//  indexes.swap(other->indexes);
-//  std::swap(has_deriv, other->has_deriv);
-//}
-//
+
+void IoSpecification::Swap(IoSpecification *other) {
+  name.swap(other->name);
+  indexes.swap(other->indexes);
+  std::swap(has_deriv, other->has_deriv);
+}
+
 //void IoSpecification::Read(std::istream &is, bool binary) {
 //  ExpectToken(is, binary, "<IoSpecification>");
 //  ReadToken(is, binary, &name);
@@ -1132,44 +1132,44 @@ bool ComputationRequest::operator== (const ComputationRequest &other) const {
       misc_info == other.misc_info;
 }
 //
-//NnetComputation::NnetComputation(const NnetComputation &other):
-//    matrices(other.matrices),
-//    matrix_debug_info(other.matrix_debug_info),
-//    submatrices(other.submatrices),
-//    component_precomputed_indexes(other.component_precomputed_indexes),
-//    indexes(other.indexes),
-//    indexes_multi(other.indexes_multi),
-//    indexes_ranges(other.indexes_ranges),
-//    commands(other.commands),
-//    need_model_derivative(other.need_model_derivative),
-//    indexes_cuda(other.indexes_cuda),
-//    indexes_ranges_cuda(other.indexes_ranges_cuda) {
-//  for (size_t i = 1; i < component_precomputed_indexes.size(); i++)
-//    component_precomputed_indexes[i].data =
-//        component_precomputed_indexes[i].data->Copy();
-//}
-//
-//NnetComputation& NnetComputation::operator = (const NnetComputation &other) {
-//  matrices = other.matrices;
-//  matrix_debug_info = other.matrix_debug_info;
-//  submatrices = other.submatrices;
-//  indexes = other.indexes;
-//  indexes_multi = other.indexes_multi;
-//  indexes_ranges = other.indexes_ranges;
-//  commands = other.commands;
-//  need_model_derivative = other.need_model_derivative;
-//  indexes_cuda = other.indexes_cuda;
-//  indexes_ranges_cuda = other.indexes_ranges_cuda;
-//
-//  for (size_t i = 1; i < component_precomputed_indexes.size(); i++)
-//    delete component_precomputed_indexes[i].data;
-//  component_precomputed_indexes = other.component_precomputed_indexes;
-//  for (size_t i = 1; i < component_precomputed_indexes.size(); i++)
-//    component_precomputed_indexes[i].data =
-//        component_precomputed_indexes[i].data->Copy();
-//  return *this;
-//}
-//
+NnetComputation::NnetComputation(const NnetComputation &other):
+    matrices(other.matrices),
+    matrix_debug_info(other.matrix_debug_info),
+    submatrices(other.submatrices),
+    component_precomputed_indexes(other.component_precomputed_indexes),
+    indexes(other.indexes),
+    indexes_multi(other.indexes_multi),
+    indexes_ranges(other.indexes_ranges),
+    commands(other.commands),
+    need_model_derivative(other.need_model_derivative),
+    indexes_cuda(other.indexes_cuda),
+    indexes_ranges_cuda(other.indexes_ranges_cuda) {
+  for (size_t i = 1; i < component_precomputed_indexes.size(); i++)
+    component_precomputed_indexes[i].data =
+        component_precomputed_indexes[i].data->Copy();
+}
+
+NnetComputation& NnetComputation::operator = (const NnetComputation &other) {
+  matrices = other.matrices;
+  matrix_debug_info = other.matrix_debug_info;
+  submatrices = other.submatrices;
+  indexes = other.indexes;
+  indexes_multi = other.indexes_multi;
+  indexes_ranges = other.indexes_ranges;
+  commands = other.commands;
+  need_model_derivative = other.need_model_derivative;
+  indexes_cuda = other.indexes_cuda;
+  indexes_ranges_cuda = other.indexes_ranges_cuda;
+
+  for (size_t i = 1; i < component_precomputed_indexes.size(); i++)
+    delete component_precomputed_indexes[i].data;
+  component_precomputed_indexes = other.component_precomputed_indexes;
+  for (size_t i = 1; i < component_precomputed_indexes.size(); i++)
+    component_precomputed_indexes[i].data =
+        component_precomputed_indexes[i].data->Copy();
+  return *this;
+}
+
 //
 void NnetComputation::GetWholeSubmatrices(
     std::vector<int32> *whole_submatrices) const {

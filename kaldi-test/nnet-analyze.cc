@@ -204,57 +204,57 @@ void ComputationVariables::RecordAccessForSubmatrix(
       ca->matrices_read.push_back(matrix_index);
   }
 }
-//
-//std::string ComputationVariables::DescribeVariable(int32 variable) const {
-//  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
-//  int32 matrix_index = variable_to_matrix_[variable],
-//      offset = variable - matrix_to_variable_index_[matrix_index],
-//      num_column_variables = column_split_points_[matrix_index].size() - 1,
-//      num_row_variables = row_split_points_[matrix_index].size() - 1,
-//      column_variable = offset % num_column_variables,
-//      row_variable = offset / num_column_variables;
-//  KALDI_ASSERT(column_variable >= 0 && row_variable >= 0 &&
-//               row_variable < num_row_variables &&
-//               column_variable < num_column_variables);
-//  std::ostringstream os;
-//  os << 'm' << matrix_index;
-//  if (num_row_variables != 1 || num_column_variables != 1) {
-//    os << '(';
-//    if (num_row_variables == 1) {
-//      os << ':';
-//    } else {
-//      os << row_split_points_[matrix_index][row_variable] << ':'
-//         << row_split_points_[matrix_index][row_variable+1] - 1;
-//    }
-//    os << ',';
-//    if (num_column_variables == 1) {
-//      os << ':';
-//    } else {
-//      os << column_split_points_[matrix_index][column_variable] << ':'
-//         << column_split_points_[matrix_index][column_variable+1] - 1;
-//    }
-//    os << ')';
-//  }
-//  return os.str();
-//}
-//
-//NnetComputation::SubMatrixInfo ComputationVariables::VariableInfo(
-//    int32 variable) const {
-//  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
-//  int32 matrix_index = variable_to_matrix_[variable],
-//      offset = variable - matrix_to_variable_index_[matrix_index],
-//      num_column_variables = column_split_points_[matrix_index].size() - 1,
-//      column_variable = offset % num_column_variables,
-//      row_variable = offset / num_column_variables;
-//  int32 row_offset = row_split_points_[matrix_index][row_variable],
-//      num_rows = row_split_points_[matrix_index][row_variable+1] - row_offset,
-//      col_offset = column_split_points_[matrix_index][column_variable],
-//      num_cols = column_split_points_[matrix_index][column_variable+1] -
-//                  col_offset;
-//  return NnetComputation::SubMatrixInfo(matrix_index, row_offset, num_rows,
-//                                        col_offset, num_cols);
-//}
-//
+
+std::string ComputationVariables::DescribeVariable(int32 variable) const {
+  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
+  int32 matrix_index = variable_to_matrix_[variable],
+      offset = variable - matrix_to_variable_index_[matrix_index],
+      num_column_variables = column_split_points_[matrix_index].size() - 1,
+      num_row_variables = row_split_points_[matrix_index].size() - 1,
+      column_variable = offset % num_column_variables,
+      row_variable = offset / num_column_variables;
+  KALDI_ASSERT(column_variable >= 0 && row_variable >= 0 &&
+               row_variable < num_row_variables &&
+               column_variable < num_column_variables);
+  std::ostringstream os;
+  os << 'm' << matrix_index;
+  if (num_row_variables != 1 || num_column_variables != 1) {
+    os << '(';
+    if (num_row_variables == 1) {
+      os << ':';
+    } else {
+      os << row_split_points_[matrix_index][row_variable] << ':'
+         << row_split_points_[matrix_index][row_variable+1] - 1;
+    }
+    os << ',';
+    if (num_column_variables == 1) {
+      os << ':';
+    } else {
+      os << column_split_points_[matrix_index][column_variable] << ':'
+         << column_split_points_[matrix_index][column_variable+1] - 1;
+    }
+    os << ')';
+  }
+  return os.str();
+}
+
+NnetComputation::SubMatrixInfo ComputationVariables::VariableInfo(
+    int32 variable) const {
+  KALDI_ASSERT(variable >= 0 && variable < num_variables_);
+  int32 matrix_index = variable_to_matrix_[variable],
+      offset = variable - matrix_to_variable_index_[matrix_index],
+      num_column_variables = column_split_points_[matrix_index].size() - 1,
+      column_variable = offset % num_column_variables,
+      row_variable = offset / num_column_variables;
+  int32 row_offset = row_split_points_[matrix_index][row_variable],
+      num_rows = row_split_points_[matrix_index][row_variable+1] - row_offset,
+      col_offset = column_split_points_[matrix_index][column_variable],
+      num_cols = column_split_points_[matrix_index][column_variable+1] -
+                  col_offset;
+  return NnetComputation::SubMatrixInfo(matrix_index, row_offset, num_rows,
+                                        col_offset, num_cols);
+}
+
 //
 ///// given a vector of pairs from computation.indexes_multi_indexes
 ///// containing paris (submatrix-index, row-index), this function outputs
@@ -1090,27 +1090,27 @@ void ComputationChecker::CheckComputationIndexes() const {
               << " but never consumed.";
   }
 }
-//
-//void ComputationChecker::CheckComputationDebugInfo() const {
-//  if (computation_.matrix_debug_info.empty()) return;
-//  if (computation_.matrix_debug_info.size() !=
-//      computation_.matrices.size())
-//    KALDI_ERR << "Debug info has wrong size";
-//  for (size_t i = 1; i < computation_.matrix_debug_info.size(); i++) {
-//    if (computation_.matrix_debug_info[i].cindexes.size() !=
-//        static_cast<size_t>(computation_.matrices[i].num_rows))
-//      KALDI_ERR << "Debug info for matrix m" << i
-//                << " has wrong num-rows.";
-//    std::vector<Cindex>::const_iterator
-//        iter = computation_.matrix_debug_info[i].cindexes.begin(),
-//        end = computation_.matrix_debug_info[i].cindexes.end();
-//    for (; iter != end; ++iter) {
-//      if (iter->second.n < 0) {
-//        KALDI_ERR << "Negative n index in debug info";
-//      }
-//    }
-//  }
-//}
+
+void ComputationChecker::CheckComputationDebugInfo() const {
+  if (computation_.matrix_debug_info.empty()) return;
+  if (computation_.matrix_debug_info.size() !=
+      computation_.matrices.size())
+    KALDI_ERR << "Debug info has wrong size";
+  for (size_t i = 1; i < computation_.matrix_debug_info.size(); i++) {
+    if (computation_.matrix_debug_info[i].cindexes.size() !=
+        static_cast<size_t>(computation_.matrices[i].num_rows))
+      KALDI_ERR << "Debug info for matrix m" << i
+                << " has wrong num-rows.";
+    std::vector<Cindex>::const_iterator
+        iter = computation_.matrix_debug_info[i].cindexes.begin(),
+        end = computation_.matrix_debug_info[i].cindexes.end();
+    for (; iter != end; ++iter) {
+      if (iter->second.n < 0) {
+        KALDI_ERR << "Negative n index in debug info";
+      }
+    }
+  }
+}
 //
 //
 //// note: 'computation' is not a reference, it's copied so that we

@@ -95,8 +95,8 @@ int32 GetChunkSize(const Nnet &nnet,
    maybe not ideal, but it was the easiest way to do it.
 
  */
-void ModifyNnetIvectorPeriod(int32 ivector_period,
-                             Nnet *nnet);
+//void ModifyNnetIvectorPeriod(int32 ivector_period,
+//                             Nnet *nnet);
 
 /**
   This function creates computation request suitable for giving to ComputeLooped().

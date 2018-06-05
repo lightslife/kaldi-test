@@ -33,14 +33,14 @@ namespace nnet3 {
 //  WriteBasicType(os, binary, x);
 //}
 //
-//
-//void Index::Read(std::istream &is, bool binary) {
-//  ExpectToken(is, binary, "<I1>");
-//  ReadBasicType(is, binary, &n);
-//  ReadBasicType(is, binary, &t);
-//  ReadBasicType(is, binary, &x);
-//}
-//
+
+void Index::Read(std::istream &is, bool binary) {
+  ExpectToken(is, binary, "<I1>");
+  ReadBasicType(is, binary, &n);
+  ReadBasicType(is, binary, &t);
+  ReadBasicType(is, binary, &x);
+}
+
 //
 //static void WriteIndexVectorElementBinary(
 //    std::ostream &os,

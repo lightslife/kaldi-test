@@ -73,8 +73,8 @@ void DecodableNnetSimpleLoopedInfo::Init(
   KALDI_ASSERT(output_dim > 0);
   // note, ivector_period is hardcoded to the same as frames_per_chunk_.
   int32 ivector_period = frames_per_chunk;
-  if (has_ivectors)
-    ModifyNnetIvectorPeriod(ivector_period, nnet);
+  //if (has_ivectors)
+  //  ModifyNnetIvectorPeriod(ivector_period, nnet);
 
   int32 num_sequences = 1;  // we're processing one utterance at a time.
 

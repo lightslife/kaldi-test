@@ -161,15 +161,15 @@ class Component {
   ///       the same matrix as out_deriv.  If Properties()&kBackpropAdds, this
   ///       is added to by the Backprop routine, else it is set.  The component
   ///       code chooses which mode to work in, based on convenience.
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &in_value,
-                        const CuMatrixBase<BaseFloat> &out_value,
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update, // may be NULL; may be identical
-                                              // to "this" or different.
-                        CuMatrixBase<BaseFloat> *in_deriv) const = 0;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &in_value,
+  //                      const CuMatrixBase<BaseFloat> &out_value,
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update, // may be NULL; may be identical
+  //                                            // to "this" or different.
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const = 0;
 
   /// \brief This function may store stats on average activation values, and for
   ///        some component types, the average value of the derivative of the
@@ -314,7 +314,7 @@ class Component {
   /// \param [in] cfl  A ConfigLine containing any parameters that
   ///            are needed for initialization. For example:
   ///            "dim=100 param-stddev=0.1"
-  virtual void InitFromConfig(ConfigLine *cfl) = 0;
+  //virtual void InitFromConfig(ConfigLine *cfl) = 0;
 
   /// \brief Returns input-dimension of this component.
   virtual int32 InputDim() const = 0;
@@ -343,7 +343,7 @@ class Component {
   virtual void Read(std::istream &is, bool binary) = 0;
 
   /// \brief Write component to stream
-  virtual void Write(std::ostream &os, bool binary) const = 0;
+  //virtual void Write(std::ostream &os, bool binary) const = 0;
 
   /// \brief Returns some text-form information about this component, for diagnostics.
   ///     Starts with the type of the component.  E.g. "SigmoidComponent dim=900",
@@ -454,7 +454,7 @@ class UpdatableComponent: public Component {
 
   /// This function is to be used in testing.  It adds unit noise times "stddev"
   /// to the parameters of the component.
-  virtual void PerturbParams(BaseFloat stddev) = 0;
+  //virtual void PerturbParams(BaseFloat stddev) = 0;
 
   /// Sets the learning rate of gradient descent- gets multiplied by
   /// learning_rate_factor_.
@@ -524,7 +524,7 @@ class UpdatableComponent: public Component {
  protected:
   // to be called from child classes, extracts any learning rate information
   // from the config line and sets them appropriately.
-  void InitLearningRatesFromConfig(ConfigLine *cfl);
+  //void InitLearningRatesFromConfig(ConfigLine *cfl);
 
   // To be used in child-class Read() functions, this function reads the opening
   // tag <ThisComponentType> and the learning-rate factor and the learning-rate.
@@ -636,15 +636,15 @@ class NonlinearComponent: public Component {
   friend class LogSoftmaxComponent;
   friend class RectifiedLinearComponent;
 
-  // This function updates the stats "value_sum_", "deriv_sum_", and
-  // count_. (If deriv == NULL, it won't update "deriv_sum_").
-  // It will be called from the Backprop function of child classes.
-  void StoreStatsInternal(const CuMatrixBase<BaseFloat> &out_value,
-                          const CuMatrixBase<BaseFloat> *deriv = NULL);
+  //// This function updates the stats "value_sum_", "deriv_sum_", and
+  //// count_. (If deriv == NULL, it won't update "deriv_sum_").
+  //// It will be called from the Backprop function of child classes.
+  //void StoreStatsInternal(const CuMatrixBase<BaseFloat> &out_value,
+  //                        const CuMatrixBase<BaseFloat> *deriv = NULL);
 
-  // This function may be called from child class members during backprop.  It
-  // stores the 'oderiv_sumsq_' stats.
-  void StoreBackpropStats(const CuMatrixBase<BaseFloat> &out_deriv);
+  //// This function may be called from child class members during backprop.  It
+  //// stores the 'oderiv_sumsq_' stats.
+  //void StoreBackpropStats(const CuMatrixBase<BaseFloat> &out_deriv);
 
 
   const NonlinearComponent &operator = (const NonlinearComponent &other); // Disallow.

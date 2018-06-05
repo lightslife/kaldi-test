@@ -315,13 +315,13 @@ namespace nnet3 {
 //  WriteBasicType(os, binary, output_dim_);
 //  WriteToken(os, binary, "</ElementwiseProductComponent>");
 //}
-//
-//void* SigmoidComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                                 const CuMatrixBase<BaseFloat> &in,
-//                                 CuMatrixBase<BaseFloat> *out) const {
-//  out->Sigmoid(in);
-//  return NULL;
-//}
+
+void* SigmoidComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                 const CuMatrixBase<BaseFloat> &in,
+                                 CuMatrixBase<BaseFloat> *out) const {
+  out->Sigmoid(in);
+  return NULL;
+}
 //
 //void SigmoidComponent::Backprop(const std::string &debug_info,
 //                                const ComponentPrecomputedIndexes *indexes,
@@ -414,7 +414,7 @@ namespace nnet3 {
 //}
 //
 //
-//
+
 //void SigmoidComponent::StoreStats(const CuMatrixBase<BaseFloat> &in_value,
 //                                  const CuMatrixBase<BaseFloat> &out_value,
 //                                  void *memo) {
@@ -429,8 +429,8 @@ namespace nnet3 {
 //  temp_deriv.MulElements(out_value);
 //  StoreStatsInternal(out_value, &temp_deriv);
 //}
-//
-//
+
+
 //
 //void* NoOpComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
 //                              const CuMatrixBase<BaseFloat> &in,
@@ -1008,54 +1008,54 @@ namespace nnet3 {
 //  StoreStatsInternal(out_value, &temp_deriv);
 //}
 //
-//void AffineComponent::Scale(BaseFloat scale) {
-//  if (scale == 0.0) {
-//    // If scale == 0.0 we call SetZero() which will get rid of NaN's and inf's.
-//    linear_params_.SetZero();
-//    bias_params_.SetZero();
-//  } else {
-//    linear_params_.Scale(scale);
-//    bias_params_.Scale(scale);
-//  }
-//}
+void AffineComponent::Scale(BaseFloat scale) {
+  if (scale == 0.0) {
+    // If scale == 0.0 we call SetZero() which will get rid of NaN's and inf's.
+    linear_params_.SetZero();
+    bias_params_.SetZero();
+  } else {
+    linear_params_.Scale(scale);
+    bias_params_.Scale(scale);
+  }
+}
+
+void AffineComponent::Resize(int32 input_dim, int32 output_dim) {
+  KALDI_ASSERT(input_dim > 0 && output_dim > 0);
+  bias_params_.Resize(output_dim);
+  linear_params_.Resize(output_dim, input_dim);
+}
+
+void AffineComponent::Add(BaseFloat alpha, const Component &other_in) {
+  const AffineComponent *other =
+      dynamic_cast<const AffineComponent*>(&other_in);
+  KALDI_ASSERT(other != NULL);
+  linear_params_.AddMat(alpha, other->linear_params_);
+  bias_params_.AddVec(alpha, other->bias_params_);
+}
+
+AffineComponent::AffineComponent(const AffineComponent &component):
+    UpdatableComponent(component),
+    linear_params_(component.linear_params_),
+    bias_params_(component.bias_params_),
+    orthonormal_constraint_(component.orthonormal_constraint_) { }
+
+AffineComponent::AffineComponent(const CuMatrixBase<BaseFloat> &linear_params,
+                                 const CuVectorBase<BaseFloat> &bias_params,
+                                 BaseFloat learning_rate):
+    linear_params_(linear_params),
+    bias_params_(bias_params),
+    orthonormal_constraint_(0.0) {
+  SetUnderlyingLearningRate(learning_rate);
+  KALDI_ASSERT(linear_params.NumRows() == bias_params.Dim()&&
+               bias_params.Dim() != 0);
+}
 //
-//void AffineComponent::Resize(int32 input_dim, int32 output_dim) {
-//  KALDI_ASSERT(input_dim > 0 && output_dim > 0);
-//  bias_params_.Resize(output_dim);
-//  linear_params_.Resize(output_dim, input_dim);
-//}
-//
-//void AffineComponent::Add(BaseFloat alpha, const Component &other_in) {
-//  const AffineComponent *other =
-//      dynamic_cast<const AffineComponent*>(&other_in);
-//  KALDI_ASSERT(other != NULL);
-//  linear_params_.AddMat(alpha, other->linear_params_);
-//  bias_params_.AddVec(alpha, other->bias_params_);
-//}
-//
-//AffineComponent::AffineComponent(const AffineComponent &component):
-//    UpdatableComponent(component),
-//    linear_params_(component.linear_params_),
-//    bias_params_(component.bias_params_),
-//    orthonormal_constraint_(component.orthonormal_constraint_) { }
-//
-//AffineComponent::AffineComponent(const CuMatrixBase<BaseFloat> &linear_params,
-//                                 const CuVectorBase<BaseFloat> &bias_params,
-//                                 BaseFloat learning_rate):
-//    linear_params_(linear_params),
-//    bias_params_(bias_params),
-//    orthonormal_constraint_(0.0) {
-//  SetUnderlyingLearningRate(learning_rate);
-//  KALDI_ASSERT(linear_params.NumRows() == bias_params.Dim()&&
-//               bias_params.Dim() != 0);
-//}
-//
-//void AffineComponent::SetParams(const CuVectorBase<BaseFloat> &bias,
-//                                const CuMatrixBase<BaseFloat> &linear) {
-//  bias_params_ = bias;
-//  linear_params_ = linear;
-//  KALDI_ASSERT(bias_params_.Dim() == linear_params_.NumRows());
-//}
+void AffineComponent::SetParams(const CuVectorBase<BaseFloat> &bias,
+                                const CuMatrixBase<BaseFloat> &linear) {
+  bias_params_ = bias;
+  linear_params_ = linear;
+  KALDI_ASSERT(bias_params_.Dim() == linear_params_.NumRows());
+}
 //
 //void AffineComponent::PerturbParams(BaseFloat stddev) {
 //  CuMatrix<BaseFloat> temp_linear_params(linear_params_);
@@ -1067,32 +1067,32 @@ namespace nnet3 {
 //  bias_params_.AddVec(stddev, temp_bias_params);
 //}
 //
-//std::string AffineComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << UpdatableComponent::Info();
-//  if (orthonormal_constraint_ != 0.0)
-//    stream << ", orthonormal-constraint=" << orthonormal_constraint_;
-//  PrintParameterStats(stream, "linear-params", linear_params_,
-//                      false, // include_mean
-//                      true, // include_row_norms
-//                      true, // include_column_norms
-//                      GetVerboseLevel() >= 2); // include_singular_values
-//  PrintParameterStats(stream, "bias", bias_params_, true);
-//  return stream.str();
-//}
+std::string AffineComponent::Info() const {
+  std::ostringstream stream;
+  stream << UpdatableComponent::Info();
+  if (orthonormal_constraint_ != 0.0)
+    stream << ", orthonormal-constraint=" << orthonormal_constraint_;
+  //PrintParameterStats(stream, "linear-params", linear_params_,
+  //                    false, // include_mean
+  //                    true, // include_row_norms
+  //                    true, // include_column_norms
+  //                    GetVerboseLevel() >= 2); // include_singular_values
+  //PrintParameterStats(stream, "bias", bias_params_, true);
+  return stream.str();
+}
 //
-//Component* AffineComponent::Copy() const {
-//  AffineComponent *ans = new AffineComponent(*this);
-//  return ans;
-//}
-//
-//BaseFloat AffineComponent::DotProduct(const UpdatableComponent &other_in) const {
-//  const AffineComponent *other =
-//      dynamic_cast<const AffineComponent*>(&other_in);
-//  return TraceMatMat(linear_params_, other->linear_params_, kTrans)
-//      + VecVec(bias_params_, other->bias_params_);
-//}
-//
+Component* AffineComponent::Copy() const {
+  AffineComponent *ans = new AffineComponent(*this);
+  return ans;
+}
+
+BaseFloat AffineComponent::DotProduct(const UpdatableComponent &other_in) const {
+  const AffineComponent *other =
+      dynamic_cast<const AffineComponent*>(&other_in);
+  return TraceMatMat(linear_params_, other->linear_params_, kTrans)
+      + VecVec(bias_params_, other->bias_params_);
+}
+
 //void AffineComponent::Init(int32 input_dim, int32 output_dim,
 //                           BaseFloat param_stddev, BaseFloat bias_stddev) {
 //  linear_params_.Resize(output_dim, input_dim);
@@ -1103,17 +1103,17 @@ namespace nnet3 {
 //  bias_params_.SetRandn();
 //  bias_params_.Scale(bias_stddev);
 //}
-//
-//void AffineComponent::Init(std::string matrix_filename) {
-//  CuMatrix<BaseFloat> mat;
-//  ReadKaldiObject(matrix_filename, &mat); // will abort on failure.
-//  KALDI_ASSERT(mat.NumCols() >= 2);
-//  int32 input_dim = mat.NumCols() - 1, output_dim = mat.NumRows();
-//  linear_params_.Resize(output_dim, input_dim);
-//  bias_params_.Resize(output_dim);
-//  linear_params_.CopyFromMat(mat.Range(0, output_dim, 0, input_dim));
-//  bias_params_.CopyColFromMat(mat, input_dim);
-//}
+
+void AffineComponent::Init(std::string matrix_filename) {
+  CuMatrix<BaseFloat> mat;
+  ReadKaldiObject(matrix_filename, &mat); // will abort on failure.
+  KALDI_ASSERT(mat.NumCols() >= 2);
+  int32 input_dim = mat.NumCols() - 1, output_dim = mat.NumRows();
+  linear_params_.Resize(output_dim, input_dim);
+  bias_params_.Resize(output_dim);
+  linear_params_.CopyFromMat(mat.Range(0, output_dim, 0, input_dim));
+  bias_params_.CopyColFromMat(mat, input_dim);
+}
 //
 //void AffineComponent::InitFromConfig(ConfigLine *cfl) {
 //  bool ok = true;
@@ -1146,20 +1146,20 @@ namespace nnet3 {
 //  if (!ok)
 //    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
 //}
-//
-//
-//
-//
-//void* AffineComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                                const CuMatrixBase<BaseFloat> &in,
-//                                 CuMatrixBase<BaseFloat> *out) const {
-//
-//  // No need for asserts as they'll happen within the matrix operations.
-//  out->CopyRowsFromVec(bias_params_); // copies bias_params_ to each row
-//  // of *out.
-//  out->AddMatMat(1.0, in, kNoTrans, linear_params_, kTrans, 1.0);
-//  return NULL;
-//}
+
+
+
+
+void* AffineComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                const CuMatrixBase<BaseFloat> &in,
+                                 CuMatrixBase<BaseFloat> *out) const {
+
+  // No need for asserts as they'll happen within the matrix operations.
+  out->CopyRowsFromVec(bias_params_); // copies bias_params_ to each row
+  // of *out.
+  out->AddMatMat(1.0, in, kNoTrans, linear_params_, kTrans, 1.0);
+  return NULL;
+}
 //
 //void AffineComponent::UpdateSimple(const CuMatrixBase<BaseFloat> &in_value,
 //                                   const CuMatrixBase<BaseFloat> &out_deriv) {
@@ -1195,56 +1195,56 @@ namespace nnet3 {
 //      to_update->Update(debug_info, in_value, out_deriv);  // by child classes.
 //  }
 //}
-//
-//void AffineComponent::Read(std::istream &is, bool binary) {
-//  ReadUpdatableCommon(is, binary);  // read opening tag and learning rate.
-//  ExpectToken(is, binary, "<LinearParams>");
-//  linear_params_.Read(is, binary);
-//  ExpectToken(is, binary, "<BiasParams>");
-//  bias_params_.Read(is, binary);
-//  if (PeekToken(is, binary) == 'I') {
-//    // for back compatibility; we don't write this here any
-//    // more as it's written and read in Write/ReadUpdatableCommon
-//    ExpectToken(is, binary, "<IsGradient>");
-//    ReadBasicType(is, binary, &is_gradient_);
-//  }
-//  if (PeekToken(is, binary) == 'O') {
-//    ExpectToken(is, binary, "<OrthonormalConstraint>");
-//    ReadBasicType(is, binary, &orthonormal_constraint_);
-//  } else {
-//    orthonormal_constraint_ = 0.0;
-//  }
-//  ExpectToken(is, binary, "</AffineComponent>");
-//}
-//
-//void AffineComponent::Write(std::ostream &os, bool binary) const {
-//  WriteUpdatableCommon(os, binary);  // Write opening tag and learning rate
-//  WriteToken(os, binary, "<LinearParams>");
-//  linear_params_.Write(os, binary);
-//  WriteToken(os, binary, "<BiasParams>");
-//  bias_params_.Write(os, binary);
-//  if (orthonormal_constraint_ != 0.0) {
-//    WriteToken(os, binary, "<OrthonormalConstraint>");
-//    WriteBasicType(os, binary, orthonormal_constraint_);
-//  }
-//  WriteToken(os, binary, "</AffineComponent>");
-//}
-//
-//int32 AffineComponent::NumParameters() const {
-//  return (InputDim() + 1) * OutputDim();
-//}
-//void AffineComponent::Vectorize(VectorBase<BaseFloat> *params) const {
-//  KALDI_ASSERT(params->Dim() == this->NumParameters());
-//  params->Range(0, InputDim() * OutputDim()).CopyRowsFromMat(linear_params_);
-//  params->Range(InputDim() * OutputDim(),
-//                OutputDim()).CopyFromVec(bias_params_);
-//}
-//void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
-//  KALDI_ASSERT(params.Dim() == this->NumParameters());
-//  linear_params_.CopyRowsFromVec(params.Range(0, InputDim() * OutputDim()));
-//  bias_params_.CopyFromVec(params.Range(InputDim() * OutputDim(),
-//                                        OutputDim()));
-//}
+
+void AffineComponent::Read(std::istream &is, bool binary) {
+  ReadUpdatableCommon(is, binary);  // read opening tag and learning rate.
+  ExpectToken(is, binary, "<LinearParams>");
+  linear_params_.Read(is, binary);
+  ExpectToken(is, binary, "<BiasParams>");
+  bias_params_.Read(is, binary);
+  if (PeekToken(is, binary) == 'I') {
+    // for back compatibility; we don't write this here any
+    // more as it's written and read in Write/ReadUpdatableCommon
+    ExpectToken(is, binary, "<IsGradient>");
+    ReadBasicType(is, binary, &is_gradient_);
+  }
+  if (PeekToken(is, binary) == 'O') {
+    ExpectToken(is, binary, "<OrthonormalConstraint>");
+    ReadBasicType(is, binary, &orthonormal_constraint_);
+  } else {
+    orthonormal_constraint_ = 0.0;
+  }
+  ExpectToken(is, binary, "</AffineComponent>");
+}
+
+void AffineComponent::Write(std::ostream &os, bool binary) const {
+  WriteUpdatableCommon(os, binary);  // Write opening tag and learning rate
+  WriteToken(os, binary, "<LinearParams>");
+  linear_params_.Write(os, binary);
+  WriteToken(os, binary, "<BiasParams>");
+  bias_params_.Write(os, binary);
+  if (orthonormal_constraint_ != 0.0) {
+    WriteToken(os, binary, "<OrthonormalConstraint>");
+    WriteBasicType(os, binary, orthonormal_constraint_);
+  }
+  WriteToken(os, binary, "</AffineComponent>");
+}
+
+int32 AffineComponent::NumParameters() const {
+  return (InputDim() + 1) * OutputDim();
+}
+void AffineComponent::Vectorize(VectorBase<BaseFloat> *params) const {
+  KALDI_ASSERT(params->Dim() == this->NumParameters());
+  params->Range(0, InputDim() * OutputDim()).CopyRowsFromMat(linear_params_);
+  params->Range(InputDim() * OutputDim(),
+                OutputDim()).CopyFromVec(bias_params_);
+}
+void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
+  KALDI_ASSERT(params.Dim() == this->NumParameters());
+  linear_params_.CopyRowsFromVec(params.Range(0, InputDim() * OutputDim()));
+  bias_params_.CopyFromVec(params.Range(InputDim() * OutputDim(),
+                                        OutputDim()));
+}
 //
 //RepeatedAffineComponent::RepeatedAffineComponent(const RepeatedAffineComponent & component) :
 //    UpdatableComponent(component),

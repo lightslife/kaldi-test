@@ -67,7 +67,7 @@ namespace nnet3 {
 //    nnet->ReadConfig(is);
 //  }
 //}
-//
+
 
 int32 GetChunkSize(const Nnet &nnet,
                    int32 frame_subsampling_factor,
@@ -222,47 +222,47 @@ void CreateLoopedComputationRequest(const Nnet &nnet,
 }
 
 //
+
+void AddTimeOffsetToComputationRequest(int32 t_offset,
+                                       ComputationRequest *request) {
+  for (size_t i = 0; i < request->inputs.size(); i++) {
+    size_t size = request->inputs[i].indexes.size();
+    for (size_t j = 0; j < size; j++)
+      request->inputs[i].indexes[j].t += t_offset;
+  }
+  for (size_t i = 0; i < request->outputs.size(); i++) {
+    size_t size = request->outputs[i].indexes.size();
+    for (size_t j = 0; j < size; j++)
+      request->outputs[i].indexes[j].t += t_offset;
+  }
+}
+
 //
-//void AddTimeOffsetToComputationRequest(int32 t_offset,
-//                                       ComputationRequest *request) {
-//  for (size_t i = 0; i < request->inputs.size(); i++) {
-//    size_t size = request->inputs[i].indexes.size();
-//    for (size_t j = 0; j < size; j++)
-//      request->inputs[i].indexes[j].t += t_offset;
-//  }
-//  for (size_t i = 0; i < request->outputs.size(); i++) {
-//    size_t size = request->outputs[i].indexes.size();
-//    for (size_t j = 0; j < size; j++)
-//      request->outputs[i].indexes[j].t += t_offset;
-//  }
-//}
 //
-//
-//
-//static bool ExtrapolateComputationRequest(
-//    const ComputationRequest &request1,
-//    const ComputationRequest &request2,
-//    ComputationRequest *request3) {
-//  // accepts two computation requests 'request1' and 'request2' that
-//  // must be identical except for a time offset, and creates 'request3'
-//  // that is the extrapolation of the next term in sequence.
-//  *request3 = request2;
-//  KALDI_ASSERT(!request1.inputs.empty() && !request1.inputs[0].indexes.empty() &&
-//               !request2.inputs.empty() && !request2.inputs[0].indexes.empty());
-//  int32 t_offset = request2.inputs[0].indexes[0].t -
-//      request1.inputs[0].indexes[0].t;
-//  // the following is just to make sure that the inputs are structurally
-//  // equivalent.
-//  AddTimeOffsetToComputationRequest(-t_offset, request3);
-//  if (!(*request3 == request1))
-//    return false;  // there is somse structural difference, or
-//                   // the time offset is not consistent.
-//  // the following reverses the last call to AddTimeOffsetToComputationRequest,
-//  // then adds the offset we want.
-//  AddTimeOffsetToComputationRequest(2 * t_offset, request3);
-//  return true;
-//}
-//
+static bool ExtrapolateComputationRequest(
+    const ComputationRequest &request1,
+    const ComputationRequest &request2,
+    ComputationRequest *request3) {
+  // accepts two computation requests 'request1' and 'request2' that
+  // must be identical except for a time offset, and creates 'request3'
+  // that is the extrapolation of the next term in sequence.
+  *request3 = request2;
+  KALDI_ASSERT(!request1.inputs.empty() && !request1.inputs[0].indexes.empty() &&
+               !request2.inputs.empty() && !request2.inputs[0].indexes.empty());
+  int32 t_offset = request2.inputs[0].indexes[0].t -
+      request1.inputs[0].indexes[0].t;
+  // the following is just to make sure that the inputs are structurally
+  // equivalent.
+  AddTimeOffsetToComputationRequest(-t_offset, request3);
+  if (!(*request3 == request1))
+    return false;  // there is somse structural difference, or
+                   // the time offset is not consistent.
+  // the following reverses the last call to AddTimeOffsetToComputationRequest,
+  // then adds the offset we want.
+  AddTimeOffsetToComputationRequest(2 * t_offset, request3);
+  return true;
+}
+
 //
 ///* Internal version of CompileLooped where
 //   you specify the the number of computation requests (must be >= 3).
@@ -272,82 +272,82 @@ void CreateLoopedComputationRequest(const Nnet &nnet,
 //   and in that case this function will return false and you should re-try
 //   with a higher value of num_requests.
 // */
-//static bool CompileLoopedInternal(
-//    const Nnet &nnet,
-//    NnetOptimizeOptions optimize_opts,
-//    const ComputationRequest &request1,
-//    const ComputationRequest &request2,
-//    const ComputationRequest &request3,
-//    int32 num_requests,
-//    NnetComputation *computation) {
-//
-//  KALDI_ASSERT(num_requests >= 3);
-//  std::vector<ComputationRequest> extra_requests(num_requests - 3);
-//  const ComputationRequest *prev_request = &request2;
-//  const ComputationRequest *cur_request = &request3;
-//  for (int32 i = 0; i < num_requests - 3; i++) {
-//    if (!ExtrapolateComputationRequest(*prev_request, *cur_request,
-//                                       &(extra_requests[i]))) {
-//      KALDI_LOG << "prev_request is:";
-//      prev_request->Print(std::cerr);
-//      KALDI_LOG << "cur_request is:";
-//      cur_request->Print(std::cerr);
-//      KALDI_ERR << "Computation requests do not have the right relationship";
-//    }
-//    prev_request = cur_request;
-//    cur_request = &(extra_requests[i]);
-//  }
-//
-//  std::vector<const ComputationRequest*> requests;
-//  requests.push_back(&request1);
-//  requests.push_back(&request2);
-//  requests.push_back(&request3);
-//  for (int32 i = 0; i < num_requests - 3; i++)
-//    requests.push_back(&(extra_requests[i]));
-//  Compiler compiler(requests, nnet);
-//  CompilerOptions compiler_opts;
-//  compiler.CreateComputation(compiler_opts, computation);
-//  optimize_opts.optimize_looped_computation = true;
-//
-//  int32 dont_really_care = MaxOutputTimeInRequest(request3);
-//  Optimize(optimize_opts, nnet,
-//           dont_really_care, computation);
-//
-//  return computation->commands.size() != 0 &&
-//      computation->commands.back().command_type == kGotoLabel;
-//}
-//
-//void CompileLooped(const Nnet &nnet,
-//                   const NnetOptimizeOptions &optimize_opts,
-//                   const ComputationRequest &request1,
-//                   const ComputationRequest &request2,
-//                   const ComputationRequest &request3,
-//                   NnetComputation *computation) {
-//  int32 num_requests1 = 5, factor = 2, max_requests = 100,
-//      num_requests;
-//
-//  Timer timer;
-//
-//  for (num_requests = num_requests1; num_requests <= max_requests;
-//       num_requests *= factor) {
-//    if (CompileLoopedInternal(nnet, optimize_opts,
-//                             request1, request2, request3,
-//                             num_requests, computation)) {
-//      KALDI_LOG << "Spent " << timer.Elapsed()
-//                << " seconds in looped compilation.";
-//      return;
-//    } else {
-//      KALDI_VLOG(2) << "Looped compilation failed with "
-//                    << num_requests << " requests, trying "
-//                    << (num_requests * factor);
-//    }
-//  }
-//  KALDI_ERR << "Looped compilation failed with "
-//            << (num_requests/factor) << " requests, which "
-//            << "we expect should be enough... something "
-//            << "went wrong.";
-//}
-//
+static bool CompileLoopedInternal(
+    const Nnet &nnet,
+    NnetOptimizeOptions optimize_opts,
+    const ComputationRequest &request1,
+    const ComputationRequest &request2,
+    const ComputationRequest &request3,
+    int32 num_requests,
+    NnetComputation *computation) {
+
+  KALDI_ASSERT(num_requests >= 3);
+  std::vector<ComputationRequest> extra_requests(num_requests - 3);
+  const ComputationRequest *prev_request = &request2;
+  const ComputationRequest *cur_request = &request3;
+  for (int32 i = 0; i < num_requests - 3; i++) {
+    if (!ExtrapolateComputationRequest(*prev_request, *cur_request,
+                                       &(extra_requests[i]))) {
+      KALDI_LOG << "prev_request is:";
+      prev_request->Print(std::cerr);
+      KALDI_LOG << "cur_request is:";
+      cur_request->Print(std::cerr);
+      KALDI_ERR << "Computation requests do not have the right relationship";
+    }
+    prev_request = cur_request;
+    cur_request = &(extra_requests[i]);
+  }
+
+  std::vector<const ComputationRequest*> requests;
+  requests.push_back(&request1);
+  requests.push_back(&request2);
+  requests.push_back(&request3);
+  for (int32 i = 0; i < num_requests - 3; i++)
+    requests.push_back(&(extra_requests[i]));
+  Compiler compiler(requests, nnet);
+  CompilerOptions compiler_opts;
+  compiler.CreateComputation(compiler_opts, computation);
+  optimize_opts.optimize_looped_computation = true;
+
+  int32 dont_really_care = MaxOutputTimeInRequest(request3);
+  Optimize(optimize_opts, nnet,
+           dont_really_care, computation);
+
+  return computation->commands.size() != 0 &&
+      computation->commands.back().command_type == kGotoLabel;
+}
+
+void CompileLooped(const Nnet &nnet,
+                   const NnetOptimizeOptions &optimize_opts,
+                   const ComputationRequest &request1,
+                   const ComputationRequest &request2,
+                   const ComputationRequest &request3,
+                   NnetComputation *computation) {
+  int32 num_requests1 = 5, factor = 2, max_requests = 100,
+      num_requests;
+
+  Timer timer;
+
+  for (num_requests = num_requests1; num_requests <= max_requests;
+       num_requests *= factor) {
+    if (CompileLoopedInternal(nnet, optimize_opts,
+                             request1, request2, request3,
+                             num_requests, computation)) {
+      KALDI_LOG << "Spent " << timer.Elapsed()
+                << " seconds in looped compilation.";
+      return;
+    } else {
+      KALDI_VLOG(2) << "Looped compilation failed with "
+                    << num_requests << " requests, trying "
+                    << (num_requests * factor);
+    }
+  }
+  KALDI_ERR << "Looped compilation failed with "
+            << (num_requests/factor) << " requests, which "
+            << "we expect should be enough... something "
+            << "went wrong.";
+}
+
 //
 //void CreateLoopedComputationRequestSimple(const Nnet &nnet,
 //                                          int32 chunk_size,

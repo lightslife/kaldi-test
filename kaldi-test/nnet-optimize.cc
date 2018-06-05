@@ -631,27 +631,27 @@ void Optimize(const NnetOptimizeOptions &config,
   }
 }
 //
-//
-//CachingOptimizingCompiler::CachingOptimizingCompiler(
-//    const Nnet &nnet,
-//    const CachingOptimizingCompilerOptions config):
-//    nnet_(nnet), config_(config),
-//    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
-//    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
-//    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
-//    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
-//
-//CachingOptimizingCompiler::CachingOptimizingCompiler(
-//    const Nnet &nnet,
-//    const NnetOptimizeOptions &opt_config,
-//    const CachingOptimizingCompilerOptions config):
-//    nnet_(nnet), config_(config), opt_config_(opt_config),
-//    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
-//    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
-//    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
-//    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
-//
-//
+
+CachingOptimizingCompiler::CachingOptimizingCompiler(
+    const Nnet &nnet,
+    const CachingOptimizingCompilerOptions config):
+    nnet_(nnet), config_(config),
+    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
+    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
+    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
+    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
+
+CachingOptimizingCompiler::CachingOptimizingCompiler(
+    const Nnet &nnet,
+    const NnetOptimizeOptions &opt_config,
+    const CachingOptimizingCompilerOptions config):
+    nnet_(nnet), config_(config), opt_config_(opt_config),
+    seconds_taken_total_(0.0), seconds_taken_compile_(0.0),
+    seconds_taken_optimize_(0.0), seconds_taken_expand_(0.0),
+    seconds_taken_check_(0.0), seconds_taken_indexes_(0.0),
+    seconds_taken_io_(0.0), cache_(config.cache_capacity) { }
+
+
 //void CachingOptimizingCompiler::ReadCache(std::istream &is, bool binary) {
 //  {
 //    Timer timer;

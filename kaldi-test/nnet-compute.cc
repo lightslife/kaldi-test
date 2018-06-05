@@ -256,42 +256,42 @@ void NnetComputer::ExecuteCommand() {
         break;
       }
       case kBackprop:
-      case kBackpropNoModelUpdate:  {
-        std::ostringstream debug_str;
-        KALDI_ASSERT(nnet_to_update_ != NULL);
-        debug_str << nnet_.GetComponentName(c.arg1);
-        const Component *component = nnet_.GetComponent(c.arg1);
-        KALDI_ASSERT(!(computation_.need_model_derivative && !nnet_to_update_));
-        Component *upd_component = NULL;
-        if (c.command_type == kBackprop) {  // this block sets 'upd_component'
-          Nnet *nnet_to_update;
-          if (component->Properties()&kUpdatableComponent) {
-            nnet_to_update = (computation_.need_model_derivative ?
-                              nnet_to_update_ : NULL);
-          } else {
-            // Some non-updatable components, such as CompositeComponent, store
-            // stats in the backprop.  For other types of non-updatable
-            // component, this arg won't matter.
-            nnet_to_update = nnet_to_store_stats_;
-          }
-          if (nnet_to_update)
-            upd_component = nnet_to_update->GetComponent(c.arg1);
-        }
-        ComponentPrecomputedIndexes *indexes =
-            computation_.component_precomputed_indexes[c.arg2].data;
-        const CuSubMatrix<BaseFloat> in_value(GetSubMatrix(c.arg3));
-        const CuSubMatrix<BaseFloat> out_value(GetSubMatrix(c.arg4));
-        const CuSubMatrix<BaseFloat> out_deriv(GetSubMatrix(c.arg5));
-        CuSubMatrix<BaseFloat> in_deriv(GetSubMatrix(c.arg6));
-        void *memo = GetMemo(c.arg7);
-        component->Backprop(debug_str.str(), indexes,
-                            in_value, out_value, out_deriv,
-                            memo, upd_component,
-                            c.arg6 == 0 ? NULL : &in_deriv);
-        if (memo != NULL)
-          component->DeleteMemo(memo);
-        break;
-      }
+      //case kBackpropNoModelUpdate:  {
+      //  std::ostringstream debug_str;
+      //  KALDI_ASSERT(nnet_to_update_ != NULL);
+      //  debug_str << nnet_.GetComponentName(c.arg1);
+      //  const Component *component = nnet_.GetComponent(c.arg1);
+      //  KALDI_ASSERT(!(computation_.need_model_derivative && !nnet_to_update_));
+      //  Component *upd_component = NULL;
+      //  if (c.command_type == kBackprop) {  // this block sets 'upd_component'
+      //    Nnet *nnet_to_update;
+      //    if (component->Properties()&kUpdatableComponent) {
+      //      nnet_to_update = (computation_.need_model_derivative ?
+      //                        nnet_to_update_ : NULL);
+      //    } else {
+      //      // Some non-updatable components, such as CompositeComponent, store
+      //      // stats in the backprop.  For other types of non-updatable
+      //      // component, this arg won't matter.
+      //      nnet_to_update = nnet_to_store_stats_;
+      //    }
+      //    if (nnet_to_update)
+      //      upd_component = nnet_to_update->GetComponent(c.arg1);
+      //  }
+      //  ComponentPrecomputedIndexes *indexes =
+      //      computation_.component_precomputed_indexes[c.arg2].data;
+      //  const CuSubMatrix<BaseFloat> in_value(GetSubMatrix(c.arg3));
+      //  const CuSubMatrix<BaseFloat> out_value(GetSubMatrix(c.arg4));
+      //  const CuSubMatrix<BaseFloat> out_deriv(GetSubMatrix(c.arg5));
+      //  CuSubMatrix<BaseFloat> in_deriv(GetSubMatrix(c.arg6));
+      //  void *memo = GetMemo(c.arg7);
+      //  component->Backprop(debug_str.str(), indexes,
+      //                      in_value, out_value, out_deriv,
+      //                      memo, upd_component,
+      //                      c.arg6 == 0 ? NULL : &in_deriv);
+      //  if (memo != NULL)
+      //    component->DeleteMemo(memo);
+      //  break;
+      //}
       case kMatrixCopy: {
         CuSubMatrix<BaseFloat> dest(GetSubMatrix(c.arg1));
         const CuSubMatrix<BaseFloat> src(GetSubMatrix(c.arg2));

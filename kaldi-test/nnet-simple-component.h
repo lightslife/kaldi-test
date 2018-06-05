@@ -231,17 +231,17 @@ class SigmoidComponent: public NonlinearComponent {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                           const CuMatrixBase<BaseFloat> &in,
                           CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &, //in_value
-                        const CuMatrixBase<BaseFloat> &out_value,
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
-  virtual void StoreStats(const CuMatrixBase<BaseFloat> &in_value,
-                          const CuMatrixBase<BaseFloat> &out_value,
-                          void *memo);
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &, //in_value
+  //                      const CuMatrixBase<BaseFloat> &out_value,
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void StoreStats(const CuMatrixBase<BaseFloat> &in_value,
+  //                        const CuMatrixBase<BaseFloat> &out_value,
+  //                        void *memo);
  private:
   // this function is called from Backprop code and only does something if the
   // self-repair-scale config value is set.
@@ -392,7 +392,7 @@ class AffineComponent: public UpdatableComponent {
 
   BaseFloat OrthonormalConstraint() const { return orthonormal_constraint_; }
   virtual std::string Info() const;
-  virtual void InitFromConfig(ConfigLine *cfl);
+  //virtual void InitFromConfig(ConfigLine *cfl);
 
   AffineComponent(): orthonormal_constraint_(0.0) { } // use Init to really initialize.
   virtual std::string Type() const { return "AffineComponent"; }
@@ -405,14 +405,14 @@ class AffineComponent: public UpdatableComponent {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                          const CuMatrixBase<BaseFloat> &in,
                          CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &in_value,
-                        const CuMatrixBase<BaseFloat> &, // out_value
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &in_value,
+  //                      const CuMatrixBase<BaseFloat> &, // out_value
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
 
   virtual void Read(std::istream &is, bool binary);
   virtual void Write(std::ostream &os, bool binary) const;
@@ -423,7 +423,7 @@ class AffineComponent: public UpdatableComponent {
   // Some functions from base-class UpdatableComponent.
   virtual void Scale(BaseFloat scale);
   virtual void Add(BaseFloat alpha, const Component &other);
-  virtual void PerturbParams(BaseFloat stddev);
+  //virtual void PerturbParams(BaseFloat stddev);
   virtual BaseFloat DotProduct(const UpdatableComponent &other) const;
   virtual int32 NumParameters() const;
   virtual void Vectorize(VectorBase<BaseFloat> *params) const;
@@ -445,25 +445,25 @@ class AffineComponent: public UpdatableComponent {
   // parameters to zero, while leaving any other configuration values the same.
   virtual void Resize(int32 input_dim, int32 output_dim);
 
-  void Init(int32 input_dim, int32 output_dim,
-            BaseFloat param_stddev, BaseFloat bias_stddev);
+  //void Init(int32 input_dim, int32 output_dim,
+  //          BaseFloat param_stddev, BaseFloat bias_stddev);
  protected:
   void Init(std::string matrix_filename);
 
   friend class NaturalGradientAffineComponent;
   // This function Update() is for extensibility; child classes may override
   // this, e.g. for natural gradient update.
-  virtual void Update(
-      const std::string &debug_info,
-      const CuMatrixBase<BaseFloat> &in_value,
-      const CuMatrixBase<BaseFloat> &out_deriv) {
-    UpdateSimple(in_value, out_deriv);
-  }
+  //virtual void Update(
+  //    const std::string &debug_info,
+  //    const CuMatrixBase<BaseFloat> &in_value,
+  //    const CuMatrixBase<BaseFloat> &out_deriv) {
+  //  UpdateSimple(in_value, out_deriv);
+  //}
   // UpdateSimple is used when *this is a gradient.  Child classes may override
   // this if needed, but typically won't need to.
-  virtual void UpdateSimple(
-      const CuMatrixBase<BaseFloat> &in_value,
-      const CuMatrixBase<BaseFloat> &out_deriv);
+  //virtual void UpdateSimple(
+  //    const CuMatrixBase<BaseFloat> &in_value,
+  //    const CuMatrixBase<BaseFloat> &out_deriv);
 
   const AffineComponent &operator = (const AffineComponent &other); // Disallow.
   CuMatrix<BaseFloat> linear_params_;

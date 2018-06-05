@@ -29,19 +29,19 @@ namespace kaldi {
 namespace nnet3 {
 //
 //// used in I/O
-//static void CopyPairVector(const CuArray<Int32Pair> &in,
-//                        std::vector<std::pair<int32, int32> > *out) {
-//  in.CopyToVec(reinterpret_cast<std::vector<Int32Pair>*>(out));
-//}
-//// used in I/O
-//static void CopyPairVector(const std::vector<std::pair<int32, int32> > &in,
-//                        CuArray<Int32Pair> *out) {
-//  const std::vector<Int32Pair> *in_cast =
-//      reinterpret_cast<const std::vector<Int32Pair>*>(&in);
-//  out->CopyFromVec(*in_cast);
-//}
-//
-//
+static void CopyPairVector(const CuArray<Int32Pair> &in,
+                        std::vector<std::pair<int32, int32> > *out) {
+  in.CopyToVec(reinterpret_cast<std::vector<Int32Pair>*>(out));
+}
+// used in I/O
+static void CopyPairVector(const std::vector<std::pair<int32, int32> > &in,
+                        CuArray<Int32Pair> *out) {
+  const std::vector<Int32Pair> *in_cast =
+      reinterpret_cast<const std::vector<Int32Pair>*>(&in);
+  out->CopyFromVec(*in_cast);
+}
+
+
 //
 ////inline
 //void DistributeComponent::ComputeInputIndexAndBlock(const Index &output_index,
@@ -86,19 +86,19 @@ namespace nnet3 {
 //  return true;
 //}
 //
-//void DistributeComponentPrecomputedIndexes::Write(std::ostream &ostream, bool binary) const {
-//  WriteToken(ostream, binary, "<DistributeComponentPrecomputedIndexes>");
-//  WriteToken(ostream, binary, "<Pairs>");
-//  WriteIntegerPairVector(ostream, binary, pairs);
-//  WriteToken(ostream, binary, "</DistributeComponentPrecomputedIndexes>");
-//}
-//
-//void DistributeComponentPrecomputedIndexes::Read(std::istream &istream, bool binary) {
-//  ExpectOneOrTwoTokens(istream, binary, "<DistributeComponentPrecomputedIndexes>", "<Pairs>");
-//  ReadIntegerPairVector(istream, binary, &pairs);
-//  ExpectToken(istream, binary, "</DistributeComponentPrecomputedIndexes>");
-//}
-//
+void DistributeComponentPrecomputedIndexes::Write(std::ostream &ostream, bool binary) const {
+  WriteToken(ostream, binary, "<DistributeComponentPrecomputedIndexes>");
+  WriteToken(ostream, binary, "<Pairs>");
+  WriteIntegerPairVector(ostream, binary, pairs);
+  WriteToken(ostream, binary, "</DistributeComponentPrecomputedIndexes>");
+}
+
+void DistributeComponentPrecomputedIndexes::Read(std::istream &istream, bool binary) {
+  ExpectOneOrTwoTokens(istream, binary, "<DistributeComponentPrecomputedIndexes>", "<Pairs>");
+  ReadIntegerPairVector(istream, binary, &pairs);
+  ExpectToken(istream, binary, "</DistributeComponentPrecomputedIndexes>");
+}
+
 //// virtual
 //ComponentPrecomputedIndexes* DistributeComponent::PrecomputeIndexes(
 //    const MiscComputationInfo &, // misc_info
@@ -253,38 +253,38 @@ namespace nnet3 {
 //  ExpectToken(is, binary, "</DistributeComponent>");
 //}
 //
-//
-//void StatisticsExtractionComponentPrecomputedIndexes::Write(std::ostream &os, bool binary) const {
-//  WriteToken(os, binary, "<StatisticsExtractionComponentPrecomputedIndexes>");
-//  WriteToken(os, binary, "<ForwardIndexes>");
-//  std::vector<std::pair<int32, int32> > pairs_cpu;
-//  CopyPairVector(forward_indexes, &pairs_cpu);
-//  WriteIntegerPairVector(os, binary, pairs_cpu);
-//  WriteToken(os, binary, "<Counts>");
-//  counts.Write(os, binary);
-//  WriteToken(os, binary, "<BackwardIndexes>");
-//  std::vector<int32> backward_indexes_cpu;
-//  backward_indexes.CopyToVec(&backward_indexes_cpu);
-//  WriteIntegerVector(os, binary, backward_indexes_cpu);
-//  WriteToken(os, binary, "</StatisticsExtractionComponentPrecomputedIndexes>");
-//}
-//
-//void StatisticsExtractionComponentPrecomputedIndexes::Read(std::istream &is, bool binary) {
-//  ExpectOneOrTwoTokens(is, binary,
-//                       "<StatisticsExtractionComponentPrecomputedIndexes>",
-//                       "<ForwardIndexes>");
-//  std::vector<std::pair<int32, int32> > pairs_cpu;
-//  ReadIntegerPairVector(is, binary, &pairs_cpu);
-//  CopyPairVector(pairs_cpu, &forward_indexes);
-//  ExpectToken(is, binary, "<Counts>");
-//  counts.Read(is, binary);
-//  ExpectToken(is, binary, "<BackwardIndexes>");
-//  std::vector<int32> backward_indexes_cpu;
-//  ReadIntegerVector(is, binary, &backward_indexes_cpu);
-//  backward_indexes.CopyFromVec(backward_indexes_cpu);
-//  ExpectToken(is, binary, "</StatisticsExtractionComponentPrecomputedIndexes>");
-//}
-//
+
+void StatisticsExtractionComponentPrecomputedIndexes::Write(std::ostream &os, bool binary) const {
+  WriteToken(os, binary, "<StatisticsExtractionComponentPrecomputedIndexes>");
+  WriteToken(os, binary, "<ForwardIndexes>");
+  std::vector<std::pair<int32, int32> > pairs_cpu;
+  CopyPairVector(forward_indexes, &pairs_cpu);
+  WriteIntegerPairVector(os, binary, pairs_cpu);
+  WriteToken(os, binary, "<Counts>");
+  counts.Write(os, binary);
+  WriteToken(os, binary, "<BackwardIndexes>");
+  std::vector<int32> backward_indexes_cpu;
+  backward_indexes.CopyToVec(&backward_indexes_cpu);
+  WriteIntegerVector(os, binary, backward_indexes_cpu);
+  WriteToken(os, binary, "</StatisticsExtractionComponentPrecomputedIndexes>");
+}
+
+void StatisticsExtractionComponentPrecomputedIndexes::Read(std::istream &is, bool binary) {
+  ExpectOneOrTwoTokens(is, binary,
+                       "<StatisticsExtractionComponentPrecomputedIndexes>",
+                       "<ForwardIndexes>");
+  std::vector<std::pair<int32, int32> > pairs_cpu;
+  ReadIntegerPairVector(is, binary, &pairs_cpu);
+  CopyPairVector(pairs_cpu, &forward_indexes);
+  ExpectToken(is, binary, "<Counts>");
+  counts.Read(is, binary);
+  ExpectToken(is, binary, "<BackwardIndexes>");
+  std::vector<int32> backward_indexes_cpu;
+  ReadIntegerVector(is, binary, &backward_indexes_cpu);
+  backward_indexes.CopyFromVec(backward_indexes_cpu);
+  ExpectToken(is, binary, "</StatisticsExtractionComponentPrecomputedIndexes>");
+}
+
 //ComponentPrecomputedIndexes*
 //StatisticsExtractionComponent::PrecomputeIndexes(
 //    const MiscComputationInfo &misc_info,
@@ -526,30 +526,30 @@ namespace nnet3 {
 //  WriteToken(os, binary, "</StatisticsExtractionComponent>");
 //}
 //
-//void StatisticsPoolingComponentPrecomputedIndexes::Write(std::ostream &os, bool binary) const {
-//  WriteToken(os, binary, "<StatisticsPoolingComponentPrecomputedIndexes>");
-//  WriteToken(os, binary, "<ForwardIndexes>");
-//  std::vector<std::pair<int32, int32> > indexes_cpu;
-//  CopyPairVector(forward_indexes, &indexes_cpu);
-//  WriteIntegerPairVector(os, binary, indexes_cpu);
-//  WriteToken(os, binary, "<BackwardIndexes>");
-//  CopyPairVector(backward_indexes, &indexes_cpu);
-//  WriteIntegerPairVector(os, binary, indexes_cpu);
-//  WriteToken(os, binary, "</StatisticsPoolingComponentPrecomputedIndexes>");
-//}
-//
-//void StatisticsPoolingComponentPrecomputedIndexes::Read(std::istream &is, bool binary) {
-//  ExpectOneOrTwoTokens(is, binary,
-//                       "<StatisticsPoolingComponentPrecomputedIndexes>",
-//                       "<ForwardIndexes>");
-//  std::vector<std::pair<int32, int32> > indexes_cpu;
-//  ReadIntegerPairVector(is, binary, &indexes_cpu);
-//  CopyPairVector(indexes_cpu, &forward_indexes);
-//  ExpectToken(is, binary, "<BackwardIndexes>");
-//  ReadIntegerPairVector(is, binary, &indexes_cpu);
-//  CopyPairVector(indexes_cpu, &backward_indexes);
-//  ExpectToken(is, binary, "</StatisticsPoolingComponentPrecomputedIndexes>");
-//}
+void StatisticsPoolingComponentPrecomputedIndexes::Write(std::ostream &os, bool binary) const {
+  WriteToken(os, binary, "<StatisticsPoolingComponentPrecomputedIndexes>");
+  WriteToken(os, binary, "<ForwardIndexes>");
+  std::vector<std::pair<int32, int32> > indexes_cpu;
+  CopyPairVector(forward_indexes, &indexes_cpu);
+  WriteIntegerPairVector(os, binary, indexes_cpu);
+  WriteToken(os, binary, "<BackwardIndexes>");
+  CopyPairVector(backward_indexes, &indexes_cpu);
+  WriteIntegerPairVector(os, binary, indexes_cpu);
+  WriteToken(os, binary, "</StatisticsPoolingComponentPrecomputedIndexes>");
+}
+
+void StatisticsPoolingComponentPrecomputedIndexes::Read(std::istream &is, bool binary) {
+  ExpectOneOrTwoTokens(is, binary,
+                       "<StatisticsPoolingComponentPrecomputedIndexes>",
+                       "<ForwardIndexes>");
+  std::vector<std::pair<int32, int32> > indexes_cpu;
+  ReadIntegerPairVector(is, binary, &indexes_cpu);
+  CopyPairVector(indexes_cpu, &forward_indexes);
+  ExpectToken(is, binary, "<BackwardIndexes>");
+  ReadIntegerPairVector(is, binary, &indexes_cpu);
+  CopyPairVector(indexes_cpu, &backward_indexes);
+  ExpectToken(is, binary, "</StatisticsPoolingComponentPrecomputedIndexes>");
+}
 //
 //void StatisticsPoolingComponent::InitFromConfig(ConfigLine *cfl) {
 //  bool ok = cfl->GetValue("input-dim", &input_dim_);
@@ -1757,30 +1757,30 @@ namespace nnet3 {
 //  }
 //  return ans;
 //}
-//
-//void GeneralDropoutComponentPrecomputedIndexes::Write(std::ostream &os,
-//    bool binary) const {
-//  WriteToken(os, binary,
-//             "<GeneralDropoutComponentPrecomputedIndexes>");
-//  WriteToken(os, binary, "<NumMaskRows>");
-//  WriteBasicType(os, binary, num_mask_rows);
-//  WriteToken(os, binary, "<Indexes>");
-//  indexes.Write(os, binary);
-//  WriteToken(os, binary,
-//             "</GeneralDropoutComponentPrecomputedIndexes>");
-//}
-//
-//void GeneralDropoutComponentPrecomputedIndexes::Read(std::istream &is,
-//    bool binary) {
-//  ExpectOneOrTwoTokens(is, binary,
-//                       "<GeneralDropoutComponentPrecomputedIndexes>",
-//                       "<NumMaskRows>");
-//  ReadBasicType(is, binary, &num_mask_rows);
-//  ExpectToken(is, binary, "<Indexes>");
-//  indexes.Read(is, binary);
-//  ExpectToken(is, binary,
-//              "</GeneralDropoutComponentPrecomputedIndexes>");
-//}
+
+void GeneralDropoutComponentPrecomputedIndexes::Write(std::ostream &os,
+    bool binary) const {
+  WriteToken(os, binary,
+             "<GeneralDropoutComponentPrecomputedIndexes>");
+  WriteToken(os, binary, "<NumMaskRows>");
+  WriteBasicType(os, binary, num_mask_rows);
+  WriteToken(os, binary, "<Indexes>");
+  indexes.Write(os, binary);
+  WriteToken(os, binary,
+             "</GeneralDropoutComponentPrecomputedIndexes>");
+}
+
+void GeneralDropoutComponentPrecomputedIndexes::Read(std::istream &is,
+    bool binary) {
+  ExpectOneOrTwoTokens(is, binary,
+                       "<GeneralDropoutComponentPrecomputedIndexes>",
+                       "<NumMaskRows>");
+  ReadBasicType(is, binary, &num_mask_rows);
+  ExpectToken(is, binary, "<Indexes>");
+  indexes.Read(is, binary);
+  ExpectToken(is, binary,
+              "</GeneralDropoutComponentPrecomputedIndexes>");
+}
 
 
 } // namespace nnet3
