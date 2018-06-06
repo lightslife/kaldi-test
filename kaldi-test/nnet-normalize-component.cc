@@ -205,51 +205,51 @@ namespace nnet3 {
 //                            in_deriv);
 //  }
 //}
+
+void BatchNormComponent::ComputeDerived() {
+  if (!test_mode_) {
+    offset_.Resize(0);
+    scale_.Resize(0);
+    return;
+  }
+
+  if (count_ == 0.0) {
+    KALDI_WARN << "Test-mode is set but there is no data count.  "
+        "Creating random counts.  This only makes sense "
+        "in unit-tests (or compute_prob_*.0.log).  If you see this "
+        "elsewhere, something is very wrong.";
+    count_ = 1.0;
+    stats_sum_.SetRandn();
+    stats_sumsq_.SetRandn();
+    stats_sumsq_.AddVecVec(1.0, stats_sum_, stats_sum_, 1.0);
+  }
+
+  offset_.Resize(block_dim_);
+  scale_.Resize(block_dim_);
+  offset_.CopyFromVec(stats_sum_);
+  offset_.Scale(-1.0 / count_);
+  // now offset_ is -mean.
+  scale_.CopyFromVec(stats_sumsq_);
+  scale_.Scale(1.0 / count_);
+  scale_.AddVecVec(-1.0, offset_, offset_, 1.0);
+  // now scale_ is variance.
+  // Mathematically the ApplyFloor statement should be a no-op; this is in case
+  // of numerical roundoff.
+  scale_.ApplyFloor(0.0);
+  scale_.Add(epsilon_);
+  BaseFloat power = -0.5;
+  scale_.ApplyPow(power);
+  // now scale_ = min(variance, epsilon)^power
+  // next, multiply by the target RMS (normally 1.0).
+  scale_.Scale(target_rms_);
+  offset_.MulElements(scale_);
+  // now offset_ is -(scale*mean).
+}
 //
-//void BatchNormComponent::ComputeDerived() {
-//  if (!test_mode_) {
-//    offset_.Resize(0);
-//    scale_.Resize(0);
-//    return;
-//  }
-//
-//  if (count_ == 0.0) {
-//    KALDI_WARN << "Test-mode is set but there is no data count.  "
-//        "Creating random counts.  This only makes sense "
-//        "in unit-tests (or compute_prob_*.0.log).  If you see this "
-//        "elsewhere, something is very wrong.";
-//    count_ = 1.0;
-//    stats_sum_.SetRandn();
-//    stats_sumsq_.SetRandn();
-//    stats_sumsq_.AddVecVec(1.0, stats_sum_, stats_sum_, 1.0);
-//  }
-//
-//  offset_.Resize(block_dim_);
-//  scale_.Resize(block_dim_);
-//  offset_.CopyFromVec(stats_sum_);
-//  offset_.Scale(-1.0 / count_);
-//  // now offset_ is -mean.
-//  scale_.CopyFromVec(stats_sumsq_);
-//  scale_.Scale(1.0 / count_);
-//  scale_.AddVecVec(-1.0, offset_, offset_, 1.0);
-//  // now scale_ is variance.
-//  // Mathematically the ApplyFloor statement should be a no-op; this is in case
-//  // of numerical roundoff.
-//  scale_.ApplyFloor(0.0);
-//  scale_.Add(epsilon_);
-//  BaseFloat power = -0.5;
-//  scale_.ApplyPow(power);
-//  // now scale_ = min(variance, epsilon)^power
-//  // next, multiply by the target RMS (normally 1.0).
-//  scale_.Scale(target_rms_);
-//  offset_.MulElements(scale_);
-//  // now offset_ is -(scale*mean).
-//}
-//
-//void BatchNormComponent::SetTestMode(bool test_mode) {
-//  test_mode_ = test_mode;
-//  ComputeDerived();
-//}
+void BatchNormComponent::SetTestMode(bool test_mode) {
+  test_mode_ = test_mode;
+  ComputeDerived();
+}
 //
 //void BatchNormComponent::Check() const {
 //  KALDI_ASSERT(dim_ > 0 && block_dim_ > 0 && dim_ % block_dim_ == 0 &&

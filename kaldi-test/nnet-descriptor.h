@@ -114,8 +114,8 @@ class ForwardingDescriptor {
 
   // Write to string that will be one line of a config-file-like format.  The
   // opposite of Parse.
- /* virtual void WriteConfig(std::ostream &os,
-                           const std::vector<std::string> &node_names) const = 0;*/
+  virtual void WriteConfig(std::ostream &os,
+                           const std::vector<std::string> &node_names) const = 0;
 
   /// This function appends to "node_indexes" all the node indexes
   // that this descriptor may access.
@@ -179,8 +179,8 @@ class OffsetForwardingDescriptor: public ForwardingDescriptor {
   virtual ForwardingDescriptor *Copy() const;
 
   // written form is: Offset(<src-written-form>, t-offset [, x-offset])
-  //virtual void WriteConfig(std::ostream &os,
-  //                         const std::vector<std::string> &node_names) const;
+  virtual void WriteConfig(std::ostream &os,
+                           const std::vector<std::string> &node_names) const;
 
   virtual int32 Modulus() const { return src_->Modulus(); }
 
@@ -213,8 +213,8 @@ class SwitchingForwardingDescriptor: public ForwardingDescriptor {
   virtual int32 Dim(const Nnet &nnet) const { return src_[0]->Dim(nnet); }
   virtual ForwardingDescriptor *Copy() const;
   // Written form is "Switch(<written-form-of-src1>, <written-form-of-src2>, ... )"
-  //virtual void WriteConfig(std::ostream &os,
-  //                        const std::vector<std::string> &node_names) const;
+  virtual void WriteConfig(std::ostream &os,
+                          const std::vector<std::string> &node_names) const;
 
   virtual int32 Modulus() const;
 
@@ -245,8 +245,8 @@ class RoundingForwardingDescriptor: public ForwardingDescriptor {
   virtual int32 Dim(const Nnet &nnet) const { return src_->Dim(nnet); }
   virtual ForwardingDescriptor *Copy() const;
   // Written form is "Round(<written-form-of-src>, <t_modulus>)"
-  //virtual void WriteConfig(std::ostream &os,
-  //                        const std::vector<std::string> &node_names) const;
+  virtual void WriteConfig(std::ostream &os,
+                          const std::vector<std::string> &node_names) const;
 
   virtual int32 Modulus() const { return t_modulus_; }
 
@@ -279,8 +279,8 @@ class ReplaceIndexForwardingDescriptor: public ForwardingDescriptor {
   virtual ForwardingDescriptor *Copy() const;
   // Written form is "ReplaceIndex(<written-form-of-src>, <variable-name>, <value>)"
   // where <variable-name> is either "t" or "x".
-  //virtual void WriteConfig(std::ostream &os,
-  //                        const std::vector<std::string> &node_names) const;
+  virtual void WriteConfig(std::ostream &os,
+                          const std::vector<std::string> &node_names) const;
 
   /// This function appends to "node_indexes" all the node indexes
   // that this descriptor may access.
@@ -371,8 +371,8 @@ class SumDescriptor {
 
   /// Write in config-file format.  Conventional Read and Write methods are not
   /// supported.
-  //virtual void WriteConfig(std::ostream &os,
-  //                         const std::vector<std::string> &node_names) const = 0;
+  virtual void WriteConfig(std::ostream &os,
+                           const std::vector<std::string> &node_names) const = 0;
 };
 
 /// This is the case of class SumDescriptor, in which we contain just one term,
@@ -399,8 +399,8 @@ class OptionalSumDescriptor: public SumDescriptor {
   virtual int32 Modulus() const { return src_->Modulus(); }
   /// written form is: if required_ == true, "<written-form-of-src>"
   /// else "IfDefined(<written-form-of-src>)".
- /* virtual void WriteConfig(std::ostream &os,
-                           const std::vector<std::string> &node_names) const;*/
+  virtual void WriteConfig(std::ostream &os,
+                           const std::vector<std::string> &node_names) const;
   virtual SumDescriptor *Copy() const;
 
   OptionalSumDescriptor(SumDescriptor *src): src_(src) { }
@@ -430,8 +430,8 @@ class SimpleSumDescriptor: public SumDescriptor {
   virtual int32 Modulus() const { return src_->Modulus(); }
   /// written form is: if required_ == true, "<written-form-of-src>"
   /// else "IfDefined(<written-form-of-src>)".
-  //virtual void WriteConfig(std::ostream &os,
-  //                         const std::vector<std::string> &node_names) const;
+  virtual void WriteConfig(std::ostream &os,
+                           const std::vector<std::string> &node_names) const;
   virtual SumDescriptor *Copy() const;
 
   SimpleSumDescriptor(ForwardingDescriptor *src): src_(src) { }
@@ -505,8 +505,8 @@ class BinarySumDescriptor: public SumDescriptor {
   /// Written form is: if op_ == kSum then "Sum(<src1>, <src2>)";
   /// if op_ == kFailover, then "Failover(<src1>, <src2>)"
   /// If you need more than binary operations, just use Sum(a, Sum(b, c)).
-  //virtual void WriteConfig(std::ostream &os,
-  //                         const std::vector<std::string> &node_names) const;
+  virtual void WriteConfig(std::ostream &os,
+                           const std::vector<std::string> &node_names) const;
   virtual SumDescriptor *Copy() const;
   BinarySumDescriptor(Operation op, SumDescriptor *src1, SumDescriptor *src2):
       op_(op), src1_(src1), src2_(src2) {}
@@ -539,8 +539,8 @@ class Descriptor {
   // Write in config-file format.
   // if parts_.size() == 1, written form is just "<written-form-of-part0>"
   // otherwise, written form is "Append(<written-form-of-part0>, <written-form-of-part1>,  ... )".
-  //void WriteConfig(std::ostream &os,
-  //                 const std::vector<std::string> &node_names) const;
+  void WriteConfig(std::ostream &os,
+                   const std::vector<std::string> &node_names) const;
 
   /// This function exists to enable us to manage optional dependencies,
   /// i.e. for making sense of expressions like (A + (B is present)) and (A if

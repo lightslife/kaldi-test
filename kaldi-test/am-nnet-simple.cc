@@ -44,19 +44,19 @@ namespace nnet3 {
 //  WriteToken(os, binary, "<Priors>");
 //  priors_.Write(os, binary);
 //}
-//
-//void AmNnetSimple::Read(std::istream &is, bool binary) {
-//  nnet_.Read(is, binary);
-//  ExpectToken(is, binary, "<LeftContext>");
-//  ReadBasicType(is, binary, &left_context_);
-//  ExpectToken(is, binary, "<RightContext>");
-//  ReadBasicType(is, binary, &right_context_);
-//  SetContext();  // temporarily, I'm not trusting the written ones (there was
-//                 // briefly a bug)
-//  ExpectToken(is, binary, "<Priors>");
-//  priors_.Read(is, binary);
-//}
-//
+
+void AmNnetSimple::Read(std::istream &is, bool binary) {
+  nnet_.Read(is, binary);
+  ExpectToken(is, binary, "<LeftContext>");
+  ReadBasicType(is, binary, &left_context_);
+  ExpectToken(is, binary, "<RightContext>");
+  ReadBasicType(is, binary, &right_context_);
+  //SetContext();  // temporarily, I'm not trusting the written ones (there was
+                 // briefly a bug)
+  ExpectToken(is, binary, "<Priors>");
+  priors_.Read(is, binary);
+}
+
 //void AmNnetSimple::SetNnet(const Nnet &nnet) {
 //  nnet_ = nnet;
 //  SetContext();
@@ -67,7 +67,7 @@ namespace nnet3 {
 //    priors_.Resize(0);
 //  }
 //}
-//
+
 //void AmNnetSimple::SetPriors(const VectorBase<BaseFloat> &priors) {
 //  priors_ = priors;
 //  if (priors_.Dim() != nnet_.OutputDim("output") &&

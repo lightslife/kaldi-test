@@ -314,7 +314,7 @@ class Component {
   /// \param [in] cfl  A ConfigLine containing any parameters that
   ///            are needed for initialization. For example:
   ///            "dim=100 param-stddev=0.1"
-  //virtual void InitFromConfig(ConfigLine *cfl) = 0;
+  virtual void InitFromConfig(ConfigLine *cfl) = 0;
 
   /// \brief Returns input-dimension of this component.
   virtual int32 InputDim() const = 0;
@@ -524,7 +524,7 @@ class UpdatableComponent: public Component {
  protected:
   // to be called from child classes, extracts any learning rate information
   // from the config line and sets them appropriately.
-  //void InitLearningRatesFromConfig(ConfigLine *cfl);
+  void InitLearningRatesFromConfig(ConfigLine *cfl);
 
   // To be used in child-class Read() functions, this function reads the opening
   // tag <ThisComponentType> and the learning-rate factor and the learning-rate.

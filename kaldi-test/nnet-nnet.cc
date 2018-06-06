@@ -69,46 +69,46 @@ const std::vector<std::string> &Nnet::GetComponentNames() const {
   return component_names_;
 }
 //
-//std::string Nnet::GetAsConfigLine(int32 node_index, bool include_dim) const {
-//  std::ostringstream ans;
-//  KALDI_ASSERT(node_index < nodes_.size() &&
-//               nodes_.size() == node_names_.size());
-//  const NetworkNode &node = nodes_[node_index];
-//  const std::string &name = node_names_[node_index];
-//  switch (node.node_type) {
-//    case kInput:
-//      ans << "input-node name=" << name << " dim=" << node.dim;
-//      break;
-//    case kDescriptor:
-//      // assert that it's an output-descriptor, not one describing the input to
-//      // a component-node.
-//      KALDI_ASSERT(IsOutputNode(node_index));
-//      ans << "output-node name=" << name << " input=";
-//      node.descriptor.WriteConfig(ans, node_names_);
-//      if (include_dim)
-//        ans << " dim=" << node.Dim(*this);
-//      ans << " objective=" << (node.u.objective_type == kLinear ? "linear" :
-//                               "quadratic");
-//      break;
-//    case kComponent:
-//      ans << "component-node name=" << name << " component="
-//          << component_names_[node.u.component_index] << " input=";
-//      KALDI_ASSERT(nodes_[node_index-1].node_type == kDescriptor);
-//      nodes_[node_index-1].descriptor.WriteConfig(ans, node_names_);
-//      if (include_dim)
-//        ans << " input-dim=" << nodes_[node_index-1].Dim(*this)
-//            << " output-dim=" << node.Dim(*this);
-//      break;
-//    case kDimRange:
-//      ans << "dim-range-node name=" << name << " input-node="
-//          << node_names_[node.u.node_index] << " dim-offset="
-//          << node.dim_offset << " dim=" << node.dim;
-//      break;
-//    default:
-//      KALDI_ERR << "Unknown node type.";
-//  }
-//  return ans.str();
-//}
+std::string Nnet::GetAsConfigLine(int32 node_index, bool include_dim) const {
+  std::ostringstream ans;
+  KALDI_ASSERT(node_index < nodes_.size() &&
+               nodes_.size() == node_names_.size());
+  const NetworkNode &node = nodes_[node_index];
+  const std::string &name = node_names_[node_index];
+  switch (node.node_type) {
+    case kInput:
+      ans << "input-node name=" << name << " dim=" << node.dim;
+      break;
+    case kDescriptor:
+      // assert that it's an output-descriptor, not one describing the input to
+      // a component-node.
+      KALDI_ASSERT(IsOutputNode(node_index));
+      ans << "output-node name=" << name << " input=";
+      node.descriptor.WriteConfig(ans, node_names_);
+      if (include_dim)
+        ans << " dim=" << node.Dim(*this);
+      ans << " objective=" << (node.u.objective_type == kLinear ? "linear" :
+                               "quadratic");
+      break;
+    case kComponent:
+      ans << "component-node name=" << name << " component="
+          << component_names_[node.u.component_index] << " input=";
+      KALDI_ASSERT(nodes_[node_index-1].node_type == kDescriptor);
+      nodes_[node_index-1].descriptor.WriteConfig(ans, node_names_);
+      if (include_dim)
+        ans << " input-dim=" << nodes_[node_index-1].Dim(*this)
+            << " output-dim=" << node.Dim(*this);
+      break;
+    case kDimRange:
+      ans << "dim-range-node name=" << name << " input-node="
+          << node_names_[node.u.node_index] << " dim-offset="
+          << node.dim_offset << " dim=" << node.dim;
+      break;
+    default:
+      KALDI_ERR << "Unknown node type.";
+  }
+  return ans.str();
+}
 
 bool Nnet::IsOutputNode(int32 node) const {
   int32 size = nodes_.size();
@@ -178,110 +178,110 @@ bool Nnet::IsComponentInputNode(int32 node) const {
           nodes_[node+1].node_type == kComponent);
 }
 
-//void Nnet::GetConfigLines(bool include_dim,
-//                          std::vector<std::string> *config_lines) const {
-//  config_lines->clear();
-//  for (int32 n = 0; n < NumNodes(); n++)
-//    if (!IsComponentInputNode(n))
-//      config_lines->push_back(GetAsConfigLine(n, include_dim));
+void Nnet::GetConfigLines(bool include_dim,
+                          std::vector<std::string> *config_lines) const {
+  config_lines->clear();
+  for (int32 n = 0; n < NumNodes(); n++)
+    if (!IsComponentInputNode(n))
+      config_lines->push_back(GetAsConfigLine(n, include_dim));
+
+}
 //
-//}
-//
-//void Nnet::ReadConfig(std::istream &config_is) {
-//
-//  std::vector<std::string> lines;
-//  // Write into "lines" a config file corresponding to whatever
-//  // nodes we currently have.  Because the numbering of nodes may
-//  // change, it's most convenient to convert to the text representation
-//  // and combine the existing and new config lines in that representation.
-//  const bool include_dim = false;
-//  GetConfigLines(include_dim, &lines);
-//
-//  // we'll later regenerate what we need from nodes_ and node_name_ from the
-//  // string representation.
-//  nodes_.clear();
-//  node_names_.clear();
-//
-//  int32 num_lines_initial = lines.size();
-//
-//  ReadConfigLines(config_is, &lines);
-//  // now "lines" will have comments removed and empty lines stripped out
-//
-//  std::vector<ConfigLine> config_lines(lines.size());
-//
-//  ParseConfigLines(lines, &config_lines);
-//
-//  // the next line will possibly remove some elements from "config_lines" so no
-//  // node or component is doubly defined, always keeping the second repeat.
-//  // Things being doubly defined can happen when a previously existing node or
-//  // component is redefined in a new config file.
-//  RemoveRedundantConfigLines(num_lines_initial, &config_lines);
-//
-//  int32 initial_num_components = components_.size();
-//  for (int32 pass = 0; pass <= 1; pass++) {
-//    for (size_t i = 0; i < config_lines.size(); i++) {
-//      const std::string &first_token = config_lines[i].FirstToken();
-//      if (first_token == "component") {
-//        if (pass == 0)
-//          ProcessComponentConfigLine(initial_num_components,
-//                                     &(config_lines[i]));
-//      } else if (first_token == "component-node") {
-//        ProcessComponentNodeConfigLine(pass,  &(config_lines[i]));
-//      } else if (first_token == "input-node") {
-//        if (pass == 0)
-//          ProcessInputNodeConfigLine(&(config_lines[i]));
-//      } else if (first_token == "output-node") {
-//        ProcessOutputNodeConfigLine(pass, &(config_lines[i]));
-//      } else if (first_token == "dim-range-node") {
-//        ProcessDimRangeNodeConfigLine(pass, &(config_lines[i]));
-//      } else {
-//        KALDI_ERR << "Invalid config-file line ('" << first_token
-//                  << "' not expected): " << config_lines[i].WholeLine();
-//      }
-//    }
-//  }
-//  Check();
-//}
+void Nnet::ReadConfig(std::istream &config_is) {
+
+  std::vector<std::string> lines;
+  // Write into "lines" a config file corresponding to whatever
+  // nodes we currently have.  Because the numbering of nodes may
+  // change, it's most convenient to convert to the text representation
+  // and combine the existing and new config lines in that representation.
+  const bool include_dim = false;
+  GetConfigLines(include_dim, &lines);
+
+  // we'll later regenerate what we need from nodes_ and node_name_ from the
+  // string representation.
+  nodes_.clear();
+  node_names_.clear();
+
+  int32 num_lines_initial = lines.size();
+
+  ReadConfigLines(config_is, &lines);
+  // now "lines" will have comments removed and empty lines stripped out
+
+  std::vector<ConfigLine> config_lines(lines.size());
+
+  ParseConfigLines(lines, &config_lines);
+
+  // the next line will possibly remove some elements from "config_lines" so no
+  // node or component is doubly defined, always keeping the second repeat.
+  // Things being doubly defined can happen when a previously existing node or
+  // component is redefined in a new config file.
+  RemoveRedundantConfigLines(num_lines_initial, &config_lines);
+
+  int32 initial_num_components = components_.size();
+  for (int32 pass = 0; pass <= 1; pass++) {
+    for (size_t i = 0; i < config_lines.size(); i++) {
+      const std::string &first_token = config_lines[i].FirstToken();
+      if (first_token == "component") {
+        if (pass == 0)
+          ProcessComponentConfigLine(initial_num_components,
+                                     &(config_lines[i]));
+      } else if (first_token == "component-node") {
+        ProcessComponentNodeConfigLine(pass,  &(config_lines[i]));
+      } else if (first_token == "input-node") {
+        if (pass == 0)
+          ProcessInputNodeConfigLine(&(config_lines[i]));
+      } else if (first_token == "output-node") {
+        ProcessOutputNodeConfigLine(pass, &(config_lines[i]));
+      } else if (first_token == "dim-range-node") {
+        ProcessDimRangeNodeConfigLine(pass, &(config_lines[i]));
+      } else {
+        KALDI_ERR << "Invalid config-file line ('" << first_token
+                  << "' not expected): " << config_lines[i].WholeLine();
+      }
+    }
+  }
+  Check();
+}
 
 
 // called only on pass 0 of ReadConfig.
-//void Nnet::ProcessComponentConfigLine(
-//    int32 initial_num_components,
-//    ConfigLine *config) {
-//  std::string name, type;
-//  if (!config->GetValue("name", &name))
-//    KALDI_ERR << "Expected field name=<component-name> in config line: "
-//              << config->WholeLine();
-//  if (!IsToken(name)) // e.g. contains a space.
-//    KALDI_ERR << "Component name '" << name << "' is not allowed, in line: "
-//              << config->WholeLine();
-//  if (!config->GetValue("type", &type))
-//    KALDI_ERR << "Expected field type=<component-type> in config line: "
-//              << config->WholeLine();
-//  Component *new_component = Component::NewComponentOfType(type);
-//  if (new_component == NULL)
-//    KALDI_ERR << "Unknown component-type '" << type
-//              << "' in config file.  Check your code version and config.";
-//  // the next call will call KALDI_ERR or KALDI_ASSERT and die if something
-//  // went wrong.
-//  new_component->InitFromConfig(config);
-//  int32 index = GetComponentIndex(name);
-//  if (index != -1) {  // Replacing existing component.
-//    if (index >= initial_num_components) {
-//      // that index was something we added from this config.
-//      KALDI_ERR << "You are adding two components with the same name: '"
-//                << name << "'";
-//    }
-//    delete components_[index];
-//    components_[index] = new_component;
-//  } else {
-//    components_.push_back(new_component);
-//    component_names_.push_back(name);
-//  }
-//  if (config->HasUnusedValues())
-//    KALDI_ERR << "Unused values '" << config->UnusedValues()
-//              << " in config line: " << config->WholeLine();
-//}
+void Nnet::ProcessComponentConfigLine(
+    int32 initial_num_components,
+    ConfigLine *config) {
+  std::string name, type;
+  if (!config->GetValue("name", &name))
+    KALDI_ERR << "Expected field name=<component-name> in config line: "
+              << config->WholeLine();
+  if (!IsToken(name)) // e.g. contains a space.
+    KALDI_ERR << "Component name '" << name << "' is not allowed, in line: "
+              << config->WholeLine();
+  if (!config->GetValue("type", &type))
+    KALDI_ERR << "Expected field type=<component-type> in config line: "
+              << config->WholeLine();
+  Component *new_component = Component::NewComponentOfType(type);
+  if (new_component == NULL)
+    KALDI_ERR << "Unknown component-type '" << type
+              << "' in config file.  Check your code version and config.";
+  // the next call will call KALDI_ERR or KALDI_ASSERT and die if something
+  // went wrong.
+  new_component->InitFromConfig(config);
+  int32 index = GetComponentIndex(name);
+  if (index != -1) {  // Replacing existing component.
+    if (index >= initial_num_components) {
+      // that index was something we added from this config.
+      KALDI_ERR << "You are adding two components with the same name: '"
+                << name << "'";
+    }
+    delete components_[index];
+    components_[index] = new_component;
+  } else {
+    components_.push_back(new_component);
+    component_names_.push_back(name);
+  }
+  if (config->HasUnusedValues())
+    KALDI_ERR << "Unused values '" << config->UnusedValues()
+              << " in config line: " << config->WholeLine();
+}
 
 
 void Nnet::ProcessComponentNodeConfigLine(
@@ -577,56 +577,56 @@ void Nnet::GetSomeNodeNames(
   }
 }
 
-//void Nnet::Swap(Nnet *other) {
-//  component_names_.swap(other->component_names_);
-//  components_.swap(other->components_);
-//  node_names_.swap(other->node_names_);
-//  nodes_.swap(other->nodes_);
-//}
+void Nnet::Swap(Nnet *other) {
+  component_names_.swap(other->component_names_);
+  components_.swap(other->components_);
+  node_names_.swap(other->node_names_);
+  nodes_.swap(other->nodes_);
+}
 //
-//void Nnet::Read(std::istream &is, bool binary) {
-//  Destroy();
-//  int first_char = PeekToken(is, binary);
-//  if (first_char == 'T') {
-//    // This branch is to allow '.mdl' files (containing a TransitionModel
-//    // and then an AmNnetSimple) to be read where .raw files (containing
-//    // just an Nnet) would be expected.  This is often convenient.
-//    TransitionModel temp_trans_model;
-//    temp_trans_model.Read(is, binary);
-//    AmNnetSimple temp_am_nnet;
-//    temp_am_nnet.Read(is, binary);
-//    temp_am_nnet.GetNnet().Swap(this);
-//    return;
-//  }
-//
-//  ExpectToken(is, binary, "<Nnet3>");
-//  std::ostringstream config_file_out;
-//  std::string cur_line;
-//  getline(is, cur_line);  // Eat up a single newline.
-//  if (!(cur_line == "" || cur_line == "\r"))
-//    KALDI_ERR << "Expected newline in config file, got " << cur_line;
-//  while (getline(is, cur_line)) {
-//    // config-file part of file is terminated by an empty line.
-//    if (cur_line == "" || cur_line == "\r")
-//      break;
-//    config_file_out << cur_line << std::endl;
-//  }
-//  // Now we read the Components; later we try to parse the config_lines.
-//  ExpectToken(is, binary, "<NumComponents>");
-//  int32 num_components;
-//  ReadBasicType(is, binary, &num_components);
-//  KALDI_ASSERT(num_components >= 0 && num_components < 100000);
-//  components_.resize(num_components, NULL);
-//  component_names_.resize(num_components);
-//  for (int32 c = 0; c < num_components; c++) {
-//    ExpectToken(is, binary, "<ComponentName>");
-//    ReadToken(is, binary, &(component_names_[c]));
-//    components_[c] = Component::ReadNew(is, binary);
-//  }
-//  ExpectToken(is, binary, "</Nnet3>");
-//  std::istringstream config_file_in(config_file_out.str());
-//  this->ReadConfig(config_file_in);
-//}
+void Nnet::Read(std::istream &is, bool binary) {
+  Destroy();
+  int first_char = PeekToken(is, binary);
+  if (first_char == 'T') {
+    // This branch is to allow '.mdl' files (containing a TransitionModel
+    // and then an AmNnetSimple) to be read where .raw files (containing
+    // just an Nnet) would be expected.  This is often convenient.
+    TransitionModel temp_trans_model;
+    temp_trans_model.Read(is, binary);
+    AmNnetSimple temp_am_nnet;
+    temp_am_nnet.Read(is, binary);
+    temp_am_nnet.GetNnet().Swap(this);
+    return;
+  }
+
+  ExpectToken(is, binary, "<Nnet3>");
+  std::ostringstream config_file_out;
+  std::string cur_line;
+  getline(is, cur_line);  // Eat up a single newline.
+  if (!(cur_line == "" || cur_line == "\r"))
+    KALDI_ERR << "Expected newline in config file, got " << cur_line;
+  while (getline(is, cur_line)) {
+    // config-file part of file is terminated by an empty line.
+    if (cur_line == "" || cur_line == "\r")
+      break;
+    config_file_out << cur_line << std::endl;
+  }
+  // Now we read the Components; later we try to parse the config_lines.
+  ExpectToken(is, binary, "<NumComponents>");
+  int32 num_components;
+  ReadBasicType(is, binary, &num_components);
+  KALDI_ASSERT(num_components >= 0 && num_components < 100000);
+  components_.resize(num_components, NULL);
+  component_names_.resize(num_components);
+  for (int32 c = 0; c < num_components; c++) {
+    ExpectToken(is, binary, "<ComponentName>");
+    ReadToken(is, binary, &(component_names_[c]));
+    components_[c] = Component::ReadNew(is, binary);
+  }
+  ExpectToken(is, binary, "</Nnet3>");
+  std::istringstream config_file_in(config_file_out.str());
+  this->ReadConfig(config_file_in);
+}
 //
 //void Nnet::Write(std::ostream &os, bool binary) const {
 //  WriteToken(os, binary, "<Nnet3>");

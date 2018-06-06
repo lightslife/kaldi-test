@@ -142,40 +142,40 @@ namespace kaldi {
 //  }
 //}
 //
-//void TransitionModel::ComputeDerived() {
-//  state2id_.resize(tuples_.size()+2);  // indexed by transition-state, which
-//  // is one based, but also an entry for one past end of list.
-//
-//  int32 cur_transition_id = 1;
-//  num_pdfs_ = 0;
-//  for (int32 tstate = 1;
-//      tstate <= static_cast<int32>(tuples_.size()+1);  // not a typo.
-//      tstate++) {
-//    state2id_[tstate] = cur_transition_id;
-//    if (static_cast<size_t>(tstate) <= tuples_.size()) {
-//      int32 phone = tuples_[tstate-1].phone,
-//          hmm_state = tuples_[tstate-1].hmm_state,
-//          forward_pdf = tuples_[tstate-1].forward_pdf,
-//          self_loop_pdf = tuples_[tstate-1].self_loop_pdf;
-//      num_pdfs_ = std::max(num_pdfs_, 1 + forward_pdf);
-//      num_pdfs_ = std::max(num_pdfs_, 1 + self_loop_pdf);
-//      const HmmTopology::HmmState &state = topo_.TopologyForPhone(phone)[hmm_state];
-//      int32 my_num_ids = static_cast<int32>(state.transitions.size());
-//      cur_transition_id += my_num_ids;  // # trans out of this state.
-//    }
-//  }
-//
-//  id2state_.resize(cur_transition_id);   // cur_transition_id is #transition-ids+1.
-//  id2pdf_id_.resize(cur_transition_id);
-//  for (int32 tstate = 1; tstate <= static_cast<int32>(tuples_.size()); tstate++)
-//    for (int32 tid = state2id_[tstate]; tid < state2id_[tstate+1]; tid++) {
-//      id2state_[tid] = tstate;
-//      if (IsSelfLoop(tid))
-//        id2pdf_id_[tid] = tuples_[tstate-1].self_loop_pdf;
-//      else
-//        id2pdf_id_[tid] = tuples_[tstate-1].forward_pdf;
-//    }
-//}
+void TransitionModel::ComputeDerived() {
+  state2id_.resize(tuples_.size()+2);  // indexed by transition-state, which
+  // is one based, but also an entry for one past end of list.
+
+  int32 cur_transition_id = 1;
+  num_pdfs_ = 0;
+  for (int32 tstate = 1;
+      tstate <= static_cast<int32>(tuples_.size()+1);  // not a typo.
+      tstate++) {
+    state2id_[tstate] = cur_transition_id;
+    if (static_cast<size_t>(tstate) <= tuples_.size()) {
+      int32 phone = tuples_[tstate-1].phone,
+          hmm_state = tuples_[tstate-1].hmm_state,
+          forward_pdf = tuples_[tstate-1].forward_pdf,
+          self_loop_pdf = tuples_[tstate-1].self_loop_pdf;
+      num_pdfs_ = std::max(num_pdfs_, 1 + forward_pdf);
+      num_pdfs_ = std::max(num_pdfs_, 1 + self_loop_pdf);
+      const HmmTopology::HmmState &state = topo_.TopologyForPhone(phone)[hmm_state];
+      int32 my_num_ids = static_cast<int32>(state.transitions.size());
+      cur_transition_id += my_num_ids;  // # trans out of this state.
+    }
+  }
+
+  id2state_.resize(cur_transition_id);   // cur_transition_id is #transition-ids+1.
+  id2pdf_id_.resize(cur_transition_id);
+  for (int32 tstate = 1; tstate <= static_cast<int32>(tuples_.size()); tstate++)
+    for (int32 tid = state2id_[tstate]; tid < state2id_[tstate+1]; tid++) {
+      id2state_[tid] = tstate;
+      if (IsSelfLoop(tid))
+        id2pdf_id_[tid] = tuples_[tstate-1].self_loop_pdf;
+      else
+        id2pdf_id_[tid] = tuples_[tstate-1].forward_pdf;
+    }
+}
 //
 //void TransitionModel::InitializeProbs() {
 //  log_probs_.Resize(NumTransitionIds()+1);  // one-based array, zeroth element empty.
@@ -196,28 +196,28 @@ namespace kaldi {
 //  ComputeDerivedOfProbs();
 //}
 //
-//void TransitionModel::Check() const {
-//  KALDI_ASSERT(NumTransitionIds() != 0 && NumTransitionStates() != 0);
-//  {
-//    int32 sum = 0;
-//    for (int32 ts = 1; ts <= NumTransitionStates(); ts++) sum += NumTransitionIndices(ts);
-//    KALDI_ASSERT(sum == NumTransitionIds());
-//  }
-//  for (int32 tid = 1; tid <= NumTransitionIds(); tid++) {
-//    int32 tstate = TransitionIdToTransitionState(tid),
-//        index = TransitionIdToTransitionIndex(tid);
-//    KALDI_ASSERT(tstate > 0 && tstate <=NumTransitionStates() && index >= 0);
-//    KALDI_ASSERT(tid == PairToTransitionId(tstate, index));
-//    int32 phone = TransitionStateToPhone(tstate),
-//        hmm_state = TransitionStateToHmmState(tstate),
-//        forward_pdf = TransitionStateToForwardPdf(tstate),
-//        self_loop_pdf = TransitionStateToSelfLoopPdf(tstate);
-//    KALDI_ASSERT(tstate == TupleToTransitionState(phone, hmm_state, forward_pdf, self_loop_pdf));
-//    KALDI_ASSERT(log_probs_(tid) <= 0.0 && log_probs_(tid) - log_probs_(tid) == 0.0);
-//    // checking finite and non-positive (and not out-of-bounds).
-//  }
-//}
-//
+void TransitionModel::Check() const {
+  KALDI_ASSERT(NumTransitionIds() != 0 && NumTransitionStates() != 0);
+  {
+    int32 sum = 0;
+    for (int32 ts = 1; ts <= NumTransitionStates(); ts++) sum += NumTransitionIndices(ts);
+    KALDI_ASSERT(sum == NumTransitionIds());
+  }
+  for (int32 tid = 1; tid <= NumTransitionIds(); tid++) {
+    int32 tstate = TransitionIdToTransitionState(tid),
+        index = TransitionIdToTransitionIndex(tid);
+    KALDI_ASSERT(tstate > 0 && tstate <=NumTransitionStates() && index >= 0);
+    KALDI_ASSERT(tid == PairToTransitionId(tstate, index));
+    int32 phone = TransitionStateToPhone(tstate),
+        hmm_state = TransitionStateToHmmState(tstate),
+        forward_pdf = TransitionStateToForwardPdf(tstate),
+        self_loop_pdf = TransitionStateToSelfLoopPdf(tstate);
+    KALDI_ASSERT(tstate == TupleToTransitionState(phone, hmm_state, forward_pdf, self_loop_pdf));
+    KALDI_ASSERT(log_probs_(tid) <= 0.0 && log_probs_(tid) - log_probs_(tid) == 0.0);
+    // checking finite and non-positive (and not out-of-bounds).
+  }
+}
+
 //bool TransitionModel::IsHmm() const {
 //  const std::vector<int32> &phones = topo_.GetPhones();
 //  KALDI_ASSERT(!phones.empty());
@@ -240,48 +240,48 @@ namespace kaldi {
 //  InitializeProbs();
 //  Check();
 //}
+
+int32 TransitionModel::TupleToTransitionState(int32 phone, int32 hmm_state, int32 pdf, int32 self_loop_pdf) const {
+  Tuple tuple(phone, hmm_state, pdf, self_loop_pdf);
+  // Note: if this ever gets too expensive, which is unlikely, we can refactor
+  // this code to sort first on pdf, and then index on pdf, so those
+  // that have the same pdf are in a contiguous range.
+  std::vector<Tuple>::const_iterator iter =
+      std::lower_bound(tuples_.begin(), tuples_.end(), tuple);
+  if (iter == tuples_.end() || !(*iter == tuple)) {
+    KALDI_ERR << "TransitionModel::TupleToTransitionState, tuple not found."
+              << " (incompatible tree and model?)";
+  }
+  // tuples_ is indexed by transition_state-1, so add one.
+  return static_cast<int32>((iter - tuples_.begin())) + 1;
+}
+
 //
-//int32 TransitionModel::TupleToTransitionState(int32 phone, int32 hmm_state, int32 pdf, int32 self_loop_pdf) const {
-//  Tuple tuple(phone, hmm_state, pdf, self_loop_pdf);
-//  // Note: if this ever gets too expensive, which is unlikely, we can refactor
-//  // this code to sort first on pdf, and then index on pdf, so those
-//  // that have the same pdf are in a contiguous range.
-//  std::vector<Tuple>::const_iterator iter =
-//      std::lower_bound(tuples_.begin(), tuples_.end(), tuple);
-//  if (iter == tuples_.end() || !(*iter == tuple)) {
-//    KALDI_ERR << "TransitionModel::TupleToTransitionState, tuple not found."
-//              << " (incompatible tree and model?)";
-//  }
-//  // tuples_ is indexed by transition_state-1, so add one.
-//  return static_cast<int32>((iter - tuples_.begin())) + 1;
-//}
+int32 TransitionModel::NumTransitionIndices(int32 trans_state) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
+  return static_cast<int32>(state2id_[trans_state+1]-state2id_[trans_state]);
+}
 //
+int32 TransitionModel::TransitionIdToTransitionState(int32 trans_id) const {
+  KALDI_ASSERT(trans_id != 0 &&  static_cast<size_t>(trans_id) < id2state_.size());
+  return id2state_[trans_id];
+}
+
+int32 TransitionModel::TransitionIdToTransitionIndex(int32 trans_id) const {
+  KALDI_ASSERT(trans_id != 0 && static_cast<size_t>(trans_id) < id2state_.size());
+  return trans_id - state2id_[id2state_[trans_id]];
+}
+
+int32 TransitionModel::TransitionStateToPhone(int32 trans_state) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
+  return tuples_[trans_state-1].phone;
+}
 //
-//int32 TransitionModel::NumTransitionIndices(int32 trans_state) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
-//  return static_cast<int32>(state2id_[trans_state+1]-state2id_[trans_state]);
-//}
-//
-//int32 TransitionModel::TransitionIdToTransitionState(int32 trans_id) const {
-//  KALDI_ASSERT(trans_id != 0 &&  static_cast<size_t>(trans_id) < id2state_.size());
-//  return id2state_[trans_id];
-//}
-//
-//int32 TransitionModel::TransitionIdToTransitionIndex(int32 trans_id) const {
-//  KALDI_ASSERT(trans_id != 0 && static_cast<size_t>(trans_id) < id2state_.size());
-//  return trans_id - state2id_[id2state_[trans_id]];
-//}
-//
-//int32 TransitionModel::TransitionStateToPhone(int32 trans_state) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
-//  return tuples_[trans_state-1].phone;
-//}
-//
-//int32 TransitionModel::TransitionStateToForwardPdf(int32 trans_state) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
-//  return tuples_[trans_state-1].forward_pdf;
-//}
-//
+int32 TransitionModel::TransitionStateToForwardPdf(int32 trans_state) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
+  return tuples_[trans_state-1].forward_pdf;
+}
+
 //int32 TransitionModel::TransitionStateToForwardPdfClass(
 //    int32 trans_state) const {
 //  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
@@ -302,21 +302,21 @@ namespace kaldi {
 //}
 //
 //
-//int32 TransitionModel::TransitionStateToSelfLoopPdf(int32 trans_state) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
-//  return tuples_[trans_state-1].self_loop_pdf;
-//}
-//
-//int32 TransitionModel::TransitionStateToHmmState(int32 trans_state) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
-//  return tuples_[trans_state-1].hmm_state;
-//}
-//
-//int32 TransitionModel::PairToTransitionId(int32 trans_state, int32 trans_index) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
-//  KALDI_ASSERT(trans_index < state2id_[trans_state+1] - state2id_[trans_state]);
-//  return state2id_[trans_state] + trans_index;
-//}
+int32 TransitionModel::TransitionStateToSelfLoopPdf(int32 trans_state) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
+  return tuples_[trans_state-1].self_loop_pdf;
+}
+
+int32 TransitionModel::TransitionStateToHmmState(int32 trans_state) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
+  return tuples_[trans_state-1].hmm_state;
+}
+
+int32 TransitionModel::PairToTransitionId(int32 trans_state, int32 trans_index) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_state) <= tuples_.size());
+  KALDI_ASSERT(trans_index < state2id_[trans_state+1] - state2id_[trans_state]);
+  return state2id_[trans_state] + trans_index;
+}
 //
 //int32 TransitionModel::NumPhones() const {
 //  int32 num_trans_state = tuples_.size();
@@ -346,68 +346,68 @@ namespace kaldi {
 //}
 //
 //
+
+int32 TransitionModel::SelfLoopOf(int32 trans_state) const {  // returns the self-loop transition-id,
+  KALDI_ASSERT(static_cast<size_t>(trans_state-1) < tuples_.size());
+  const Tuple &tuple = tuples_[trans_state-1];
+  // or zero if does not exist.
+  int32 phone = tuple.phone, hmm_state = tuple.hmm_state;
+  const HmmTopology::TopologyEntry &entry = topo_.TopologyForPhone(phone);
+  KALDI_ASSERT(static_cast<size_t>(hmm_state) < entry.size());
+  for (int32 trans_index = 0;
+      trans_index < static_cast<int32>(entry[hmm_state].transitions.size());
+      trans_index++)
+    if (entry[hmm_state].transitions[trans_index].first == hmm_state)
+      return PairToTransitionId(trans_state, trans_index);
+  return 0;  // invalid transition id.
+}
 //
-//int32 TransitionModel::SelfLoopOf(int32 trans_state) const {  // returns the self-loop transition-id,
-//  KALDI_ASSERT(static_cast<size_t>(trans_state-1) < tuples_.size());
-//  const Tuple &tuple = tuples_[trans_state-1];
-//  // or zero if does not exist.
-//  int32 phone = tuple.phone, hmm_state = tuple.hmm_state;
-//  const HmmTopology::TopologyEntry &entry = topo_.TopologyForPhone(phone);
-//  KALDI_ASSERT(static_cast<size_t>(hmm_state) < entry.size());
-//  for (int32 trans_index = 0;
-//      trans_index < static_cast<int32>(entry[hmm_state].transitions.size());
-//      trans_index++)
-//    if (entry[hmm_state].transitions[trans_index].first == hmm_state)
-//      return PairToTransitionId(trans_state, trans_index);
-//  return 0;  // invalid transition id.
-//}
+void TransitionModel::ComputeDerivedOfProbs() {
+  non_self_loop_log_probs_.Resize(NumTransitionStates()+1);  // this array indexed
+  //  by transition-state with nothing in zeroth element.
+  for (int32 tstate = 1; tstate <= NumTransitionStates(); tstate++) {
+    int32 tid = SelfLoopOf(tstate);
+    if (tid == 0) {  // no self-loop
+      non_self_loop_log_probs_(tstate) = 0.0;  // log(1.0)
+    } else {
+      BaseFloat self_loop_prob = Exp(GetTransitionLogProb(tid)),
+          non_self_loop_prob = 1.0 - self_loop_prob;
+      if (non_self_loop_prob <= 0.0) {
+        KALDI_WARN << "ComputeDerivedOfProbs(): non-self-loop prob is " << non_self_loop_prob;
+        non_self_loop_prob = 1.0e-10;  // just so we can continue...
+      }
+      non_self_loop_log_probs_(tstate) = Log(non_self_loop_prob);  // will be negative.
+    }
+  }
+}
 //
-//void TransitionModel::ComputeDerivedOfProbs() {
-//  non_self_loop_log_probs_.Resize(NumTransitionStates()+1);  // this array indexed
-//  //  by transition-state with nothing in zeroth element.
-//  for (int32 tstate = 1; tstate <= NumTransitionStates(); tstate++) {
-//    int32 tid = SelfLoopOf(tstate);
-//    if (tid == 0) {  // no self-loop
-//      non_self_loop_log_probs_(tstate) = 0.0;  // log(1.0)
-//    } else {
-//      BaseFloat self_loop_prob = Exp(GetTransitionLogProb(tid)),
-//          non_self_loop_prob = 1.0 - self_loop_prob;
-//      if (non_self_loop_prob <= 0.0) {
-//        KALDI_WARN << "ComputeDerivedOfProbs(): non-self-loop prob is " << non_self_loop_prob;
-//        non_self_loop_prob = 1.0e-10;  // just so we can continue...
-//      }
-//      non_self_loop_log_probs_(tstate) = Log(non_self_loop_prob);  // will be negative.
-//    }
-//  }
-//}
-//
-//void TransitionModel::Read(std::istream &is, bool binary) {
-//  ExpectToken(is, binary, "<TransitionModel>");
-//  topo_.Read(is, binary);
-//  std::string token;
-//  ReadToken(is, binary, &token);
-//  int32 size;
-//  ReadBasicType(is, binary, &size);
-//  tuples_.resize(size);
-//  for (int32 i = 0; i < size; i++) {
-//    ReadBasicType(is, binary, &(tuples_[i].phone));
-//    ReadBasicType(is, binary, &(tuples_[i].hmm_state));
-//    ReadBasicType(is, binary, &(tuples_[i].forward_pdf));
-//    if (token == "<Tuples>")
-//      ReadBasicType(is, binary, &(tuples_[i].self_loop_pdf));
-//    else if (token == "<Triples>")
-//      tuples_[i].self_loop_pdf = tuples_[i].forward_pdf;
-//  }
-//  ReadToken(is, binary, &token);
-//  KALDI_ASSERT(token == "</Triples>" || token == "</Tuples>");
-//  ComputeDerived();
-//  ExpectToken(is, binary, "<LogProbs>");
-//  log_probs_.Read(is, binary);
-//  ExpectToken(is, binary, "</LogProbs>");
-//  ExpectToken(is, binary, "</TransitionModel>");
-//  ComputeDerivedOfProbs();
-//  Check();
-//}
+void TransitionModel::Read(std::istream &is, bool binary) {
+  ExpectToken(is, binary, "<TransitionModel>");
+  topo_.Read(is, binary);
+  std::string token;
+  ReadToken(is, binary, &token);
+  int32 size;
+  ReadBasicType(is, binary, &size);
+  tuples_.resize(size);
+  for (int32 i = 0; i < size; i++) {
+    ReadBasicType(is, binary, &(tuples_[i].phone));
+    ReadBasicType(is, binary, &(tuples_[i].hmm_state));
+    ReadBasicType(is, binary, &(tuples_[i].forward_pdf));
+    if (token == "<Tuples>")
+      ReadBasicType(is, binary, &(tuples_[i].self_loop_pdf));
+    else if (token == "<Triples>")
+      tuples_[i].self_loop_pdf = tuples_[i].forward_pdf;
+  }
+  ReadToken(is, binary, &token);
+  KALDI_ASSERT(token == "</Triples>" || token == "</Tuples>");
+  ComputeDerived();
+  ExpectToken(is, binary, "<LogProbs>");
+  log_probs_.Read(is, binary);
+  ExpectToken(is, binary, "</LogProbs>");
+  ExpectToken(is, binary, "</TransitionModel>");
+  ComputeDerivedOfProbs();
+  Check();
+}
 //
 //void TransitionModel::Write(std::ostream &os, bool binary) const {
 //  bool is_hmm = IsHmm();
@@ -446,9 +446,9 @@ namespace kaldi {
 //  return Exp(log_probs_(trans_id));
 //}
 //
-//BaseFloat TransitionModel::GetTransitionLogProb(int32 trans_id) const {
-//  return log_probs_(trans_id);
-//}
+BaseFloat TransitionModel::GetTransitionLogProb(int32 trans_id) const {
+  return log_probs_(trans_id);
+}
 //
 //BaseFloat TransitionModel::GetNonSelfLoopLogProb(int32 trans_state) const {
 //  KALDI_ASSERT(trans_state != 0);
@@ -899,16 +899,16 @@ namespace kaldi {
 //          && num_pdfs_ == other.num_pdfs_);
 //}
 //
-//bool TransitionModel::IsSelfLoop(int32 trans_id) const {
-//  KALDI_ASSERT(static_cast<size_t>(trans_id) < id2state_.size());
-//  int32 trans_state = id2state_[trans_id];
-//  int32 trans_index = trans_id - state2id_[trans_state];
-//  const Tuple &tuple = tuples_[trans_state-1];
-//  int32 phone = tuple.phone, hmm_state = tuple.hmm_state;
-//  const HmmTopology::TopologyEntry &entry = topo_.TopologyForPhone(phone);
-//  KALDI_ASSERT(static_cast<size_t>(hmm_state) < entry.size());
-//  return (static_cast<size_t>(trans_index) < entry[hmm_state].transitions.size()
-//          && entry[hmm_state].transitions[trans_index].first == hmm_state);
-//}
+bool TransitionModel::IsSelfLoop(int32 trans_id) const {
+  KALDI_ASSERT(static_cast<size_t>(trans_id) < id2state_.size());
+  int32 trans_state = id2state_[trans_id];
+  int32 trans_index = trans_id - state2id_[trans_state];
+  const Tuple &tuple = tuples_[trans_state-1];
+  int32 phone = tuple.phone, hmm_state = tuple.hmm_state;
+  const HmmTopology::TopologyEntry &entry = topo_.TopologyForPhone(phone);
+  KALDI_ASSERT(static_cast<size_t>(hmm_state) < entry.size());
+  return (static_cast<size_t>(trans_index) < entry[hmm_state].transitions.size()
+          && entry[hmm_state].transitions[trans_index].first == hmm_state);
+}
 
 } // End namespace kaldi

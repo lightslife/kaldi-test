@@ -531,23 +531,23 @@ void ComputeSimpleNnetContext(const Nnet &nnet,
 //
 //
 //
-//void SetBatchnormTestMode(bool test_mode,  Nnet *nnet) {
-//  for (int32 c = 0; c < nnet->NumComponents(); c++) {
-//    Component *comp = nnet->GetComponent(c);
-//    BatchNormComponent *bc = dynamic_cast<BatchNormComponent*>(comp);
-//    if (bc != NULL)
-//      bc->SetTestMode(test_mode);
-//  }
-//}
+void SetBatchnormTestMode(bool test_mode,  Nnet *nnet) {
+  for (int32 c = 0; c < nnet->NumComponents(); c++) {
+    Component *comp = nnet->GetComponent(c);
+    BatchNormComponent *bc = dynamic_cast<BatchNormComponent*>(comp);
+    if (bc != NULL)
+      bc->SetTestMode(test_mode);
+  }
+}
 //
-//void SetDropoutTestMode(bool test_mode,  Nnet *nnet) {
-//  for (int32 c = 0; c < nnet->NumComponents(); c++) {
-//    Component *comp = nnet->GetComponent(c);
-//    RandomComponent *rc = dynamic_cast<RandomComponent*>(comp);
-//    if (rc != NULL)
-//      rc->SetTestMode(test_mode);
-//  }
-//}
+void SetDropoutTestMode(bool test_mode,  Nnet *nnet) {
+  for (int32 c = 0; c < nnet->NumComponents(); c++) {
+    Component *comp = nnet->GetComponent(c);
+    RandomComponent *rc = dynamic_cast<RandomComponent*>(comp);
+    if (rc != NULL)
+      rc->SetTestMode(test_mode);
+  }
+}
 //
 //void ResetGenerators(Nnet *nnet){
 //  for (int32 c = 0; c < nnet->NumComponents(); c++) {

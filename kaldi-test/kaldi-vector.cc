@@ -296,24 +296,24 @@ void VectorBase<Real>::SetZero() {
 //    abs_max = std::max(std::abs(data_[i]), abs_max);
 //  return (abs_max <= cutoff);
 //}
-//
-//template<typename Real>
-//void VectorBase<Real>::SetRandn() {
-//  kaldi::RandomState rstate;
-//  MatrixIndexT last = (Dim() % 2 == 1) ? Dim() - 1 : Dim();
-//  for (MatrixIndexT i = 0; i < last; i += 2) {
-//    kaldi::RandGauss2(data_ + i, data_ + i +1, &rstate);
-//  }
-//  if (Dim() != last) data_[last] = static_cast<Real>(kaldi::RandGauss(&rstate));
-//}
-//
-//template<typename Real>
-//void VectorBase<Real>::SetRandUniform() {
-//  kaldi::RandomState rstate;
-//  for (MatrixIndexT i = 0; i < Dim(); i++) {
-//    *(data_+i) = RandUniform(&rstate);
-//  }
-//}
+
+template<typename Real>
+void VectorBase<Real>::SetRandn() {
+  kaldi::RandomState rstate;
+  MatrixIndexT last = (Dim() % 2 == 1) ? Dim() - 1 : Dim();
+  for (MatrixIndexT i = 0; i < last; i += 2) {
+    kaldi::RandGauss2(data_ + i, data_ + i +1, &rstate);
+  }
+  if (Dim() != last) data_[last] = static_cast<Real>(kaldi::RandGauss(&rstate));
+}
+
+template<typename Real>
+void VectorBase<Real>::SetRandUniform() {
+  kaldi::RandomState rstate;
+  for (MatrixIndexT i = 0; i < Dim(); i++) {
+    *(data_+i) = RandUniform(&rstate);
+  }
+}
 //
 //template<typename Real>
 //MatrixIndexT VectorBase<Real>::RandCategorical() const {
@@ -949,25 +949,25 @@ void VectorBase<Real>::Sigmoid(const VectorBase<Real> &src) {
 #endif
 
 //
-//template<typename Real>
-//void VectorBase<Real>::Add(Real c) {
-//  for (MatrixIndexT i = 0; i < dim_; i++) {
-//    data_[i] += c;
-//  }
-//}
+template<typename Real>
+void VectorBase<Real>::Add(Real c) {
+  for (MatrixIndexT i = 0; i < dim_; i++) {
+    data_[i] += c;
+  }
+}
 
 template<typename Real>
 void VectorBase<Real>::Scale(Real alpha) {
   cblas_Xscal(dim_, alpha, data_, 1);
 }
 //
-//template<typename Real>
-//void VectorBase<Real>::MulElements(const VectorBase<Real> &v) {
-//  KALDI_ASSERT(dim_ == v.dim_);
-//  for (MatrixIndexT i = 0; i < dim_; i++) {
-//    data_[i] *= v.data_[i];
-//  }
-//}
+template<typename Real>
+void VectorBase<Real>::MulElements(const VectorBase<Real> &v) {
+  KALDI_ASSERT(dim_ == v.dim_);
+  for (MatrixIndexT i = 0; i < dim_; i++) {
+    data_[i] *= v.data_[i];
+  }
+}
 //
 //template<typename Real>  // Set each element to y = (x == orig ? changed : x).
 //void VectorBase<Real>::ReplaceValue(Real orig, Real changed) {

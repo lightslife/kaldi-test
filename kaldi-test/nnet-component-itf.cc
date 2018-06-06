@@ -75,20 +75,20 @@ ComponentPrecomputedIndexes* ComponentPrecomputedIndexes::NewComponentPrecompute
   }
   return ans;
 }
-//
-//// static
-//Component* Component::ReadNew(std::istream &is, bool binary) {
-//  std::string token;
-//  ReadToken(is, binary, &token); // e.g. "<SigmoidComponent>".
-//  token.erase(0, 1); // erase "<".
-//  token.erase(token.length()-1); // erase ">".
-//  Component *ans = NewComponentOfType(token);
-//  if (!ans)
-//    KALDI_ERR << "Unknown component type " << token;
-//  ans->Read(is, binary);
-//  return ans;
-//}
-//
+
+// static
+Component* Component::ReadNew(std::istream &is, bool binary) {
+  std::string token;
+  ReadToken(is, binary, &token); // e.g. "<SigmoidComponent>".
+  token.erase(0, 1); // erase "<".
+  token.erase(token.length()-1); // erase ">".
+  Component *ans = NewComponentOfType(token);
+  if (!ans)
+    KALDI_ERR << "Unknown component type " << token;
+  ans->Read(is, binary);
+  return ans;
+}
+
 //
 //// static
 Component* Component::NewComponentOfType(const std::string &component_type) {
@@ -233,20 +233,20 @@ UpdatableComponent::UpdatableComponent(const UpdatableComponent &other):
 
 // If these defaults are changed, the defaults in the constructor that
 // takes no arguments should be changed too.
-//void UpdatableComponent::InitLearningRatesFromConfig(ConfigLine *cfl) {
-//  learning_rate_ = 0.001;
-//  cfl->GetValue("learning-rate", &learning_rate_);
-//  learning_rate_factor_ = 1.0;
-//  cfl->GetValue("learning-rate-factor", &learning_rate_factor_);
-//  max_change_ = 0.0;
-//  cfl->GetValue("max-change", &max_change_);
-//  l2_regularize_ = 0.0;
-//  cfl->GetValue("l2-regularize", &l2_regularize_);
-//  if (learning_rate_ < 0.0 || learning_rate_factor_ < 0.0 ||
-//      max_change_ < 0.0 || l2_regularize_ < 0.0)
-//    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
-//}
-////
+void UpdatableComponent::InitLearningRatesFromConfig(ConfigLine *cfl) {
+  learning_rate_ = 0.001;
+  cfl->GetValue("learning-rate", &learning_rate_);
+  learning_rate_factor_ = 1.0;
+  cfl->GetValue("learning-rate-factor", &learning_rate_factor_);
+  max_change_ = 0.0;
+  cfl->GetValue("max-change", &max_change_);
+  l2_regularize_ = 0.0;
+  cfl->GetValue("l2-regularize", &l2_regularize_);
+  if (learning_rate_ < 0.0 || learning_rate_factor_ < 0.0 ||
+      max_change_ < 0.0 || l2_regularize_ < 0.0)
+    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
+}
+//
 
 std::string UpdatableComponent::ReadUpdatableCommon(std::istream &is,
                                                     bool binary) {

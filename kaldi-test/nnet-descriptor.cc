@@ -131,17 +131,17 @@ ForwardingDescriptor *OffsetForwardingDescriptor::Copy() const {
   return new OffsetForwardingDescriptor(src_->Copy(), offset_);
 }
 //
-//void OffsetForwardingDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  KALDI_ASSERT(offset_.n == 0);
-//  os << "Offset(";
-//  src_->WriteConfig(os, node_names);
-//  os << ", " << offset_.t;
-//  if (offset_.x != 0)
-//    os << ", " << offset_.x;
-//  os << ")";
-//}
+void OffsetForwardingDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  KALDI_ASSERT(offset_.n == 0);
+  os << "Offset(";
+  src_->WriteConfig(os, node_names);
+  os << ", " << offset_.t;
+  if (offset_.x != 0)
+    os << ", " << offset_.x;
+  os << ")";
+}
 
 //
 void SwitchingForwardingDescriptor::GetNodeDependencies(
@@ -167,18 +167,18 @@ ForwardingDescriptor *SwitchingForwardingDescriptor::Copy() const {
 }
 //
 //
-//void SwitchingForwardingDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  KALDI_ASSERT(!src_.empty());
-//  os << "Switch(";
-//  for (size_t i = 0; i < src_.size(); i++) {
-//    src_[i]->WriteConfig(os, node_names);
-//    if (i + 1 < src_.size())
-//      os << ", ";
-//  }
-//  os << ")";
-//}
+void SwitchingForwardingDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  KALDI_ASSERT(!src_.empty());
+  os << "Switch(";
+  for (size_t i = 0; i < src_.size(); i++) {
+    src_[i]->WriteConfig(os, node_names);
+    if (i + 1 < src_.size())
+      os << ", ";
+  }
+  os << ")";
+}
 //
 void RoundingForwardingDescriptor::GetNodeDependencies(
     std::vector<int32> *node_indexes) const {
@@ -205,13 +205,13 @@ ForwardingDescriptor *RoundingForwardingDescriptor::Copy() const {
   return new RoundingForwardingDescriptor(src_->Copy(), t_modulus_);
 }
 //
-//void RoundingForwardingDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  os << "Round(";
-//  src_->WriteConfig(os, node_names);
-//  os << ", " << t_modulus_ << ")";
-//}
+void RoundingForwardingDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  os << "Round(";
+  src_->WriteConfig(os, node_names);
+  os << ", " << t_modulus_ << ")";
+}
 
 void ReplaceIndexForwardingDescriptor::GetNodeDependencies(
     std::vector<int32> *node_indexes) const {
@@ -241,15 +241,15 @@ ForwardingDescriptor *ReplaceIndexForwardingDescriptor::Copy() const {
 
 }
 //
-//void ReplaceIndexForwardingDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  os << "ReplaceIndex(";
-//  src_->WriteConfig(os, node_names);
-//  KALDI_ASSERT(variable_name_ == kT || variable_name_ == kX);
-//  os << ", " << (variable_name_ == kT  ? "t" : "x") << ", "
-//     << value_ << ")";
-//}
+void ReplaceIndexForwardingDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  os << "ReplaceIndex(";
+  src_->WriteConfig(os, node_names);
+  KALDI_ASSERT(variable_name_ == kT || variable_name_ == kX);
+  os << ", " << (variable_name_ == kT  ? "t" : "x") << ", "
+     << value_ << ")";
+}
 //
 SumDescriptor *OptionalSumDescriptor::Copy() const {
   return new OptionalSumDescriptor(src_->Copy());
@@ -261,13 +261,13 @@ void OptionalSumDescriptor::GetDependencies(
   src_->GetDependencies(ind, dependencies);
 }
 
-//void OptionalSumDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  os << "IfDefined(";
-//  src_->WriteConfig(os, node_names);
-//  os << ")";
-//}
+void OptionalSumDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  os << "IfDefined(";
+  src_->WriteConfig(os, node_names);
+  os << ")";
+}
 //
 int32 OptionalSumDescriptor::Dim(const Nnet &nnet) const {
   return src_->Dim(nnet);
@@ -312,11 +312,11 @@ bool SimpleSumDescriptor::IsComputable(
   return src_present;
 }
 //
-//void SimpleSumDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  src_->WriteConfig(os, node_names);
-//}
+void SimpleSumDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  src_->WriteConfig(os, node_names);
+}
 
 int32 SimpleSumDescriptor::Dim(const Nnet &nnet) const {
   return src_->Dim(nnet);
@@ -452,17 +452,17 @@ SumDescriptor *BinarySumDescriptor::Copy() const {
   return new BinarySumDescriptor(op_, src1_->Copy(), src2_->Copy());
 }
 
-//void BinarySumDescriptor::WriteConfig(
-//    std::ostream &os,
-//    const std::vector<std::string> &node_names) const {
-//  KALDI_ASSERT(op_ == kSumOperation || op_ == kFailoverOperation);
-//  if (op_ == kSumOperation) os << "Sum(";
-//  if (op_ == kFailoverOperation) os << "Failover(";
-//  src1_->WriteConfig(os, node_names);
-//  os << ", ";
-//  src2_->WriteConfig(os, node_names);
-//  os << ")";
-//}
+void BinarySumDescriptor::WriteConfig(
+    std::ostream &os,
+    const std::vector<std::string> &node_names) const {
+  KALDI_ASSERT(op_ == kSumOperation || op_ == kFailoverOperation);
+  if (op_ == kSumOperation) os << "Sum(";
+  if (op_ == kFailoverOperation) os << "Failover(";
+  src1_->WriteConfig(os, node_names);
+  os << ", ";
+  src2_->WriteConfig(os, node_names);
+  os << ")";
+}
 
 int32 SwitchingForwardingDescriptor::Modulus() const {
   int32 ans = src_.size();;
@@ -508,21 +508,21 @@ bool Descriptor::Parse(const std::vector<std::string> &node_names,
   return true;
 }
 
-//void Descriptor::WriteConfig(std::ostream &os,
-//                             const std::vector<std::string> &node_names) const {
-//  KALDI_ASSERT(parts_.size() > 0);
-//  if (parts_.size() == 1)
-//    parts_[0]->WriteConfig(os, node_names);
-//  else {
-//    os << "Append(";
-//    for (size_t i = 0; i < parts_.size(); i++) {
-//      parts_[i]->WriteConfig(os, node_names);
-//      if (i + 1 < parts_.size())
-//        os << ", ";
-//    }
-//    os << ")";
-//  }
-//}
+void Descriptor::WriteConfig(std::ostream &os,
+                             const std::vector<std::string> &node_names) const {
+  KALDI_ASSERT(parts_.size() > 0);
+  if (parts_.size() == 1)
+    parts_[0]->WriteConfig(os, node_names);
+  else {
+    os << "Append(";
+    for (size_t i = 0; i < parts_.size(); i++) {
+      parts_[i]->WriteConfig(os, node_names);
+      if (i + 1 < parts_.size())
+        os << ", ";
+    }
+    os << ")";
+  }
+}
 void Descriptor::Destroy() {
   for (size_t i = 0; i < parts_.size(); i++)
     delete parts_[i];

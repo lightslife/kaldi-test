@@ -1093,16 +1093,16 @@ BaseFloat AffineComponent::DotProduct(const UpdatableComponent &other_in) const 
       + VecVec(bias_params_, other->bias_params_);
 }
 
-//void AffineComponent::Init(int32 input_dim, int32 output_dim,
-//                           BaseFloat param_stddev, BaseFloat bias_stddev) {
-//  linear_params_.Resize(output_dim, input_dim);
-//  bias_params_.Resize(output_dim);
-//  KALDI_ASSERT(output_dim > 0 && input_dim > 0 && param_stddev >= 0.0);
-//  linear_params_.SetRandn(); // sets to random normally distributed noise.
-//  linear_params_.Scale(param_stddev);
-//  bias_params_.SetRandn();
-//  bias_params_.Scale(bias_stddev);
-//}
+void AffineComponent::Init(int32 input_dim, int32 output_dim,
+                           BaseFloat param_stddev, BaseFloat bias_stddev) {
+  linear_params_.Resize(output_dim, input_dim);
+  bias_params_.Resize(output_dim);
+  KALDI_ASSERT(output_dim > 0 && input_dim > 0 && param_stddev >= 0.0);
+  linear_params_.SetRandn(); // sets to random normally distributed noise.
+  linear_params_.Scale(param_stddev);
+  bias_params_.SetRandn();
+  bias_params_.Scale(bias_stddev);
+}
 
 void AffineComponent::Init(std::string matrix_filename) {
   CuMatrix<BaseFloat> mat;
@@ -1115,37 +1115,37 @@ void AffineComponent::Init(std::string matrix_filename) {
   bias_params_.CopyColFromMat(mat, input_dim);
 }
 //
-//void AffineComponent::InitFromConfig(ConfigLine *cfl) {
-//  bool ok = true;
-//  std::string matrix_filename;
-//  int32 input_dim = -1, output_dim = -1;
-//  InitLearningRatesFromConfig(cfl);
-//  if (cfl->GetValue("matrix", &matrix_filename)) {
-//    Init(matrix_filename);
-//    if (cfl->GetValue("input-dim", &input_dim))
-//      KALDI_ASSERT(input_dim == InputDim() &&
-//                   "input-dim mismatch vs. matrix.");
-//    if (cfl->GetValue("output-dim", &output_dim))
-//      KALDI_ASSERT(output_dim == OutputDim() &&
-//                   "output-dim mismatch vs. matrix.");
-//  } else {
-//    ok = ok && cfl->GetValue("input-dim", &input_dim);
-//    ok = ok && cfl->GetValue("output-dim", &output_dim);
-//    BaseFloat param_stddev = 1.0 / std::sqrt(input_dim),
-//        bias_stddev = 1.0;
-//    cfl->GetValue("param-stddev", &param_stddev);
-//    cfl->GetValue("bias-stddev", &bias_stddev);
-//    Init(input_dim, output_dim,
-//         param_stddev, bias_stddev);
-//  }
-//  cfl->GetValue("orthonormal-constraint", &orthonormal_constraint_);
-//
-//  if (cfl->HasUnusedValues())
-//    KALDI_ERR << "Could not process these elements in initializer: "
-//              << cfl->UnusedValues();
-//  if (!ok)
-//    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
-//}
+void AffineComponent::InitFromConfig(ConfigLine *cfl) {
+  bool ok = true;
+  std::string matrix_filename;
+  int32 input_dim = -1, output_dim = -1;
+  InitLearningRatesFromConfig(cfl);
+  if (cfl->GetValue("matrix", &matrix_filename)) {
+    Init(matrix_filename);
+    if (cfl->GetValue("input-dim", &input_dim))
+      KALDI_ASSERT(input_dim == InputDim() &&
+                   "input-dim mismatch vs. matrix.");
+    if (cfl->GetValue("output-dim", &output_dim))
+      KALDI_ASSERT(output_dim == OutputDim() &&
+                   "output-dim mismatch vs. matrix.");
+  } else {
+    ok = ok && cfl->GetValue("input-dim", &input_dim);
+    ok = ok && cfl->GetValue("output-dim", &output_dim);
+    BaseFloat param_stddev = 1.0 / std::sqrt(input_dim),
+        bias_stddev = 1.0;
+    cfl->GetValue("param-stddev", &param_stddev);
+    cfl->GetValue("bias-stddev", &bias_stddev);
+    Init(input_dim, output_dim,
+         param_stddev, bias_stddev);
+  }
+  cfl->GetValue("orthonormal-constraint", &orthonormal_constraint_);
+
+  if (cfl->HasUnusedValues())
+    KALDI_ERR << "Could not process these elements in initializer: "
+              << cfl->UnusedValues();
+  if (!ok)
+    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
+}
 
 
 

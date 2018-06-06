@@ -392,7 +392,7 @@ class AffineComponent: public UpdatableComponent {
 
   BaseFloat OrthonormalConstraint() const { return orthonormal_constraint_; }
   virtual std::string Info() const;
-  //virtual void InitFromConfig(ConfigLine *cfl);
+  virtual void InitFromConfig(ConfigLine *cfl);
 
   AffineComponent(): orthonormal_constraint_(0.0) { } // use Init to really initialize.
   virtual std::string Type() const { return "AffineComponent"; }
@@ -445,8 +445,8 @@ class AffineComponent: public UpdatableComponent {
   // parameters to zero, while leaving any other configuration values the same.
   virtual void Resize(int32 input_dim, int32 output_dim);
 
-  //void Init(int32 input_dim, int32 output_dim,
-  //          BaseFloat param_stddev, BaseFloat bias_stddev);
+  void Init(int32 input_dim, int32 output_dim,
+            BaseFloat param_stddev, BaseFloat bias_stddev);
  protected:
   void Init(std::string matrix_filename);
 
