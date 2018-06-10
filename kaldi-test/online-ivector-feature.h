@@ -241,7 +241,7 @@ struct OnlineIvectorExtractionConfig {
 ///// the CMVN-normalized features, and with those and the unnormalized features
 ///// it obtains iVectors.
 //
-//class OnlineIvectorFeature: public OnlineFeatureInterface {
+class OnlineIvectorFeature: public OnlineFeatureInterface {
 // public:
 //  /// Constructor.  base_feature is for example raw MFCC or PLP or filterbank
 //  /// features, whatever was used to train the iVector extractor.
@@ -386,7 +386,7 @@ struct OnlineIvectorExtractionConfig {
 //  /// frame t = i * info_.ivector_period.
 //  std::vector<Vector<BaseFloat>* > ivectors_history_;
 // 
-//};
+};
 
 
 struct OnlineSilenceWeightingConfig {

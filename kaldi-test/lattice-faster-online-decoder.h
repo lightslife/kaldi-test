@@ -117,6 +117,9 @@ namespace kaldi {
 		// whenever we call ProcessEmitting().
 		inline int32 NumFramesDecoded() const { return active_toks_.size() - 1; }
 
+
+		bool LatticeFasterOnlineDecoder::GetBestPath(std::vector<int> *olabel,
+			bool use_final_probs) const;
 		BaseFloat LatticeFasterOnlineDecoder::FinalRelativeCost() const;
 	private:
 		typedef int  Label;
@@ -194,8 +197,7 @@ namespace kaldi {
 
 
 
-		bool LatticeFasterOnlineDecoder::GetBestPath(std::vector<int> *olabel,
-			bool use_final_probs) const;
+
 
 		void PossiblyResizeHash(size_t num_toks);
 

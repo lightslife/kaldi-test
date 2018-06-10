@@ -220,6 +220,7 @@
     <ClInclude Include="online-feature.h" />
     <ClInclude Include="online-ivector-feature.h" />
     <ClInclude Include="online-nnet2-feature-pipeline.h" />
+    <ClInclude Include="online-nnet3-decoding.h" />
     <ClInclude Include="optimization.h" />
     <ClInclude Include="options-itf.h" />
     <ClInclude Include="packed-matrix.h" />
@@ -297,6 +298,7 @@
     <ClCompile Include="online-feature.cc" />
     <ClCompile Include="online-ivector-feature.cc" />
     <ClCompile Include="online-nnet2-feature-pipeline.cc" />
+    <ClCompile Include="online-nnet3-decoding.cc" />
     <ClCompile Include="optimization.cc" />
     <ClCompile Include="packed-matrix.cc" />
     <ClCompile Include="parse-options.cc" />

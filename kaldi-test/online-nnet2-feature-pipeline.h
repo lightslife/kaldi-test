@@ -232,9 +232,9 @@ class OnlineNnet2FeaturePipeline: public OnlineFeatureInterface {
   // (or NULL if iVectors are not being used); the pointer is owned here and not
   // given to the caller.  This function is used in nnet3, and also in the
   // silence-weighting code used to exclude silence from the iVector estimation.
-  //OnlineIvectorFeature *IvectorFeature() {
-  //  return ivector_feature_;
-  //}
+  OnlineIvectorFeature *IvectorFeature() {
+    return ivector_feature_;
+  }
 
   // This function returns the part of the feature pipeline that would be given
   // as the primary (non-iVector) input to the neural network in nnet3
@@ -259,7 +259,7 @@ class OnlineNnet2FeaturePipeline: public OnlineFeatureInterface {
   /// base_feature_.
   OnlineFeatureInterface *feature_plus_optional_pitch_;
 
-  //OnlineIvectorFeature *ivector_feature_;  // iVector feature, if used.
+  OnlineIvectorFeature *ivector_feature_;  // iVector feature, if used.
 
   // final_feature_ is feature_plus_optional_pitch_ appended
   // (OnlineAppendFeature) with ivector_feature_, if ivector_feature_ is used;
