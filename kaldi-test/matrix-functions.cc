@@ -75,7 +75,7 @@ namespace kaldi {
 //                VectorBase<double> *out, bool forward);
 //
 //
-//#define KALDI_COMPLEXFFT_BLOCKSIZE 8192
+#define KALDI_COMPLEXFFT_BLOCKSIZE 8192
 //// This #define affects how we recurse in ComplexFftRecursive.
 //// We assume that memory-caching happens on a scale at
 //// least as small as this.
@@ -93,118 +93,118 @@ namespace kaldi {
 ////! See the comments below this code for the detailed equations
 ////! of the recursion.
 //
-//
-//template<typename Real>
-//void ComplexFftRecursive (Real *data, int nffts, int N,
-//                          const int *factor_begin,
-//                          const int *factor_end, bool forward,
-//                          Vector<Real> *tmp_vec) {
-//  if (factor_begin == factor_end) {
-//    KALDI_ASSERT(N == 1);
-//    return;
-//  }
-//
-//  {  // an optimization: compute in smaller blocks.
-//    // this block of code could be removed and it would still work.
-//    MatrixIndexT size_perblock = N * 2 * sizeof(Real);
-//    if (nffts > 1 && size_perblock*nffts > KALDI_COMPLEXFFT_BLOCKSIZE) {  // can break it up...
-//      // Break up into multiple blocks.  This is an optimization.  We make
-//      // no progress on the FFT when we do this.
-//      int block_skip = KALDI_COMPLEXFFT_BLOCKSIZE / size_perblock;  // n blocks per call
-//      if (block_skip == 0) block_skip = 1;
-//      if (block_skip < nffts) {
-//        int blocks_left = nffts;
-//        while (blocks_left > 0) {
-//          int skip_now = std::min(blocks_left, block_skip);
-//          ComplexFftRecursive(data, skip_now, N, factor_begin, factor_end, forward, tmp_vec);
-//          blocks_left -= skip_now;
-//          data += skip_now * N*2;
-//        }
-//        return;
-//      } // else do the actual algorithm.
-//    } // else do the actual algorithm.
-//  }
-//
-//  int P = *factor_begin;
-//  KALDI_ASSERT(P > 1);
-//  int Q = N / P;
-//
-//
-//  if (P > 1 && Q > 1) {  // Do the rearrangement.   C.f. eq. (8) below.  Transform
-//    // (a) to (b).
-//    Real *data_thisblock = data;
-//    if (tmp_vec->Dim() < (MatrixIndexT)N) tmp_vec->Resize(N);
-//    Real *data_tmp = tmp_vec->Data();
-//    for (int thisfft = 0; thisfft < nffts; thisfft++, data_thisblock+=N*2) {
-//      for (int offset = 0; offset < 2; offset++) {  // 0 == real, 1 == im.
-//        for (int p = 0; p < P; p++) {
-//          for (int q = 0; q < Q; q++) {
-//            int aidx = q*P + p, bidx = p*Q + q;
-//            data_tmp[bidx] = data_thisblock[2*aidx+offset];
-//          }
-//        }
-//        for (int n = 0;n < P*Q;n++) data_thisblock[2*n+offset] = data_tmp[n];
-//      }
-//    }
-//  }
-//
-//  {  // Recurse.
-//    ComplexFftRecursive(data, nffts*P, Q, factor_begin+1, factor_end, forward, tmp_vec);
-//  }
-//
-//  int exp_sign = (forward ? -1 : 1);
-//  Real rootN_re, rootN_im;  // Nth root of unity.
-//  ComplexImExp(static_cast<Real>(exp_sign * M_2PI / N), &rootN_re, &rootN_im);
-//
-//  Real rootP_re, rootP_im;  // Pth root of unity.
-//  ComplexImExp(static_cast<Real>(exp_sign * M_2PI / P), &rootP_re, &rootP_im);
-//
-//  {  // Do the multiplication
-//    // could avoid a bunch of complex multiplies by moving the loop over data_thisblock
-//    // inside.
-//    if (tmp_vec->Dim() < (MatrixIndexT)(P*2)) tmp_vec->Resize(P*2);
-//    Real *temp_a = tmp_vec->Data();
-//
-//    Real *data_thisblock = data, *data_end = data+(N*2*nffts);
-//    for (; data_thisblock != data_end; data_thisblock += N*2) {  // for each separate fft.
-//      Real qd_re = 1.0, qd_im = 0.0;  // 1^(q'/N)
-//      for (int qd = 0; qd < Q; qd++) {
-//        Real pdQ_qd_re = qd_re, pdQ_qd_im = qd_im;  // 1^((p'Q+q') / N) == 1^((p'/P) + (q'/N))
-//                                              // Initialize to q'/N, corresponding to p' == 0.
-//        for (int pd = 0; pd < P; pd++) {  // pd == p'
-//          {  // This is the p = 0 case of the loop below [an optimization].
-//            temp_a[pd*2] = data_thisblock[qd*2];
-//            temp_a[pd*2 + 1] = data_thisblock[qd*2 + 1];
-//          }
-//          {  // This is the p = 1 case of the loop below [an optimization]
-//            // **** MOST OF THE TIME (>60% I think) gets spent here. ***
-//            ComplexAddProduct(pdQ_qd_re, pdQ_qd_im,
-//                              data_thisblock[(qd+Q)*2], data_thisblock[(qd+Q)*2 + 1],
-//                              &(temp_a[pd*2]), &(temp_a[pd*2 + 1]));
-//          }
-//          if (P > 2) {
-//            Real p_pdQ_qd_re = pdQ_qd_re, p_pdQ_qd_im = pdQ_qd_im;  // 1^(p(p'Q+q')/N)
-//            for (int p = 2; p < P; p++) {
-//              ComplexMul(pdQ_qd_re, pdQ_qd_im, &p_pdQ_qd_re, &p_pdQ_qd_im);  // p_pdQ_qd *= pdQ_qd.
-//              int data_idx = p*Q + qd;
-//              ComplexAddProduct(p_pdQ_qd_re, p_pdQ_qd_im,
-//                                data_thisblock[data_idx*2], data_thisblock[data_idx*2 + 1],
-//                                &(temp_a[pd*2]), &(temp_a[pd*2 + 1]));
-//            }
-//          }
-//          if (pd != P-1)
-//            ComplexMul(rootP_re, rootP_im, &pdQ_qd_re, &pdQ_qd_im);  // pdQ_qd *= (rootP == 1^{1/P})
-//          // (using 1/P == Q/N)
-//        }
-//        for (int pd = 0; pd < P; pd++) {
-//          data_thisblock[(pd*Q + qd)*2] = temp_a[pd*2];
-//          data_thisblock[(pd*Q + qd)*2 + 1] = temp_a[pd*2 + 1];
-//        }
-//        ComplexMul(rootN_re, rootN_im, &qd_re, &qd_im);  // qd *= rootN.
-//      }
-//    }
-//  }
-//}
+
+template<typename Real>
+void ComplexFftRecursive (Real *data, int nffts, int N,
+                          const int *factor_begin,
+                          const int *factor_end, bool forward,
+                          Vector<Real> *tmp_vec) {
+  if (factor_begin == factor_end) {
+    KALDI_ASSERT(N == 1);
+    return;
+  }
+
+  {  // an optimization: compute in smaller blocks.
+    // this block of code could be removed and it would still work.
+    MatrixIndexT size_perblock = N * 2 * sizeof(Real);
+    if (nffts > 1 && size_perblock*nffts > KALDI_COMPLEXFFT_BLOCKSIZE) {  // can break it up...
+      // Break up into multiple blocks.  This is an optimization.  We make
+      // no progress on the FFT when we do this.
+      int block_skip = KALDI_COMPLEXFFT_BLOCKSIZE / size_perblock;  // n blocks per call
+      if (block_skip == 0) block_skip = 1;
+      if (block_skip < nffts) {
+        int blocks_left = nffts;
+        while (blocks_left > 0) {
+          int skip_now = std::min(blocks_left, block_skip);
+          ComplexFftRecursive(data, skip_now, N, factor_begin, factor_end, forward, tmp_vec);
+          blocks_left -= skip_now;
+          data += skip_now * N*2;
+        }
+        return;
+      } // else do the actual algorithm.
+    } // else do the actual algorithm.
+  }
+
+  int P = *factor_begin;
+  KALDI_ASSERT(P > 1);
+  int Q = N / P;
+
+
+  if (P > 1 && Q > 1) {  // Do the rearrangement.   C.f. eq. (8) below.  Transform
+    // (a) to (b).
+    Real *data_thisblock = data;
+    if (tmp_vec->Dim() < (MatrixIndexT)N) tmp_vec->Resize(N);
+    Real *data_tmp = tmp_vec->Data();
+    for (int thisfft = 0; thisfft < nffts; thisfft++, data_thisblock+=N*2) {
+      for (int offset = 0; offset < 2; offset++) {  // 0 == real, 1 == im.
+        for (int p = 0; p < P; p++) {
+          for (int q = 0; q < Q; q++) {
+            int aidx = q*P + p, bidx = p*Q + q;
+            data_tmp[bidx] = data_thisblock[2*aidx+offset];
+          }
+        }
+        for (int n = 0;n < P*Q;n++) data_thisblock[2*n+offset] = data_tmp[n];
+      }
+    }
+  }
+
+  {  // Recurse.
+    ComplexFftRecursive(data, nffts*P, Q, factor_begin+1, factor_end, forward, tmp_vec);
+  }
+
+  int exp_sign = (forward ? -1 : 1);
+  Real rootN_re, rootN_im;  // Nth root of unity.
+  ComplexImExp(static_cast<Real>(exp_sign * M_2PI / N), &rootN_re, &rootN_im);
+
+  Real rootP_re, rootP_im;  // Pth root of unity.
+  ComplexImExp(static_cast<Real>(exp_sign * M_2PI / P), &rootP_re, &rootP_im);
+
+  {  // Do the multiplication
+    // could avoid a bunch of complex multiplies by moving the loop over data_thisblock
+    // inside.
+    if (tmp_vec->Dim() < (MatrixIndexT)(P*2)) tmp_vec->Resize(P*2);
+    Real *temp_a = tmp_vec->Data();
+
+    Real *data_thisblock = data, *data_end = data+(N*2*nffts);
+    for (; data_thisblock != data_end; data_thisblock += N*2) {  // for each separate fft.
+      Real qd_re = 1.0, qd_im = 0.0;  // 1^(q'/N)
+      for (int qd = 0; qd < Q; qd++) {
+        Real pdQ_qd_re = qd_re, pdQ_qd_im = qd_im;  // 1^((p'Q+q') / N) == 1^((p'/P) + (q'/N))
+                                              // Initialize to q'/N, corresponding to p' == 0.
+        for (int pd = 0; pd < P; pd++) {  // pd == p'
+          {  // This is the p = 0 case of the loop below [an optimization].
+            temp_a[pd*2] = data_thisblock[qd*2];
+            temp_a[pd*2 + 1] = data_thisblock[qd*2 + 1];
+          }
+          {  // This is the p = 1 case of the loop below [an optimization]
+            // **** MOST OF THE TIME (>60% I think) gets spent here. ***
+            ComplexAddProduct(pdQ_qd_re, pdQ_qd_im,
+                              data_thisblock[(qd+Q)*2], data_thisblock[(qd+Q)*2 + 1],
+                              &(temp_a[pd*2]), &(temp_a[pd*2 + 1]));
+          }
+          if (P > 2) {
+            Real p_pdQ_qd_re = pdQ_qd_re, p_pdQ_qd_im = pdQ_qd_im;  // 1^(p(p'Q+q')/N)
+            for (int p = 2; p < P; p++) {
+              ComplexMul(pdQ_qd_re, pdQ_qd_im, &p_pdQ_qd_re, &p_pdQ_qd_im);  // p_pdQ_qd *= pdQ_qd.
+              int data_idx = p*Q + qd;
+              ComplexAddProduct(p_pdQ_qd_re, p_pdQ_qd_im,
+                                data_thisblock[data_idx*2], data_thisblock[data_idx*2 + 1],
+                                &(temp_a[pd*2]), &(temp_a[pd*2 + 1]));
+            }
+          }
+          if (pd != P-1)
+            ComplexMul(rootP_re, rootP_im, &pdQ_qd_re, &pdQ_qd_im);  // pdQ_qd *= (rootP == 1^{1/P})
+          // (using 1/P == Q/N)
+        }
+        for (int pd = 0; pd < P; pd++) {
+          data_thisblock[(pd*Q + qd)*2] = temp_a[pd*2];
+          data_thisblock[(pd*Q + qd)*2 + 1] = temp_a[pd*2 + 1];
+        }
+        ComplexMul(rootN_re, rootN_im, &qd_re, &qd_im);  // qd *= rootN.
+      }
+    }
+  }
+}
 //
 ///* Equations for ComplexFftRecursive.
 //   We consider here one of the "nffts" separate ffts; it's just a question of
@@ -332,20 +332,20 @@ namespace kaldi {
 //
 //// This is the outer-layer calling code for ComplexFftRecursive.
 //// It factorizes the dimension and then calls the FFT routine.
-//template<typename Real> void ComplexFft(VectorBase<Real> *v, bool forward, Vector<Real> *tmp_in) {
-//  KALDI_ASSERT(v != NULL);
-//
-//  if (v->Dim()<=1) return;
-//  KALDI_ASSERT(v->Dim() % 2 == 0);  // complex input.
-//  int N = v->Dim() / 2;
-//  std::vector<int> factors;
-//  Factorize(N, &factors);
-//  int *factor_beg = NULL;
-//  if (factors.size() > 0)
-//    factor_beg = &(factors[0]);
-//  Vector<Real> tmp;  // allocated in ComplexFftRecursive.
-//  ComplexFftRecursive(v->Data(), 1, N, factor_beg, factor_beg+factors.size(), forward, (tmp_in?tmp_in:&tmp));
-//}
+template<typename Real> void ComplexFft(VectorBase<Real> *v, bool forward, Vector<Real> *tmp_in) {
+  KALDI_ASSERT(v != NULL);
+
+  if (v->Dim()<=1) return;
+  KALDI_ASSERT(v->Dim() % 2 == 0);  // complex input.
+  int N = v->Dim() / 2;
+  std::vector<int> factors;
+  Factorize(N, &factors);
+  int *factor_beg = NULL;
+  if (factors.size() > 0)
+    factor_beg = &(factors[0]);
+  Vector<Real> tmp;  // allocated in ComplexFftRecursive.
+  ComplexFftRecursive(v->Data(), 1, N, factor_beg, factor_beg+factors.size(), forward, (tmp_in?tmp_in:&tmp));
+}
 //
 ////! Inefficient version of Fourier transform, for testing purposes.
 //template<typename Real> void RealFftInefficient (VectorBase<Real> *v, bool forward) {
@@ -381,88 +381,88 @@ namespace kaldi {
 //
 //template void RealFftInefficient (VectorBase<float> *v, bool forward);
 //template void RealFftInefficient (VectorBase<double> *v, bool forward);
+
+template
+void ComplexFft(VectorBase<float> *v, bool forward, Vector<float> *tmp_in);
+template
+void ComplexFft(VectorBase<double> *v, bool forward, Vector<double> *tmp_in);
+
 //
-//template
-//void ComplexFft(VectorBase<float> *v, bool forward, Vector<float> *tmp_in);
-//template
-//void ComplexFft(VectorBase<double> *v, bool forward, Vector<double> *tmp_in);
-//
-//
-//// See the long comment below for the math behind this.
-//template<typename Real> void RealFft (VectorBase<Real> *v, bool forward) {
-//  KALDI_ASSERT(v != NULL);
-//  MatrixIndexT N = v->Dim(), N2 = N/2;
-//  KALDI_ASSERT(N%2 == 0);
-//  if (N == 0) return;
-//
-//  if (forward) ComplexFft(v, true);
-//
-//  Real *data = v->Data();
-//  Real rootN_re, rootN_im;  // exp(-2pi/N), forward; exp(2pi/N), backward
-//  int forward_sign = forward ? -1 : 1;
-//  ComplexImExp(static_cast<Real>(M_2PI/N *forward_sign), &rootN_re, &rootN_im);
-//  Real kN_re = -forward_sign, kN_im = 0.0;  // exp(-2pik/N), forward; exp(-2pik/N), backward
-//  // kN starts out as 1.0 for forward algorithm but -1.0 for backward.
-//  for (MatrixIndexT k = 1; 2*k <= N2; k++) {
-//    ComplexMul(rootN_re, rootN_im, &kN_re, &kN_im);
-//
-//    Real Ck_re, Ck_im, Dk_re, Dk_im;
-//    // C_k = 1/2 (B_k + B_{N/2 - k}^*) :
-//    Ck_re = 0.5 * (data[2*k] + data[N - 2*k]);
-//    Ck_im = 0.5 * (data[2*k + 1] - data[N - 2*k + 1]);
-//    // re(D_k)= 1/2 (im(B_k) + im(B_{N/2-k})):
-//    Dk_re = 0.5 * (data[2*k + 1] + data[N - 2*k + 1]);
-//    // im(D_k) = -1/2 (re(B_k) - re(B_{N/2-k}))
-//    Dk_im =-0.5 * (data[2*k] - data[N - 2*k]);
-//    // A_k = C_k + 1^(k/N) D_k:
-//    data[2*k] = Ck_re;  // A_k <-- C_k
-//    data[2*k+1] = Ck_im;
-//    // now A_k += D_k 1^(k/N)
-//    ComplexAddProduct(Dk_re, Dk_im, kN_re, kN_im, &(data[2*k]), &(data[2*k+1]));
-//
-//    MatrixIndexT kdash = N2 - k;
-//    if (kdash != k) {
-//      // Next we handle the index k' = N/2 - k.  This is necessary
-//      // to do now, to avoid invalidating data that we will later need.
-//      // The quantities C_{k'} and D_{k'} are just the conjugates of C_k
-//      // and D_k, so the equations are simple modifications of the above,
-//      // replacing Ck_im and Dk_im with their negatives.
-//      data[2*kdash] = Ck_re;  // A_k' <-- C_k'
-//      data[2*kdash+1] = -Ck_im;
-//      // now A_k' += D_k' 1^(k'/N)
-//      // We use 1^(k'/N) = 1^((N/2 - k) / N) = 1^(1/2) 1^(-k/N) = -1 * (1^(k/N))^*
-//      // so it's the same as 1^(k/N) but with the real part negated.
-//      ComplexAddProduct(Dk_re, -Dk_im, -kN_re, kN_im, &(data[2*kdash]), &(data[2*kdash+1]));
-//    }
-//  }
-//
-//  {  // Now handle k = 0.
-//    // In simple terms: after the complex fft, data[0] becomes the sum of real
-//    // parts input[0], input[2]... and data[1] becomes the sum of imaginary
-//    // pats input[1], input[3]...
-//    // "zeroth" [A_0] is just the sum of input[0]+input[1]+input[2]..
-//    // and "n2th" [A_{N/2}] is input[0]-input[1]+input[2]... .
-//    Real zeroth = data[0] + data[1],
-//        n2th = data[0] - data[1];
-//    data[0] = zeroth;
-//    data[1] = n2th;
-//    if (!forward) {
-//      data[0] /= 2;
-//      data[1] /= 2;
-//    }
-//  }
-//
-//  if (!forward) {
-//    ComplexFft(v, false);
-//    v->Scale(2.0);  // This is so we get a factor of N increase, rather than N/2 which we would
-//    // otherwise get from [ComplexFft, forward] + [ComplexFft, backward] in dimension N/2.
-//    // It's for consistency with our normal FFT convensions.
-//  }
-//}
-//
-//template void RealFft (VectorBase<float> *v, bool forward);
-//template void RealFft (VectorBase<double> *v, bool forward);
-//
+// See the long comment below for the math behind this.
+template<typename Real> void RealFft (VectorBase<Real> *v, bool forward) {
+  KALDI_ASSERT(v != NULL);
+  MatrixIndexT N = v->Dim(), N2 = N/2;
+  KALDI_ASSERT(N%2 == 0);
+  if (N == 0) return;
+
+  if (forward) ComplexFft(v, true);
+
+  Real *data = v->Data();
+  Real rootN_re, rootN_im;  // exp(-2pi/N), forward; exp(2pi/N), backward
+  int forward_sign = forward ? -1 : 1;
+  ComplexImExp(static_cast<Real>(M_2PI/N *forward_sign), &rootN_re, &rootN_im);
+  Real kN_re = -forward_sign, kN_im = 0.0;  // exp(-2pik/N), forward; exp(-2pik/N), backward
+  // kN starts out as 1.0 for forward algorithm but -1.0 for backward.
+  for (MatrixIndexT k = 1; 2*k <= N2; k++) {
+    ComplexMul(rootN_re, rootN_im, &kN_re, &kN_im);
+
+    Real Ck_re, Ck_im, Dk_re, Dk_im;
+    // C_k = 1/2 (B_k + B_{N/2 - k}^*) :
+    Ck_re = 0.5 * (data[2*k] + data[N - 2*k]);
+    Ck_im = 0.5 * (data[2*k + 1] - data[N - 2*k + 1]);
+    // re(D_k)= 1/2 (im(B_k) + im(B_{N/2-k})):
+    Dk_re = 0.5 * (data[2*k + 1] + data[N - 2*k + 1]);
+    // im(D_k) = -1/2 (re(B_k) - re(B_{N/2-k}))
+    Dk_im =-0.5 * (data[2*k] - data[N - 2*k]);
+    // A_k = C_k + 1^(k/N) D_k:
+    data[2*k] = Ck_re;  // A_k <-- C_k
+    data[2*k+1] = Ck_im;
+    // now A_k += D_k 1^(k/N)
+    ComplexAddProduct(Dk_re, Dk_im, kN_re, kN_im, &(data[2*k]), &(data[2*k+1]));
+
+    MatrixIndexT kdash = N2 - k;
+    if (kdash != k) {
+      // Next we handle the index k' = N/2 - k.  This is necessary
+      // to do now, to avoid invalidating data that we will later need.
+      // The quantities C_{k'} and D_{k'} are just the conjugates of C_k
+      // and D_k, so the equations are simple modifications of the above,
+      // replacing Ck_im and Dk_im with their negatives.
+      data[2*kdash] = Ck_re;  // A_k' <-- C_k'
+      data[2*kdash+1] = -Ck_im;
+      // now A_k' += D_k' 1^(k'/N)
+      // We use 1^(k'/N) = 1^((N/2 - k) / N) = 1^(1/2) 1^(-k/N) = -1 * (1^(k/N))^*
+      // so it's the same as 1^(k/N) but with the real part negated.
+      ComplexAddProduct(Dk_re, -Dk_im, -kN_re, kN_im, &(data[2*kdash]), &(data[2*kdash+1]));
+    }
+  }
+
+  {  // Now handle k = 0.
+    // In simple terms: after the complex fft, data[0] becomes the sum of real
+    // parts input[0], input[2]... and data[1] becomes the sum of imaginary
+    // pats input[1], input[3]...
+    // "zeroth" [A_0] is just the sum of input[0]+input[1]+input[2]..
+    // and "n2th" [A_{N/2}] is input[0]-input[1]+input[2]... .
+    Real zeroth = data[0] + data[1],
+        n2th = data[0] - data[1];
+    data[0] = zeroth;
+    data[1] = n2th;
+    if (!forward) {
+      data[0] /= 2;
+      data[1] /= 2;
+    }
+  }
+
+  if (!forward) {
+    ComplexFft(v, false);
+    v->Scale(2.0);  // This is so we get a factor of N increase, rather than N/2 which we would
+    // otherwise get from [ComplexFft, forward] + [ComplexFft, backward] in dimension N/2.
+    // It's for consistency with our normal FFT convensions.
+  }
+}
+
+template void RealFft (VectorBase<float> *v, bool forward);
+template void RealFft (VectorBase<double> *v, bool forward);
+
 ///* Notes for real FFTs.
 //   We are using the same convention as above, 1^x to mean exp(-2\pi x) for the forward transform.
 //   Actually, in a slight abuse of notation, we use this meaning for 1^x in both the forward and
@@ -590,28 +590,28 @@ namespace kaldi {
 //
 // */
 //
-//template<typename Real> void ComputeDctMatrix(Matrix<Real> *M) {
-//  //KALDI_ASSERT(M->NumRows() == M->NumCols());
-//  MatrixIndexT K = M->NumRows();
-//  MatrixIndexT N = M->NumCols();
-//
-//  KALDI_ASSERT(K > 0);
-//  KALDI_ASSERT(N > 0);
-//  Real normalizer = std::sqrt(1.0 / static_cast<Real>(N));  // normalizer for
-//  // X_0.
-//  for (MatrixIndexT j = 0; j < N; j++) (*M)(0, j) = normalizer;
-//  normalizer = std::sqrt(2.0 / static_cast<Real>(N));  // normalizer for other
-//   // elements.
-//  for (MatrixIndexT k = 1; k < K; k++)
-//    for (MatrixIndexT n = 0; n < N; n++)
-//      (*M)(k, n) = normalizer
-//          * std::cos( static_cast<double>(M_PI)/N * (n + 0.5) * k );
-//}
-//
-//
-//template void ComputeDctMatrix(Matrix<float> *M);
-//template void ComputeDctMatrix(Matrix<double> *M);
-//
+template<typename Real> void ComputeDctMatrix(Matrix<Real> *M) {
+  //KALDI_ASSERT(M->NumRows() == M->NumCols());
+  MatrixIndexT K = M->NumRows();
+  MatrixIndexT N = M->NumCols();
+
+  KALDI_ASSERT(K > 0);
+  KALDI_ASSERT(N > 0);
+  Real normalizer = std::sqrt(1.0 / static_cast<Real>(N));  // normalizer for
+  // X_0.
+  for (MatrixIndexT j = 0; j < N; j++) (*M)(0, j) = normalizer;
+  normalizer = std::sqrt(2.0 / static_cast<Real>(N));  // normalizer for other
+   // elements.
+  for (MatrixIndexT k = 1; k < K; k++)
+    for (MatrixIndexT n = 0; n < N; n++)
+      (*M)(k, n) = normalizer
+          * std::cos( static_cast<double>(M_PI)/N * (n + 0.5) * k );
+}
+
+
+template void ComputeDctMatrix(Matrix<float> *M);
+template void ComputeDctMatrix(Matrix<double> *M);
+
 //
 //template<typename Real>
 //void ComputePca(const MatrixBase<Real> &X,

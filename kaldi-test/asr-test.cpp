@@ -6,7 +6,11 @@
 #include <iostream>
 #include "transition-model.h"
 #include "am-nnet-simple.h"
+#include "decodable-simple-looped.h"
 #include "nnet-utils.h"
+#include "online-nnet2-feature-pipeline.h"
+#include "lattice-faster-online-decoder.h"
+#include "online-endpoint.h"
 int main()
 {
 
@@ -29,6 +33,15 @@ int main()
 		//nnet3::CollapseModel(nnet3::CollapseModelConfig(), &(am_nnet.GetNnet()));
 	}
 
+
+	OnlineNnet2FeaturePipelineConfig feature_opts;
+	nnet3::NnetSimpleLoopedComputationOptions decodable_opts;
+	LatticeFasterDecoderConfig decoder_opts;
+	OnlineEndpointConfig endpoint_opts;
+
+	BaseFloat chunk_length_secs = 0.18;
+	bool do_endpointing = false;
+	bool online = true;
 
     return 0;
 }

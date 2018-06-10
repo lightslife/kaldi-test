@@ -772,11 +772,11 @@ BaseFloat TransitionModel::GetTransitionLogProb(int32 trans_id) const {
 //}
 //
 //
-//int32 TransitionModel::TransitionIdToPhone(int32 trans_id) const {
-//  KALDI_ASSERT(trans_id != 0 && static_cast<size_t>(trans_id) < id2state_.size());
-//  int32 trans_state = id2state_[trans_id];
-//  return tuples_[trans_state-1].phone;
-//}
+int32 TransitionModel::TransitionIdToPhone(int32 trans_id) const {
+  KALDI_ASSERT(trans_id != 0 && static_cast<size_t>(trans_id) < id2state_.size());
+  int32 trans_state = id2state_[trans_id];
+  return tuples_[trans_state-1].phone;
+}
 //
 //int32 TransitionModel::TransitionIdToPdfClass(int32 trans_id) const {
 //  KALDI_ASSERT(trans_id != 0 && static_cast<size_t>(trans_id) < id2state_.size());

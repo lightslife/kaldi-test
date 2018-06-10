@@ -101,4 +101,14 @@ namespace kaldi {
 		return 0;
 	}
 
+	int cblas_Xgemv(int trans, int mRows, int mCols, float alpha, const float * mData, int mStride, const float * vData, int a, float beta, float *data_, int b) {
+		//TODO
+		return 0;
+	}
+	int cblas_Xgemv(int trans, int mRows, int mCols, float alpha, const double * mData, int mStride, const double * vData, int a, float beta, double *data_, int b) {
+		//TODO
+		return 0;
+	}
+
+
 }//kaldi

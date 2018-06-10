@@ -177,10 +177,21 @@ namespace kaldi {
 	int cblas_Xdot(int aDim, const double * aData, int a,  const double *bData, int b);
 
 
+ // template<typename Real>
+	//	void VectorBase<Real>::AddMatVec(const Real alpha,
+	//		const MatrixBase<Real> &M,
+	//		MatrixTransposeType trans,
+	//		const VectorBase<Real> &v,
+	//		const Real beta) {
+	//	KALDI_ASSERT((trans == kNoTrans && M.NumCols() == v.dim_ && M.NumRows() == dim_)
+	//		|| (trans == kTrans && M.NumRows() == v.dim_ && M.NumCols() == dim_));
+	//	KALDI_ASSERT(&v != this);
+	//	cblas_Xgemv(trans, M.NumRows(), M.NumCols(), alpha, M.Data(), M.Stride(),
+	//		v.Data(), 1, beta, data_, 1);
+	//}
 
-
-
-
+	int cblas_Xgemv(int trans, int mRows, int mCols, float alpha, const float * mData, int mStride, const float * vData, int a, float beta, float *data_, int b);
+	int cblas_Xgemv(int trans, int mRows, int mCols, float alpha, const double * mData, int mStride, const double * vData, int a, float beta, double *data_, int b);
 
 }
 

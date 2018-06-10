@@ -273,6 +273,60 @@
     <ClInclude Include="cu-compressed-matrix.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="online-nnet2-feature-pipeline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="online-feature.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-common-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-fbank.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-functions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-mfcc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-spectrogram.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="feature-window.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mel-computations.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="signal.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="wave-reader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="online-endpoint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="online-ivector-feature.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lattice-faster-online-decoder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hash-list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hash-list-inl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="wfst-read.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -438,6 +492,48 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="cu-vector.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="online-nnet2-feature-pipeline.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="online-feature.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="feature-fbank.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="feature-functions.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="feature-mfcc.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="feature-spectrogram.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="feature-window.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mel-computations.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="signal.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="wave-reader.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="online-endpoint.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="online-ivector-feature.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lattice-faster-online-decoder.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="wfst-read.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

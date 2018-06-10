@@ -88,18 +88,18 @@ void VectorBase<double>::AddVec(const double alpha,
   cblas_Xaxpy(dim_, alpha, v.Data(), 1, data_, 1);
 }
 
-//template<typename Real>
-//void VectorBase<Real>::AddMatVec(const Real alpha,
-//                                  const MatrixBase<Real> &M,
-//                                  MatrixTransposeType trans,
-//                                  const VectorBase<Real> &v,
-//                                  const Real beta) {
-//  KALDI_ASSERT((trans == kNoTrans && M.NumCols() == v.dim_ && M.NumRows() == dim_)
-//               || (trans == kTrans && M.NumRows() == v.dim_ && M.NumCols() == dim_));
-//  KALDI_ASSERT(&v != this);
-//  cblas_Xgemv(trans, M.NumRows(), M.NumCols(), alpha, M.Data(), M.Stride(),
-//              v.Data(), 1, beta, data_, 1);
-//}
+template<typename Real>
+void VectorBase<Real>::AddMatVec(const Real alpha,
+                                  const MatrixBase<Real> &M,
+                                  MatrixTransposeType trans,
+                                  const VectorBase<Real> &v,
+                                  const Real beta) {
+  KALDI_ASSERT((trans == kNoTrans && M.NumCols() == v.dim_ && M.NumRows() == dim_)
+               || (trans == kTrans && M.NumRows() == v.dim_ && M.NumCols() == dim_));
+  KALDI_ASSERT(&v != this);
+  cblas_Xgemv(trans, M.NumRows(), M.NumCols(), alpha, M.Data(), M.Stride(),
+              v.Data(), 1, beta, data_, 1);
+}
 //
 //template<typename Real>
 //void VectorBase<Real>::AddMatSvec(const Real alpha,

@@ -160,6 +160,15 @@
     <ClInclude Include="decodable-itf.h" />
     <ClInclude Include="decodable-online-looped.h" />
     <ClInclude Include="decodable-simple-looped.h" />
+    <ClInclude Include="feature-common-inl.h" />
+    <ClInclude Include="feature-common.h" />
+    <ClInclude Include="feature-fbank.h" />
+    <ClInclude Include="feature-functions.h" />
+    <ClInclude Include="feature-mfcc.h" />
+    <ClInclude Include="feature-spectrogram.h" />
+    <ClInclude Include="feature-window.h" />
+    <ClInclude Include="hash-list-inl.h" />
+    <ClInclude Include="hash-list.h" />
     <ClInclude Include="hmm-topology.h" />
     <ClInclude Include="io-funcs-inl.h" />
     <ClInclude Include="io-funcs.h" />
@@ -180,10 +189,12 @@
     <ClInclude Include="kaldi-utils.h" />
     <ClInclude Include="kaldi-vector-inl.h" />
     <ClInclude Include="kaldi-vector.h" />
+    <ClInclude Include="lattice-faster-online-decoder.h" />
     <ClInclude Include="matrix-common.h" />
     <ClInclude Include="matrix-functions-inl.h" />
     <ClInclude Include="matrix-functions.h" />
     <ClInclude Include="matrix-lib.h" />
+    <ClInclude Include="mel-computations.h" />
     <ClInclude Include="nnet-am-decodable-simple.h" />
     <ClInclude Include="nnet-analyze.h" />
     <ClInclude Include="nnet-common.h" />
@@ -204,11 +215,16 @@
     <ClInclude Include="nnet-parse.h" />
     <ClInclude Include="nnet-simple-component.h" />
     <ClInclude Include="nnet-utils.h" />
+    <ClInclude Include="online-endpoint.h" />
     <ClInclude Include="online-feature-itf.h" />
+    <ClInclude Include="online-feature.h" />
+    <ClInclude Include="online-ivector-feature.h" />
+    <ClInclude Include="online-nnet2-feature-pipeline.h" />
     <ClInclude Include="optimization.h" />
     <ClInclude Include="options-itf.h" />
     <ClInclude Include="packed-matrix.h" />
     <ClInclude Include="parse-options.h" />
+    <ClInclude Include="signal.h" />
     <ClInclude Include="simple-io-funcs.h" />
     <ClInclude Include="simple-options.h" />
     <ClInclude Include="sp-matrix.h" />
@@ -223,6 +239,8 @@
     <ClInclude Include="tp-matrix.h" />
     <ClInclude Include="transition-model.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="wave-reader.h" />
+    <ClInclude Include="wfst-read.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="am-nnet-simple.cc" />
@@ -235,6 +253,11 @@
     <ClCompile Include="cu-vector.cc" />
     <ClCompile Include="decodable-online-looped.cc" />
     <ClCompile Include="decodable-simple-looped.cc" />
+    <ClCompile Include="feature-fbank.cc" />
+    <ClCompile Include="feature-functions.cc" />
+    <ClCompile Include="feature-mfcc.cc" />
+    <ClCompile Include="feature-spectrogram.cc" />
+    <ClCompile Include="feature-window.cc" />
     <ClCompile Include="hmm-topology.cc" />
     <ClCompile Include="io-funcs.cc" />
     <ClCompile Include="kaldi-error.cc" />
@@ -247,7 +270,9 @@
     <ClCompile Include="asr-test.cpp" />
     <ClCompile Include="kaldi-utils.cc" />
     <ClCompile Include="kaldi-vector.cc" />
+    <ClCompile Include="lattice-faster-online-decoder.cc" />
     <ClCompile Include="matrix-functions.cc" />
+    <ClCompile Include="mel-computations.cc" />
     <ClCompile Include="nnet-am-decodable-simple.cc" />
     <ClCompile Include="nnet-analyze.cc" />
     <ClCompile Include="nnet-common.cc" />
@@ -268,10 +293,15 @@
     <ClCompile Include="nnet-parse.cc" />
     <ClCompile Include="nnet-simple-component.cc" />
     <ClCompile Include="nnet-utils.cc" />
+    <ClCompile Include="online-endpoint.cc" />
+    <ClCompile Include="online-feature.cc" />
+    <ClCompile Include="online-ivector-feature.cc" />
+    <ClCompile Include="online-nnet2-feature-pipeline.cc" />
     <ClCompile Include="optimization.cc" />
     <ClCompile Include="packed-matrix.cc" />
     <ClCompile Include="parse-options.cc" />
     <ClCompile Include="qr.cc" />
+    <ClCompile Include="signal.cc" />
     <ClCompile Include="simple-io-funcs.cc" />
     <ClCompile Include="simple-options.cc" />
     <ClCompile Include="sparse-matrix.cc" />
@@ -285,6 +315,8 @@
     <ClCompile Include="text-utils.cc" />
     <ClCompile Include="tp-matrix.cc" />
     <ClCompile Include="transition-model.cc" />
+    <ClCompile Include="wave-reader.cc" />
+    <ClCompile Include="wfst-read.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
