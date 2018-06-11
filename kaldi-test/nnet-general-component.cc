@@ -889,39 +889,39 @@ void StatisticsPoolingComponentPrecomputedIndexes::Read(std::istream &is, bool b
 //}
 //
 //// virtual
-//void BackpropTruncationComponent::Read(std::istream &is, bool binary) {
-//  // might not see the "<NaturalGradientAffineComponent>" part because
-//  // of how ReadNew() works.
-//  ExpectOneOrTwoTokens(is, binary, "<BackpropTruncationComponent>",
-//                       "<Dim>");
-//  ReadBasicType(is, binary, &dim_);
-//  std::string tok;
-//  ReadToken(is, binary, &tok);
-//  if (tok == "<Scale>") {
-//    ReadBasicType(is, binary, &scale_);
-//    ReadToken(is, binary, &tok);
-//  } else {
-//    scale_ = 1.0;
-//  }
-//  KALDI_ASSERT(tok == "<ClippingThreshold>");
-//  ReadBasicType(is, binary, &clipping_threshold_);
-//  ExpectToken(is, binary, "<ZeroingThreshold>");
-//  ReadBasicType(is, binary, &zeroing_threshold_);
-//  ExpectToken(is, binary, "<ZeroingInterval>");
-//  ReadBasicType(is, binary, &zeroing_interval_);
-//  ExpectToken(is, binary, "<RecurrenceInterval>");
-//  ReadBasicType(is, binary, &recurrence_interval_);
-//  ExpectToken(is, binary, "<NumElementsClipped>");
-//  ReadBasicType(is, binary, &num_clipped_);
-//  ExpectToken(is, binary, "<NumElementsZeroed>");
-//  ReadBasicType(is, binary, &num_zeroed_);
-//  ExpectToken(is, binary, "<NumElementsProcessed>");
-//  ReadBasicType(is, binary, &count_);
-//  ExpectToken(is, binary, "<NumZeroingBoundaries>");
-//  ReadBasicType(is, binary, &count_zeroing_boundaries_);
-//  ExpectToken(is, binary, "</BackpropTruncationComponent>");
-//}
-//
+void BackpropTruncationComponent::Read(std::istream &is, bool binary) {
+  // might not see the "<NaturalGradientAffineComponent>" part because
+  // of how ReadNew() works.
+  ExpectOneOrTwoTokens(is, binary, "<BackpropTruncationComponent>",
+                       "<Dim>");
+  ReadBasicType(is, binary, &dim_);
+  std::string tok;
+  ReadToken(is, binary, &tok);
+  if (tok == "<Scale>") {
+    ReadBasicType(is, binary, &scale_);
+    ReadToken(is, binary, &tok);
+  } else {
+    scale_ = 1.0;
+  }
+  KALDI_ASSERT(tok == "<ClippingThreshold>");
+  ReadBasicType(is, binary, &clipping_threshold_);
+  ExpectToken(is, binary, "<ZeroingThreshold>");
+  ReadBasicType(is, binary, &zeroing_threshold_);
+  ExpectToken(is, binary, "<ZeroingInterval>");
+  ReadBasicType(is, binary, &zeroing_interval_);
+  ExpectToken(is, binary, "<RecurrenceInterval>");
+  ReadBasicType(is, binary, &recurrence_interval_);
+  ExpectToken(is, binary, "<NumElementsClipped>");
+  ReadBasicType(is, binary, &num_clipped_);
+  ExpectToken(is, binary, "<NumElementsZeroed>");
+  ReadBasicType(is, binary, &num_zeroed_);
+  ExpectToken(is, binary, "<NumElementsProcessed>");
+  ReadBasicType(is, binary, &count_);
+  ExpectToken(is, binary, "<NumZeroingBoundaries>");
+  ReadBasicType(is, binary, &count_zeroing_boundaries_);
+  ExpectToken(is, binary, "</BackpropTruncationComponent>");
+}
+
 //// virtual
 //void BackpropTruncationComponent::Write(std::ostream &os, bool binary) const {
 //  WriteToken(os, binary, "<BackpropTruncationComponent>");
@@ -959,142 +959,142 @@ void StatisticsPoolingComponentPrecomputedIndexes::Read(std::istream &is, bool b
 //  WriteToken(ostream, binary,
 //             "</BackpropTruncationComponentPrecomputedIndexes>");
 //}
+
+void BackpropTruncationComponentPrecomputedIndexes::Read(std::istream &istream,
+    bool binary) {
+  ExpectOneOrTwoTokens(istream, binary,
+                       "<BackpropTruncationComponentPrecomputedIndexes>",
+                       "<Zeroing>");
+  zeroing.Read(istream, binary);
+  ExpectToken(istream, binary, "<ZeroingSum>");
+  ReadBasicType(istream, binary, &zeroing_sum);
+  ExpectToken(istream, binary,
+              "</BackpropTruncationComponentPrecomputedIndexes>");
+}
 //
-//void BackpropTruncationComponentPrecomputedIndexes::Read(std::istream &istream,
-//    bool binary) {
-//  ExpectOneOrTwoTokens(istream, binary,
-//                       "<BackpropTruncationComponentPrecomputedIndexes>",
-//                       "<Zeroing>");
-//  zeroing.Read(istream, binary);
-//  ExpectToken(istream, binary, "<ZeroingSum>");
-//  ReadBasicType(istream, binary, &zeroing_sum);
-//  ExpectToken(istream, binary,
-//              "</BackpropTruncationComponentPrecomputedIndexes>");
-//}
-//
-//std::string BackpropTruncationComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << Type() << ", dim=" << dim_
-//         << ", scale=" << scale_
-//         << ", count=" << std::setprecision(3) << count_ << std::setprecision(6)
-//         << ", recurrence-interval=" << recurrence_interval_
-//         << ", clipping-threshold=" << clipping_threshold_
-//         << ", clipped-proportion="
-//         << (count_ > 0.0 ? num_clipped_ / count_ : 0)
-//         << ", zeroing-threshold=" << zeroing_threshold_
-//         << ", zeroing-interval=" << zeroing_interval_
-//         << ", zeroed-proportion="
-//         << (count_zeroing_boundaries_ > 0.0 ?
-//             num_zeroed_ / count_zeroing_boundaries_ : 0)
-//         << ", count-zeroing-boundaries="
-//         << static_cast<int32>(count_zeroing_boundaries_);
-//  return stream.str();
-//}
-//
-//void BackpropTruncationComponent::Init(
-//    int32 dim, BaseFloat scale, BaseFloat clipping_threshold,
-//    BaseFloat zeroing_threshold, int32 zeroing_interval,
-//    int32 recurrence_interval) {
-//  KALDI_ASSERT(clipping_threshold >= 0 && zeroing_threshold >= 0 &&
-//               scale > 0.0 && zeroing_interval > 0 &&
-//               recurrence_interval > 0 && dim > 0);
-//  dim_ = dim;
-//  scale_ = scale;
-//  clipping_threshold_ = clipping_threshold;
-//  zeroing_threshold_ = zeroing_threshold;
-//  zeroing_interval_ = zeroing_interval;
-//  recurrence_interval_ = recurrence_interval;
-//  num_clipped_ = 0.0;
-//  num_zeroed_ = 0.0;
-//  count_ = 0.0;
-//  count_zeroing_boundaries_ = 0.0;
-//}
-//
-//// virtual
-//void BackpropTruncationComponent::InitFromConfig(ConfigLine *cfl) {
-//  int32 dim = 0;
-//  bool ok = cfl->GetValue("dim", &dim);
-//  BaseFloat scale = 1.0,
-//      clipping_threshold = 30.0,
-//      zeroing_threshold = 15.0;
-//  int32 zeroing_interval = 20, recurrence_interval = 1;
-//  cfl->GetValue("scale", &scale);
-//  cfl->GetValue("clipping-threshold", &clipping_threshold);
-//  cfl->GetValue("zeroing-threshold", &zeroing_threshold);
-//  cfl->GetValue("zeroing-interval", &zeroing_interval);
-//  cfl->GetValue("recurrence-interval", &recurrence_interval);
-//  if (!ok || cfl->HasUnusedValues() ||
-//      clipping_threshold < 0 || zeroing_threshold < 0 || zeroing_interval < 1 ||
-//      recurrence_interval < 1 || dim <= 0)
-//    KALDI_ERR << "Invalid initializer for layer of type "
-//              << Type() << ": \"" << cfl->WholeLine() << "\"";
-//  Init(dim, scale, clipping_threshold, zeroing_threshold,
-//      zeroing_interval, recurrence_interval);
-//}
-//
-//// virtual
-//Component* BackpropTruncationComponent::Copy() const {
-//  BackpropTruncationComponent *ans = new BackpropTruncationComponent();
-//  ans->dim_ = dim_;
-//  ans->scale_ = scale_;
-//  ans->clipping_threshold_ = clipping_threshold_;
-//  ans->zeroing_threshold_ = zeroing_threshold_;
-//  ans->zeroing_interval_ = zeroing_interval_;
-//  ans->recurrence_interval_ = recurrence_interval_;
-//  ans->num_clipped_ = num_clipped_;
-//  ans->num_zeroed_ = num_zeroed_;
-//  ans->count_ = count_;
-//  ans->count_zeroing_boundaries_ = count_zeroing_boundaries_;
-//  return ans;
-//}
-//
-//// virtual
-//ComponentPrecomputedIndexes*
-//BackpropTruncationComponent::PrecomputeIndexes(
-//    const MiscComputationInfo &misc_info,
-//    const std::vector<Index> &input_indexes,
-//    const std::vector<Index> &output_indexes,
-//    bool need_backprop) const {
-//  int32 num_input_indexes = input_indexes.size(),
-//      num_output_indexes = output_indexes.size();
-//  KALDI_ASSERT(num_input_indexes == num_output_indexes);
-//  Vector<BaseFloat> zeroing_cpu(num_output_indexes);
-//
-//  for (int32 i = 0; i < num_output_indexes; i++) {
-//    const int32 output_n = output_indexes[i].n;
-//    const int32 output_t = output_indexes[i].t;
-//    // checks if output_t crosses a boundary that is a multiple of
-//    // zeroing_interval_. Note that frame (output_t - recurrence_interval_) is
-//    // right before frame output_t in RNNs. If the range
-//    // [output_t - recurrence_interval_, output_t] contains a multiple of
-//    // zeroing_interval_, then frame output_t crosses the boundary.
-//    // output_n is used to shift where we put the boundary, so that
-//    // we don't always zero out gradients on frame 0. It will help avoid
-//    // learning utterance-boundary effects.
-//    if (DivideRoundingDown(output_t - output_n, zeroing_interval_) !=
-//        DivideRoundingDown(output_t - recurrence_interval_ - output_n,
-//        zeroing_interval_))
-//      zeroing_cpu(i) = -1.0;
-//  }
-//
-//  BackpropTruncationComponentPrecomputedIndexes *ans = new
-//      BackpropTruncationComponentPrecomputedIndexes();
-//  ans->zeroing = zeroing_cpu;
-//  ans->zeroing_sum = -zeroing_cpu.Sum();
-//  return ans;
-//}
-//
-//// virtual
-//void* BackpropTruncationComponent::Propagate(
-//                                 const ComponentPrecomputedIndexes *indexes,
-//                                 const CuMatrixBase<BaseFloat> &in,
-//                                 CuMatrixBase<BaseFloat> *out) const {
-//  out->CopyFromMat(in);
-//  if (scale_ != 1.0)
-//    out->Scale(scale_);
-//  return NULL;
-//}
-//
+std::string BackpropTruncationComponent::Info() const {
+  std::ostringstream stream;
+  stream << Type() << ", dim=" << dim_
+         << ", scale=" << scale_
+         << ", count=" << std::setprecision(3) << count_ << std::setprecision(6)
+         << ", recurrence-interval=" << recurrence_interval_
+         << ", clipping-threshold=" << clipping_threshold_
+         << ", clipped-proportion="
+         << (count_ > 0.0 ? num_clipped_ / count_ : 0)
+         << ", zeroing-threshold=" << zeroing_threshold_
+         << ", zeroing-interval=" << zeroing_interval_
+         << ", zeroed-proportion="
+         << (count_zeroing_boundaries_ > 0.0 ?
+             num_zeroed_ / count_zeroing_boundaries_ : 0)
+         << ", count-zeroing-boundaries="
+         << static_cast<int32>(count_zeroing_boundaries_);
+  return stream.str();
+}
+
+void BackpropTruncationComponent::Init(
+    int32 dim, BaseFloat scale, BaseFloat clipping_threshold,
+    BaseFloat zeroing_threshold, int32 zeroing_interval,
+    int32 recurrence_interval) {
+  KALDI_ASSERT(clipping_threshold >= 0 && zeroing_threshold >= 0 &&
+               scale > 0.0 && zeroing_interval > 0 &&
+               recurrence_interval > 0 && dim > 0);
+  dim_ = dim;
+  scale_ = scale;
+  clipping_threshold_ = clipping_threshold;
+  zeroing_threshold_ = zeroing_threshold;
+  zeroing_interval_ = zeroing_interval;
+  recurrence_interval_ = recurrence_interval;
+  num_clipped_ = 0.0;
+  num_zeroed_ = 0.0;
+  count_ = 0.0;
+  count_zeroing_boundaries_ = 0.0;
+}
+
+// virtual
+void BackpropTruncationComponent::InitFromConfig(ConfigLine *cfl) {
+  int32 dim = 0;
+  bool ok = cfl->GetValue("dim", &dim);
+  BaseFloat scale = 1.0,
+      clipping_threshold = 30.0,
+      zeroing_threshold = 15.0;
+  int32 zeroing_interval = 20, recurrence_interval = 1;
+  cfl->GetValue("scale", &scale);
+  cfl->GetValue("clipping-threshold", &clipping_threshold);
+  cfl->GetValue("zeroing-threshold", &zeroing_threshold);
+  cfl->GetValue("zeroing-interval", &zeroing_interval);
+  cfl->GetValue("recurrence-interval", &recurrence_interval);
+  if (!ok || cfl->HasUnusedValues() ||
+      clipping_threshold < 0 || zeroing_threshold < 0 || zeroing_interval < 1 ||
+      recurrence_interval < 1 || dim <= 0)
+    KALDI_ERR << "Invalid initializer for layer of type "
+              << Type() << ": \"" << cfl->WholeLine() << "\"";
+  Init(dim, scale, clipping_threshold, zeroing_threshold,
+      zeroing_interval, recurrence_interval);
+}
+
+// virtual
+Component* BackpropTruncationComponent::Copy() const {
+  BackpropTruncationComponent *ans = new BackpropTruncationComponent();
+  ans->dim_ = dim_;
+  ans->scale_ = scale_;
+  ans->clipping_threshold_ = clipping_threshold_;
+  ans->zeroing_threshold_ = zeroing_threshold_;
+  ans->zeroing_interval_ = zeroing_interval_;
+  ans->recurrence_interval_ = recurrence_interval_;
+  ans->num_clipped_ = num_clipped_;
+  ans->num_zeroed_ = num_zeroed_;
+  ans->count_ = count_;
+  ans->count_zeroing_boundaries_ = count_zeroing_boundaries_;
+  return ans;
+}
+
+// virtual
+ComponentPrecomputedIndexes*
+BackpropTruncationComponent::PrecomputeIndexes(
+    const MiscComputationInfo &misc_info,
+    const std::vector<Index> &input_indexes,
+    const std::vector<Index> &output_indexes,
+    bool need_backprop) const {
+  int32 num_input_indexes = input_indexes.size(),
+      num_output_indexes = output_indexes.size();
+  KALDI_ASSERT(num_input_indexes == num_output_indexes);
+  Vector<BaseFloat> zeroing_cpu(num_output_indexes);
+
+  for (int32 i = 0; i < num_output_indexes; i++) {
+    const int32 output_n = output_indexes[i].n;
+    const int32 output_t = output_indexes[i].t;
+    // checks if output_t crosses a boundary that is a multiple of
+    // zeroing_interval_. Note that frame (output_t - recurrence_interval_) is
+    // right before frame output_t in RNNs. If the range
+    // [output_t - recurrence_interval_, output_t] contains a multiple of
+    // zeroing_interval_, then frame output_t crosses the boundary.
+    // output_n is used to shift where we put the boundary, so that
+    // we don't always zero out gradients on frame 0. It will help avoid
+    // learning utterance-boundary effects.
+    if (DivideRoundingDown(output_t - output_n, zeroing_interval_) !=
+        DivideRoundingDown(output_t - recurrence_interval_ - output_n,
+        zeroing_interval_))
+      zeroing_cpu(i) = -1.0;
+  }
+
+  BackpropTruncationComponentPrecomputedIndexes *ans = new
+      BackpropTruncationComponentPrecomputedIndexes();
+  ans->zeroing = zeroing_cpu;
+  ans->zeroing_sum = -zeroing_cpu.Sum();
+  return ans;
+}
+
+// virtual
+void* BackpropTruncationComponent::Propagate(
+                                 const ComponentPrecomputedIndexes *indexes,
+                                 const CuMatrixBase<BaseFloat> &in,
+                                 CuMatrixBase<BaseFloat> *out) const {
+  out->CopyFromMat(in);
+  if (scale_ != 1.0)
+    out->Scale(scale_);
+  return NULL;
+}
+
 //// virtual
 //void BackpropTruncationComponent::Backprop(const std::string &debug_info,
 //                             const ComponentPrecomputedIndexes *indexes_in,
@@ -1171,35 +1171,35 @@ void StatisticsPoolingComponentPrecomputedIndexes::Read(std::istream &is, bool b
 //  in_deriv->MulRowsVec(combined_scales);
 //}
 //
-//// virtual
-//void BackpropTruncationComponent::ZeroStats()  {
-//  count_ = 0.0;
-//  count_zeroing_boundaries_ = 0.0;
-//  num_clipped_ = 0.0;
-//  num_zeroed_ = 0.0;
-//}
-//
-//// virtual
-//void BackpropTruncationComponent::Scale(BaseFloat scale) {
-//  count_ *= scale;
-//  count_zeroing_boundaries_ *= scale;
-//  num_clipped_ *= scale;
-//  num_zeroed_ *= scale;
-//}
-//
-//// virtual
-//void BackpropTruncationComponent::Add(BaseFloat alpha,
-//                                      const Component &other_in) {
-//  const BackpropTruncationComponent *other =
-//      dynamic_cast<const BackpropTruncationComponent*>(&other_in);
-//  KALDI_ASSERT(other != NULL);
-//  count_ += alpha * other->count_;
-//  count_zeroing_boundaries_ += alpha * other->count_zeroing_boundaries_;
-//  num_clipped_ += alpha * other->num_clipped_;
-//  num_zeroed_ += alpha * other->num_zeroed_;
-//}
-//
-//
+// virtual
+void BackpropTruncationComponent::ZeroStats()  {
+  count_ = 0.0;
+  count_zeroing_boundaries_ = 0.0;
+  num_clipped_ = 0.0;
+  num_zeroed_ = 0.0;
+}
+
+// virtual
+void BackpropTruncationComponent::Scale(BaseFloat scale) {
+  count_ *= scale;
+  count_zeroing_boundaries_ *= scale;
+  num_clipped_ *= scale;
+  num_zeroed_ *= scale;
+}
+
+// virtual
+void BackpropTruncationComponent::Add(BaseFloat alpha,
+                                      const Component &other_in) {
+  const BackpropTruncationComponent *other =
+      dynamic_cast<const BackpropTruncationComponent*>(&other_in);
+  KALDI_ASSERT(other != NULL);
+  count_ += alpha * other->count_;
+  count_zeroing_boundaries_ += alpha * other->count_zeroing_boundaries_;
+  num_clipped_ += alpha * other->num_clipped_;
+  num_zeroed_ += alpha * other->num_zeroed_;
+}
+
+
 //std::string ConstantComponent::Info() const {
 //  std::ostringstream stream;
 //  stream << UpdatableComponent::Info()

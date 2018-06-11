@@ -476,35 +476,35 @@ void CuVectorBase<Real>::ApplyLog() {
 }
 
 //
-//template<typename Real>
-//void CuVectorBase<Real>::AddMatVec(const Real alpha,
-//                                   const CuMatrixBase<Real> &M,
-//                                   MatrixTransposeType trans,
-//                                   const CuVectorBase<Real> &v,
-//                                   const Real beta) {
-//  KALDI_ASSERT((trans == kNoTrans && M.NumCols() == v.dim_ && M.NumRows() == dim_) ||
-//               (trans == kTrans && M.NumRows() == v.dim_ && M.NumCols() == dim_));
-//  KALDI_ASSERT(&v != this);
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    if (dim_ == 0) return;
-//    CuTimer tim;
-//
-//    // Everything is backwards in CuBlas.  We need to reverse rows, columns,
-//    // transpose-ness.
-//    CUBLAS_SAFE_CALL(cublas_gemv(GetCublasHandle(),
-//                                 (trans==kTrans? CUBLAS_OP_N:CUBLAS_OP_T),
-//                                 M.NumCols(), M.NumRows(), alpha, M.Data(),
-//                                 M.Stride(), v.Data(), 1, beta, data_, 1));
-//
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    Vec().AddMatVec(alpha,M.Mat(),trans,v.Vec(),beta);
-//  }
-//}
-//
+template<typename Real>
+void CuVectorBase<Real>::AddMatVec(const Real alpha,
+                                   const CuMatrixBase<Real> &M,
+                                   MatrixTransposeType trans,
+                                   const CuVectorBase<Real> &v,
+                                   const Real beta) {
+  KALDI_ASSERT((trans == kNoTrans && M.NumCols() == v.dim_ && M.NumRows() == dim_) ||
+               (trans == kTrans && M.NumRows() == v.dim_ && M.NumCols() == dim_));
+  KALDI_ASSERT(&v != this);
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    if (dim_ == 0) return;
+    CuTimer tim;
+
+    // Everything is backwards in CuBlas.  We need to reverse rows, columns,
+    // transpose-ness.
+    CUBLAS_SAFE_CALL(cublas_gemv(GetCublasHandle(),
+                                 (trans==kTrans? CUBLAS_OP_N:CUBLAS_OP_T),
+                                 M.NumCols(), M.NumRows(), alpha, M.Data(),
+                                 M.Stride(), v.Data(), 1, beta, data_, 1));
+
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    Vec().AddMatVec(alpha,M.Mat(),trans,v.Vec(),beta);
+  }
+}
+
 //template<typename Real>
 //void CuVectorBase<Real>::AddSpVec(const Real alpha,
 //                                  const CuSpMatrix<Real> &M,
@@ -565,21 +565,21 @@ void CuVectorBase<Real>::AddVecVec(Real alpha, const CuVectorBase<Real> &v,
 //}
 //
 //
-//template<typename Real>
-//void CuVectorBase<Real>::AddDiagMat2(Real alpha, const CuMatrixBase<Real> &M,
-//                                     MatrixTransposeType trans, Real beta) {
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    if (dim_ == 0) return;
-//    MatrixTransposeType other_trans = (trans == kTrans ? kNoTrans : kTrans);
-//    this->AddDiagMatMat(alpha, M, trans,
-//                        M, other_trans, beta);
-//  } else
-//#endif
-//  {
-//    Vec().AddDiagMat2(alpha, M.Mat(), trans, beta);
-//  }
-//}
+template<typename Real>
+void CuVectorBase<Real>::AddDiagMat2(Real alpha, const CuMatrixBase<Real> &M,
+                                     MatrixTransposeType trans, Real beta) {
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    if (dim_ == 0) return;
+    MatrixTransposeType other_trans = (trans == kTrans ? kNoTrans : kTrans);
+    this->AddDiagMatMat(alpha, M, trans,
+                        M, other_trans, beta);
+  } else
+#endif
+  {
+    Vec().AddDiagMat2(alpha, M.Mat(), trans, beta);
+  }
+}
 //
 //template<typename Real>
 //void CuVectorBase<Real>::AddDiagMatMat(Real alpha, const CuMatrixBase<Real> &M,
@@ -1079,26 +1079,26 @@ std::ostream &operator << (std::ostream &out, const CuVectorBase<double> &vec);
 ///*
 // * Methods wrapping the ANSI-C CUDA kernels
 // */
-//template<typename Real>
-//void CuVectorBase<Real>::Set(Real value) {
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    CuTimer tim;
-//
-//    dim3 dimBlock(CU1DBLOCK);
-//    dim3 dimGrid(n_blocks(Dim(), CU1DBLOCK));
-//    ::MatrixDim d = { 1, Dim(), Dim() };
-//
-//    cuda_set_const(dimGrid, dimBlock, data_, value, d);
-//    CU_SAFE_CALL(cudaGetLastError());
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    Vec().Set(value);
-//  }
-//}
-//
+template<typename Real>
+void CuVectorBase<Real>::Set(Real value) {
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    CuTimer tim;
+
+    dim3 dimBlock(CU1DBLOCK);
+    dim3 dimGrid(n_blocks(Dim(), CU1DBLOCK));
+    ::MatrixDim d = { 1, Dim(), Dim() };
+
+    cuda_set_const(dimGrid, dimBlock, data_, value, d);
+    CU_SAFE_CALL(cudaGetLastError());
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    Vec().Set(value);
+  }
+}
+
 
 
 template<typename Real>
@@ -1221,17 +1221,17 @@ template
 void CuVectorBase<double>::AddVec(double alpha, const CuVectorBase<float> &vec,
                                   double beta);
 
-//template<typename Real>
-//void CuVectorBase<Real>::AddRowSumMat(Real alpha, const CuMatrixBase<Real> &mat,
-//                                      Real beta) {
-//  KALDI_ASSERT(mat.NumCols() == Dim());
-//  if (Dim() == 0)
-//    return;
-//  CuVector<Real> ones(mat.NumRows());
-//  ones.Set(1.0);
-//  this->AddMatVec(alpha, mat, kTrans, ones, beta);
-//
-//}
+template<typename Real>
+void CuVectorBase<Real>::AddRowSumMat(Real alpha, const CuMatrixBase<Real> &mat,
+                                      Real beta) {
+  KALDI_ASSERT(mat.NumCols() == Dim());
+  if (Dim() == 0)
+    return;
+  CuVector<Real> ones(mat.NumRows());
+  ones.Set(1.0);
+  this->AddMatVec(alpha, mat, kTrans, ones, beta);
+
+}
 //
 //template<typename Real>
 //void CuVectorBase<Real>::AddColSumMat(Real alpha, const CuMatrixBase<Real> &mat,

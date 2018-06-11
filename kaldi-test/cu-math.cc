@@ -277,54 +277,54 @@ namespace cu {
 //// square root is exactly representable as float.
 //// If add_log_stddev_ is true, log(max(epsi, sqrt(x^t x / D)))
 //// is an extra dimension of the output.
-//template<typename Real>
-//void NormalizePerRow(const CuMatrixBase<Real>& in, const Real target_rms,
-//                     const bool add_log_stddev, CuMatrixBase<Real>* out) {
-//  const Real kSquaredNormFloor = 1.3552527156068805425e-20; // 2^-66
-//  if (add_log_stddev) {
-//    KALDI_ASSERT(in.NumRows() == out->NumRows());
-//    KALDI_ASSERT(in.NumCols() + 1 == out->NumCols());
-//  } else {
-//    KALDI_ASSERT(SameDim(in, *out));
-//  }
-//
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    CuTimer tim;
-//    size_t dimBlock = CU1DBLOCK;
-//    size_t dimGrid = out->NumRows();
-//    cuda_normalize_per_row(dimGrid, dimBlock, out->Data(), out->Stride(),
-//                           in.Data(), in.Dim(), target_rms, add_log_stddev);
-//    CU_SAFE_CALL(cudaGetLastError());
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    CuSubMatrix<Real> out_no_log(*out, 0, out->NumRows(), 0, in.NumCols());
-//    if (in.Data() != out_no_log.Data())
-//      out_no_log.CopyFromMat(in);
-//    CuVector<Real> in_norm(in.NumRows());
-//    Real d_scaled = in.NumCols() * target_rms * target_rms;
-//    in_norm.AddDiagMat2(1.0 / d_scaled, in, kNoTrans, 0.0);
-//    in_norm.ApplyFloor(kSquaredNormFloor);
-//    in_norm.ApplyPow(-0.5);
-//    out_no_log.MulRowsVec(in_norm);
-//    if (add_log_stddev) {
-//      in_norm.ApplyLog();
-//      in_norm.Scale(-1.0);
-//      in_norm.Add(log(target_rms));
-//      out->CopyColFromVec(in_norm, in.NumCols());
-//    }
-//  }
-//}
-//
-//template
-//void NormalizePerRow(const CuMatrixBase<float>& in, const float target_rms,
-//                     const bool add_log_stddev, CuMatrixBase<float>* out);
-//template
-//void NormalizePerRow(const CuMatrixBase<double>& in, const double target_rms,
-//                     const bool add_log_stddev, CuMatrixBase<double>* out);
-//
+template<typename Real>
+void NormalizePerRow(const CuMatrixBase<Real>& in, const Real target_rms,
+                     const bool add_log_stddev, CuMatrixBase<Real>* out) {
+  const Real kSquaredNormFloor = 1.3552527156068805425e-20; // 2^-66
+  if (add_log_stddev) {
+    KALDI_ASSERT(in.NumRows() == out->NumRows());
+    KALDI_ASSERT(in.NumCols() + 1 == out->NumCols());
+  } else {
+    KALDI_ASSERT(SameDim(in, *out));
+  }
+
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    CuTimer tim;
+    size_t dimBlock = CU1DBLOCK;
+    size_t dimGrid = out->NumRows();
+    cuda_normalize_per_row(dimGrid, dimBlock, out->Data(), out->Stride(),
+                           in.Data(), in.Dim(), target_rms, add_log_stddev);
+    CU_SAFE_CALL(cudaGetLastError());
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    CuSubMatrix<Real> out_no_log(*out, 0, out->NumRows(), 0, in.NumCols());
+    if (in.Data() != out_no_log.Data())
+      out_no_log.CopyFromMat(in);
+    CuVector<Real> in_norm(in.NumRows());
+    Real d_scaled = in.NumCols() * target_rms * target_rms;
+    in_norm.AddDiagMat2(1.0 / d_scaled, in, kNoTrans, 0.0);
+    in_norm.ApplyFloor(kSquaredNormFloor);
+    in_norm.ApplyPow(-0.5);
+    out_no_log.MulRowsVec(in_norm);
+    if (add_log_stddev) {
+      in_norm.ApplyLog();
+      in_norm.Scale(-1.0);
+      in_norm.Add(log(target_rms));
+      out->CopyColFromVec(in_norm, in.NumCols());
+    }
+  }
+}
+
+template
+void NormalizePerRow(const CuMatrixBase<float>& in, const float target_rms,
+                     const bool add_log_stddev, CuMatrixBase<float>* out);
+template
+void NormalizePerRow(const CuMatrixBase<double>& in, const double target_rms,
+                     const bool add_log_stddev, CuMatrixBase<double>* out);
+
 //
 //// A note on the derivative of NormalizeComponent...
 //// let both row_in and row_out be vectors of dimension D.
@@ -421,125 +421,125 @@ namespace cu {
 //
 //
 //// not calling this Sigmoid to reduce the chance of future collisions.
-//template<typename Real>
-//static inline Real ScalarSigmoid(Real a) {
-//  if (a > Real(0)) {
-//    return Real(1) / (Real(1) + Exp(-a));
-//  } else {
-//    Real x = Exp(a);
-//    return x / (x + Real(1));
-//  }
-//}
+template<typename Real>
+static inline Real ScalarSigmoid(Real a) {
+  if (a > Real(0)) {
+    return Real(1) / (Real(1) + Exp(-a));
+  } else {
+    Real x = Exp(a);
+    return x / (x + Real(1));
+  }
+}
+
+template<typename Real>
+static inline Real ScalarTanh(Real a) {
+  if (a > Real(0)) {
+    Real inv_expa = Exp(-a);
+    return -Real(1) + Real(2) / (Real(1) + inv_expa * inv_expa);
+  } else {
+    Real expa = Exp(a);
+    return Real(1) - Real(2) / (Real(1) + expa * expa);
+  }
+}
 //
-//template<typename Real>
-//static inline Real ScalarTanh(Real a) {
-//  if (a > Real(0)) {
-//    Real inv_expa = Exp(-a);
-//    return -Real(1) + Real(2) / (Real(1) + inv_expa * inv_expa);
-//  } else {
-//    Real expa = Exp(a);
-//    return Real(1) - Real(2) / (Real(1) + expa * expa);
-//  }
-//}
-//
-//template<typename Real>
-//void CpuComputeLstmNonlinearity(const MatrixBase<Real> &input_mat,
-//                                const MatrixBase<Real> &params_mat,
-//                                MatrixBase<Real> *output) {
-//  int32 num_rows = input_mat.NumRows(),
-//      input_cols = input_mat.NumCols(),
-//        cell_dim = input_cols / 5;
-//  KALDI_ASSERT(input_cols == (cell_dim * 5) || input_cols == (cell_dim * 5) + 3);
-//  KALDI_ASSERT(output->NumRows() == num_rows);
-//  KALDI_ASSERT(params_mat.NumRows() == 3);
-//  KALDI_ASSERT(params_mat.NumCols() == cell_dim);
-//  KALDI_ASSERT(output->NumCols() == 2 * cell_dim);
-//
-//  MatrixBase<Real> &output_mat = *output;
-//  const Real *params_data = params_mat.Data();
-//  int32 params_stride = params_mat.Stride();
-//  for (int32 r = 0; r < num_rows; r++) {
-//    const Real *input_row = input_mat.RowData(r);
-//    // i_scale and f_scale relate to dropout, they will normally be 1.0.
-//    Real i_scale = (input_cols == cell_dim*5 ? 1.0:input_row[cell_dim*5]),
-//         f_scale = (input_cols == cell_dim*5 ? 1.0:input_row[cell_dim*5 + 1]),
-//         o_scale = (input_cols == cell_dim*5 ? 1.0:input_row[cell_dim*5 + 2]);
-//
-//    Real *output_row = output_mat.RowData(r);
-//    for (int32 c = 0; c < cell_dim; c++) {
-//      Real i_part = input_row[c];
-//      Real f_part = input_row[c + cell_dim];
-//      Real c_part = input_row[c + 2 * cell_dim];
-//      Real o_part = input_row[c + 3 * cell_dim];
-//      Real c_prev = input_row[c + 4 * cell_dim];
-//      Real w_ic = params_data[c];
-//      Real w_fc = params_data[c + params_stride];
-//      Real w_oc = params_data[c + params_stride * 2];
-//      Real i_t = ScalarSigmoid(i_part + w_ic * c_prev);
-//      Real f_t = ScalarSigmoid(f_part + w_fc * c_prev);
-//      Real c_t = f_t * f_scale * c_prev + i_t * i_scale * ScalarTanh(c_part);
-//      Real o_t = ScalarSigmoid(o_part + w_oc * c_t);
-//      Real m_t = o_t * o_scale * ScalarTanh(c_t);
-//      output_row[c] = c_t;
-//      output_row[c + cell_dim] = m_t;
-//    }
-//  }
-//}
-//
-//template<typename Real>
-//void ComputeLstmNonlinearity(const CuMatrixBase<Real> &input,
-//                             const CuMatrixBase<Real> &params,
-//                             CuMatrixBase<Real> *output) {
-//  int32 num_rows = input.NumRows(),
-//      input_cols = input.NumCols(),
-//        cell_dim = input_cols / 5;
-//  KALDI_ASSERT(input_cols == (cell_dim * 5) || input_cols == (cell_dim * 5) + 3);
-//  KALDI_ASSERT(output->NumRows() == num_rows);
-//  KALDI_ASSERT(params.NumRows() == 3);
-//  KALDI_ASSERT(params.NumCols() == cell_dim);
-//  KALDI_ASSERT(output->NumCols() == 2 * cell_dim);
-//
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    CuTimer tim;
-//
-//    int have_dropout_mask = (input_cols == (cell_dim * 5) + 3);
-//
-//    // Each thread block is working on 1 row of the data.
-//    // It's best that cell dim is a multiple fo CU1DBLOCK
-//    dim3 dimBlock(CU1DBLOCK);
-//    dim3 dimGrid(num_rows);
-//
-//    cuda_lstm_nonlinearity(dimGrid, dimBlock, input.Data(), input.Stride(),
-//                           params.Data(), params.Stride(), output->Stride(),
-//                           cell_dim, have_dropout_mask, num_rows, output->Data());
-//    CU_SAFE_CALL(cudaGetLastError());
-//
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    CpuComputeLstmNonlinearity(input.Mat(), params.Mat(), &output->Mat());
-//  }
-//}
-//
-//template
-//void CpuComputeLstmNonlinearity(const MatrixBase<float> &input_mat,
-//                                const MatrixBase<float> &params_mat,
-//                                MatrixBase<float> *output);
-//template
-//void CpuComputeLstmNonlinearity(const MatrixBase<double> &input_mat,
-//                                const MatrixBase<double> &params_mat,
-//                                MatrixBase<double> *output);
-//template
-//void ComputeLstmNonlinearity(const CuMatrixBase<float> &input,
-//                             const CuMatrixBase<float> &params,
-//                             CuMatrixBase<float> *output);
-//template
-//void ComputeLstmNonlinearity(const CuMatrixBase<double> &input,
-//                             const CuMatrixBase<double> &params,
-//                             CuMatrixBase<double> *output);
-//
+template<typename Real>
+void CpuComputeLstmNonlinearity(const MatrixBase<Real> &input_mat,
+                                const MatrixBase<Real> &params_mat,
+                                MatrixBase<Real> *output) {
+  int32 num_rows = input_mat.NumRows(),
+      input_cols = input_mat.NumCols(),
+        cell_dim = input_cols / 5;
+  KALDI_ASSERT(input_cols == (cell_dim * 5) || input_cols == (cell_dim * 5) + 3);
+  KALDI_ASSERT(output->NumRows() == num_rows);
+  KALDI_ASSERT(params_mat.NumRows() == 3);
+  KALDI_ASSERT(params_mat.NumCols() == cell_dim);
+  KALDI_ASSERT(output->NumCols() == 2 * cell_dim);
+
+  MatrixBase<Real> &output_mat = *output;
+  const Real *params_data = params_mat.Data();
+  int32 params_stride = params_mat.Stride();
+  for (int32 r = 0; r < num_rows; r++) {
+    const Real *input_row = input_mat.RowData(r);
+    // i_scale and f_scale relate to dropout, they will normally be 1.0.
+    Real i_scale = (input_cols == cell_dim*5 ? 1.0:input_row[cell_dim*5]),
+         f_scale = (input_cols == cell_dim*5 ? 1.0:input_row[cell_dim*5 + 1]),
+         o_scale = (input_cols == cell_dim*5 ? 1.0:input_row[cell_dim*5 + 2]);
+
+    Real *output_row = output_mat.RowData(r);
+    for (int32 c = 0; c < cell_dim; c++) {
+      Real i_part = input_row[c];
+      Real f_part = input_row[c + cell_dim];
+      Real c_part = input_row[c + 2 * cell_dim];
+      Real o_part = input_row[c + 3 * cell_dim];
+      Real c_prev = input_row[c + 4 * cell_dim];
+      Real w_ic = params_data[c];
+      Real w_fc = params_data[c + params_stride];
+      Real w_oc = params_data[c + params_stride * 2];
+      Real i_t = ScalarSigmoid(i_part + w_ic * c_prev);
+      Real f_t = ScalarSigmoid(f_part + w_fc * c_prev);
+      Real c_t = f_t * f_scale * c_prev + i_t * i_scale * ScalarTanh(c_part);
+      Real o_t = ScalarSigmoid(o_part + w_oc * c_t);
+      Real m_t = o_t * o_scale * ScalarTanh(c_t);
+      output_row[c] = c_t;
+      output_row[c + cell_dim] = m_t;
+    }
+  }
+}
+
+template<typename Real>
+void ComputeLstmNonlinearity(const CuMatrixBase<Real> &input,
+                             const CuMatrixBase<Real> &params,
+                             CuMatrixBase<Real> *output) {
+  int32 num_rows = input.NumRows(),
+      input_cols = input.NumCols(),
+        cell_dim = input_cols / 5;
+  KALDI_ASSERT(input_cols == (cell_dim * 5) || input_cols == (cell_dim * 5) + 3);
+  KALDI_ASSERT(output->NumRows() == num_rows);
+  KALDI_ASSERT(params.NumRows() == 3);
+  KALDI_ASSERT(params.NumCols() == cell_dim);
+  KALDI_ASSERT(output->NumCols() == 2 * cell_dim);
+
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    CuTimer tim;
+
+    int have_dropout_mask = (input_cols == (cell_dim * 5) + 3);
+
+    // Each thread block is working on 1 row of the data.
+    // It's best that cell dim is a multiple fo CU1DBLOCK
+    dim3 dimBlock(CU1DBLOCK);
+    dim3 dimGrid(num_rows);
+
+    cuda_lstm_nonlinearity(dimGrid, dimBlock, input.Data(), input.Stride(),
+                           params.Data(), params.Stride(), output->Stride(),
+                           cell_dim, have_dropout_mask, num_rows, output->Data());
+    CU_SAFE_CALL(cudaGetLastError());
+
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    CpuComputeLstmNonlinearity(input.Mat(), params.Mat(), &output->Mat());
+  }
+}
+
+template
+void CpuComputeLstmNonlinearity(const MatrixBase<float> &input_mat,
+                                const MatrixBase<float> &params_mat,
+                                MatrixBase<float> *output);
+template
+void CpuComputeLstmNonlinearity(const MatrixBase<double> &input_mat,
+                                const MatrixBase<double> &params_mat,
+                                MatrixBase<double> *output);
+template
+void ComputeLstmNonlinearity(const CuMatrixBase<float> &input,
+                             const CuMatrixBase<float> &params,
+                             CuMatrixBase<float> *output);
+template
+void ComputeLstmNonlinearity(const CuMatrixBase<double> &input,
+                             const CuMatrixBase<double> &params,
+                             CuMatrixBase<double> *output);
+
 //template<typename Real>
 //void CpuBackpropLstmNonlinearity(const MatrixBase<Real> &input,
 //                                 const MatrixBase<Real> &params,

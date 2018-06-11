@@ -34,67 +34,67 @@ namespace nnet3 {
 //const BaseFloat NormalizeComponent::kSquaredNormFloor =
 //    pow(2.0, NormalizeComponent::kExpSquaredNormFloor);
 //
-//NormalizeComponent::NormalizeComponent(const NormalizeComponent &other):
-//    input_dim_(other.input_dim_), block_dim_(other.block_dim_),
-//    target_rms_(other.target_rms_),
-//    add_log_stddev_(other.add_log_stddev_) { }
+NormalizeComponent::NormalizeComponent(const NormalizeComponent &other):
+    input_dim_(other.input_dim_), block_dim_(other.block_dim_),
+    target_rms_(other.target_rms_),
+    add_log_stddev_(other.add_log_stddev_) { }
 //
-//void NormalizeComponent::InitFromConfig(ConfigLine *cfl) {
-//  input_dim_ = 0;
-//  add_log_stddev_ = false;
-//  target_rms_ = 1.0;
-//  bool ok = cfl->GetValue("dim", &input_dim_) ||
-//      cfl->GetValue("input-dim", &input_dim_);
-//  block_dim_ = input_dim_;
-//  cfl->GetValue("block-dim", &block_dim_);
-//  cfl->GetValue("target-rms", &target_rms_);
-//  cfl->GetValue("add-log-stddev", &add_log_stddev_);
-//  if (!ok || cfl->HasUnusedValues() || input_dim_ <= 0 || target_rms_ <= 0.0 ||
-//      block_dim_ <= 0 || input_dim_ % block_dim_ != 0)
-//    KALDI_ERR << "Invalid initializer for layer of type "
-//              << Type() << ": \"" << cfl->WholeLine() << "\"";
-//}
+void NormalizeComponent::InitFromConfig(ConfigLine *cfl) {
+  input_dim_ = 0;
+  add_log_stddev_ = false;
+  target_rms_ = 1.0;
+  bool ok = cfl->GetValue("dim", &input_dim_) ||
+      cfl->GetValue("input-dim", &input_dim_);
+  block_dim_ = input_dim_;
+  cfl->GetValue("block-dim", &block_dim_);
+  cfl->GetValue("target-rms", &target_rms_);
+  cfl->GetValue("add-log-stddev", &add_log_stddev_);
+  if (!ok || cfl->HasUnusedValues() || input_dim_ <= 0 || target_rms_ <= 0.0 ||
+      block_dim_ <= 0 || input_dim_ % block_dim_ != 0)
+    KALDI_ERR << "Invalid initializer for layer of type "
+              << Type() << ": \"" << cfl->WholeLine() << "\"";
+}
 //
-//void NormalizeComponent::Read(std::istream &is, bool binary) {
-//  std::string token;
-//  ReadToken(is, binary, &token);
-//  if (token == "<NormalizeComponent>") {
-//    ReadToken(is, binary, &token);
-//  }
-//  KALDI_ASSERT(token == "<Dim>" || token == "<InputDim>");
-//  ReadBasicType(is, binary, &input_dim_); // Read dimension.
-//  ReadToken(is, binary, &token);
-//  if (token == "<BlockDim>") {
-//    ReadBasicType(is, binary, &block_dim_);
-//    ReadToken(is, binary, &token);
-//  } else {
-//    block_dim_ = input_dim_;
-//  }
-//  // read target_rms_ if it is available.
-//  if (token == "<TargetRms>") {
-//    ReadBasicType(is, binary, &target_rms_);
-//    ReadToken(is, binary, &token);
-//  }
-//  //  Read add_log_stddev_ token, if it is available.
-//  if (token == "<AddLogStddev>") {
-//    ReadBasicType(is, binary, &add_log_stddev_);
-//    ReadToken(is, binary, &token);
-//  } else {
-//    add_log_stddev_ = false;
-//  }
-//  if (token == "<ValueAvg>") {
-//    // back-compatibility code.
-//    CuVector<double> temp;
-//    temp.Read(is, binary);
-//    ExpectToken(is, binary, "<DerivAvg>");
-//    temp.Read(is, binary);
-//    ExpectToken(is, binary, "<Count>");
-//    double count;
-//    ReadBasicType(is, binary, &count);
-//    ReadToken(is, binary, &token);
-//  }
-//  KALDI_ASSERT(token == "</NormalizeComponent>");
-//}
+void NormalizeComponent::Read(std::istream &is, bool binary) {
+  std::string token;
+  ReadToken(is, binary, &token);
+  if (token == "<NormalizeComponent>") {
+    ReadToken(is, binary, &token);
+  }
+  KALDI_ASSERT(token == "<Dim>" || token == "<InputDim>");
+  ReadBasicType(is, binary, &input_dim_); // Read dimension.
+  ReadToken(is, binary, &token);
+  if (token == "<BlockDim>") {
+    ReadBasicType(is, binary, &block_dim_);
+    ReadToken(is, binary, &token);
+  } else {
+    block_dim_ = input_dim_;
+  }
+  // read target_rms_ if it is available.
+  if (token == "<TargetRms>") {
+    ReadBasicType(is, binary, &target_rms_);
+    ReadToken(is, binary, &token);
+  }
+  //  Read add_log_stddev_ token, if it is available.
+  if (token == "<AddLogStddev>") {
+    ReadBasicType(is, binary, &add_log_stddev_);
+    ReadToken(is, binary, &token);
+  } else {
+    add_log_stddev_ = false;
+  }
+  if (token == "<ValueAvg>") {
+    // back-compatibility code.
+    CuVector<double> temp;
+    temp.Read(is, binary);
+    ExpectToken(is, binary, "<DerivAvg>");
+    temp.Read(is, binary);
+    ExpectToken(is, binary, "<Count>");
+    double count;
+    ReadBasicType(is, binary, &count);
+    ReadToken(is, binary, &token);
+  }
+  KALDI_ASSERT(token == "</NormalizeComponent>");
+}
 //
 //void NormalizeComponent::Write(std::ostream &os, bool binary) const {
 //  WriteToken(os, binary, "<NormalizeComponent>");
@@ -110,48 +110,48 @@ namespace nnet3 {
 //  WriteBasicType(os, binary, add_log_stddev_);
 //  WriteToken(os, binary, "</NormalizeComponent>");
 //}
-//
-//std::string NormalizeComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << Type() << ", input-dim=" << InputDim()
-//         << ", output-dim=" << OutputDim() << ", target-rms=" << target_rms_
-//         << ", add-log-stddev=" << std::boolalpha << add_log_stddev_;
-//  if (block_dim_ != input_dim_)
-//    stream << ", block-dim=" << block_dim_;
-//  return stream.str();
-//}
-//
-//// The output y_i = scale * x_i,
-//// and we want to RMS value of the y_i to equal target_rms,
-//// so y^t y = D * target_rms^2 (if y is one row of the input).
-//// we need to have scale = 1.0 / sqrt(x^t x / (D * target_rms^2)).
-//// there is also flooring involved, to avoid division-by-zero
-//// problems.  It's important for the backprop, that the floor's
-//// square root is exactly representable as float.
-//// If add_log_stddev_ is true, log(max(epsi, sqrt(x^t x / D)))
-//// is an extra dimension of the output.
-//void* NormalizeComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                                   const CuMatrixBase<BaseFloat> &in,
-//                                   CuMatrixBase<BaseFloat> *out) const {
-//  KALDI_ASSERT(in.NumCols() == InputDim() && out->NumCols() == OutputDim() &&
-//               in.NumRows() == out->NumRows());
-//  if (block_dim_ != input_dim_) {
-//    int32 num_blocks = input_dim_ / block_dim_,
-//        new_num_rows = in.NumRows() * num_blocks,
-//        output_block_dim = block_dim_ + (add_log_stddev_ ? 1 : 0);
-//    KALDI_ASSERT(in.Stride() == in.NumCols() && out->Stride() == out->NumCols());
-//    CuSubMatrix<BaseFloat> in_reshaped(in.Data(), new_num_rows,
-//                                       block_dim_, block_dim_),
-//        out_reshaped(out->Data(), new_num_rows,
-//                     output_block_dim, output_block_dim);
-//    cu::NormalizePerRow(in_reshaped, target_rms_, add_log_stddev_,
-//                        &out_reshaped);
-//  } else {
-//    cu::NormalizePerRow(in, target_rms_, add_log_stddev_, out);
-//  }
-//  return NULL;
-//}
-//
+
+std::string NormalizeComponent::Info() const {
+  std::ostringstream stream;
+  stream << Type() << ", input-dim=" << InputDim()
+         << ", output-dim=" << OutputDim() << ", target-rms=" << target_rms_
+         << ", add-log-stddev=" << std::boolalpha << add_log_stddev_;
+  if (block_dim_ != input_dim_)
+    stream << ", block-dim=" << block_dim_;
+  return stream.str();
+}
+
+// The output y_i = scale * x_i,
+// and we want to RMS value of the y_i to equal target_rms,
+// so y^t y = D * target_rms^2 (if y is one row of the input).
+// we need to have scale = 1.0 / sqrt(x^t x / (D * target_rms^2)).
+// there is also flooring involved, to avoid division-by-zero
+// problems.  It's important for the backprop, that the floor's
+// square root is exactly representable as float.
+// If add_log_stddev_ is true, log(max(epsi, sqrt(x^t x / D)))
+// is an extra dimension of the output.
+void* NormalizeComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                   const CuMatrixBase<BaseFloat> &in,
+                                   CuMatrixBase<BaseFloat> *out) const {
+  KALDI_ASSERT(in.NumCols() == InputDim() && out->NumCols() == OutputDim() &&
+               in.NumRows() == out->NumRows());
+  if (block_dim_ != input_dim_) {
+    int32 num_blocks = input_dim_ / block_dim_,
+        new_num_rows = in.NumRows() * num_blocks,
+        output_block_dim = block_dim_ + (add_log_stddev_ ? 1 : 0);
+    KALDI_ASSERT(in.Stride() == in.NumCols() && out->Stride() == out->NumCols());
+    CuSubMatrix<BaseFloat> in_reshaped(in.Data(), new_num_rows,
+                                       block_dim_, block_dim_),
+        out_reshaped(out->Data(), new_num_rows,
+                     output_block_dim, output_block_dim);
+    cu::NormalizePerRow(in_reshaped, target_rms_, add_log_stddev_,
+                        &out_reshaped);
+  } else {
+    cu::NormalizePerRow(in, target_rms_, add_log_stddev_, out);
+  }
+  return NULL;
+}
+
 ///*
 //  A note on the derivative of NormalizeComponent...
 //  let both row_in and row_out be vectors of dimension D.

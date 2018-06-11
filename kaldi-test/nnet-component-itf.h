@@ -97,7 +97,7 @@ enum ComponentProperties {
 class ComponentPrecomputedIndexes {
  public:
   virtual ComponentPrecomputedIndexes *Copy() const = 0;
-  virtual void Write(std::ostream &os, bool binary) const = 0;
+  //virtual void Write(std::ostream &os, bool binary) const = 0;
   virtual void Read(std::istream &os, bool binary) = 0;
   virtual std::string Type() const = 0;
   static ComponentPrecomputedIndexes* ReadNew(std::istream &is, bool binary);
@@ -639,8 +639,8 @@ class NonlinearComponent: public Component {
   //// This function updates the stats "value_sum_", "deriv_sum_", and
   //// count_. (If deriv == NULL, it won't update "deriv_sum_").
   //// It will be called from the Backprop function of child classes.
-  //void StoreStatsInternal(const CuMatrixBase<BaseFloat> &out_value,
-  //                        const CuMatrixBase<BaseFloat> *deriv = NULL);
+  void StoreStatsInternal(const CuMatrixBase<BaseFloat> &out_value,
+                          const CuMatrixBase<BaseFloat> *deriv = NULL);
 
   //// This function may be called from child class members during backprop.  It
   //// stores the 'oderiv_sumsq_' stats.

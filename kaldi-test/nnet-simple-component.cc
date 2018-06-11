@@ -875,15 +875,15 @@ void* SigmoidComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
 //  StoreStatsInternal(out_value, &temp_deriv);
 //}
 //
-//void* RectifiedLinearComponent::Propagate(
-//    const ComponentPrecomputedIndexes *indexes,
-//    const CuMatrixBase<BaseFloat> &in,
-//    CuMatrixBase<BaseFloat> *out) const {
-//  // Apply rectified linear function (x >= 0 ? 1.0 : 0.0)
-//  out->CopyFromMat(in);
-//  out->ApplyFloor(0.0);
-//  return NULL;
-//}
+void* RectifiedLinearComponent::Propagate(
+    const ComponentPrecomputedIndexes *indexes,
+    const CuMatrixBase<BaseFloat> &in,
+    CuMatrixBase<BaseFloat> *out) const {
+  // Apply rectified linear function (x >= 0 ? 1.0 : 0.0)
+  out->CopyFromMat(in);
+  out->ApplyFloor(0.0);
+  return NULL;
+}
 //
 //void RectifiedLinearComponent::Backprop(
 //    const std::string &debug_info,
@@ -994,19 +994,19 @@ void* SigmoidComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
 //}
 //
 //
-//void RectifiedLinearComponent::StoreStats(
-//    const CuMatrixBase<BaseFloat> &in_value,
-//    const CuMatrixBase<BaseFloat> &out_value,
-//    void *memo) {
-//  // only store stats about every other minibatch.
-//  if (RandInt(0, 1) == 0)
-//    return;
-//  CuMatrix<BaseFloat> temp_deriv(out_value.NumRows(),
-//                                 out_value.NumCols(),
-//                                 kUndefined);
-//  temp_deriv.Heaviside(out_value);
-//  StoreStatsInternal(out_value, &temp_deriv);
-//}
+void RectifiedLinearComponent::StoreStats(
+    const CuMatrixBase<BaseFloat> &in_value,
+    const CuMatrixBase<BaseFloat> &out_value,
+    void *memo) {
+  // only store stats about every other minibatch.
+  if (RandInt(0, 1) == 0)
+    return;
+  CuMatrix<BaseFloat> temp_deriv(out_value.NumRows(),
+                                 out_value.NumCols(),
+                                 kUndefined);
+  temp_deriv.Heaviside(out_value);
+  StoreStatsInternal(out_value, &temp_deriv);
+}
 //
 void AffineComponent::Scale(BaseFloat scale) {
   if (scale == 0.0) {
@@ -2670,164 +2670,164 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //}
 //
 //
+
+void NaturalGradientAffineComponent::Read(std::istream &is, bool binary) {
+  ReadUpdatableCommon(is, binary);  // Read the opening tag and learning rate
+  ExpectToken(is, binary, "<LinearParams>");
+  linear_params_.Read(is, binary);
+  ExpectToken(is, binary, "<BiasParams>");
+  bias_params_.Read(is, binary);
+
+  BaseFloat num_samples_history, alpha;
+  int32 rank_in, rank_out, update_period;
+
+  ExpectToken(is, binary, "<RankIn>");
+  ReadBasicType(is, binary, &rank_in);
+  ExpectToken(is, binary, "<RankOut>");
+  ReadBasicType(is, binary, &rank_out);
+  if (PeekToken(is, binary) == 'O') {
+    ExpectToken(is, binary, "<OrthonormalConstraint>");
+    ReadBasicType(is, binary, &orthonormal_constraint_);
+  } else {
+    orthonormal_constraint_ = 0.0;
+  }
+  ExpectToken(is, binary, "<UpdatePeriod>");
+  ReadBasicType(is, binary, &update_period);
+  ExpectToken(is, binary, "<NumSamplesHistory>");
+  ReadBasicType(is, binary, &num_samples_history);
+  ExpectToken(is, binary, "<Alpha>");
+  ReadBasicType(is, binary, &alpha);
+
+  //preconditioner_in_.SetNumSamplesHistory(num_samples_history);
+  //preconditioner_out_.SetNumSamplesHistory(num_samples_history);
+  //preconditioner_in_.SetAlpha(alpha);
+  //preconditioner_out_.SetAlpha(alpha);
+  //preconditioner_in_.SetRank(rank_in);
+  //preconditioner_out_.SetRank(rank_out);
+  //preconditioner_in_.SetUpdatePeriod(update_period);
+  //preconditioner_out_.SetUpdatePeriod(update_period);
+
+  if (PeekToken(is, binary) == 'M') {
+    // MaxChangePerSample, long ago removed; back compatibility.
+    ExpectToken(is, binary, "<MaxChangePerSample>");
+    BaseFloat temp;
+    ReadBasicType(is, binary, &temp);
+  }
+  if (PeekToken(is, binary) == 'I') {
+    // for back compatibility; we don't write this here any
+    // more as it's written and read in Write/ReadUpdatableCommon
+    ExpectToken(is, binary, "<IsGradient>");
+    ReadBasicType(is, binary, &is_gradient_);
+  }
+  if (PeekToken(is, binary) == 'U') {
+    ExpectToken(is, binary, "<UpdateCount>");
+    // back-compatibility branch (these configs were added and then removed).
+    double temp;
+    ReadBasicType(is, binary, &temp);
+    ExpectToken(is, binary, "<ActiveScalingCount>");
+    ReadBasicType(is, binary, &temp);
+    ExpectToken(is, binary, "<MaxChangeScaleStats>");
+    ReadBasicType(is, binary, &temp);
+  }
+  std::string token;
+  ReadToken(is, binary, &token);
+  // the following has to handle a couple variants of
+  if (token.find("NaturalGradientAffineComponent>") == std::string::npos)
+    KALDI_ERR << "Expected <NaturalGradientAffineComponent> or "
+              << "</NaturalGradientAffineComponent>, got " << token;
+}
+
+
+NaturalGradientAffineComponent::NaturalGradientAffineComponent(
+    const CuMatrixBase<BaseFloat> &linear_params,
+    const CuVectorBase<BaseFloat> &bias_params):
+    AffineComponent(linear_params, bias_params, 0.001) {
+  KALDI_ASSERT(bias_params.Dim() == linear_params.NumRows() &&
+               bias_params.Dim() != 0);
+
+  // set some default natural gradient configs.
+  //preconditioner_in_.SetRank(20);
+  //preconditioner_out_.SetRank(80);
+  //preconditioner_in_.SetUpdatePeriod(4);
+  //preconditioner_out_.SetUpdatePeriod(4);
+}
 //
-//void NaturalGradientAffineComponent::Read(std::istream &is, bool binary) {
-//  ReadUpdatableCommon(is, binary);  // Read the opening tag and learning rate
-//  ExpectToken(is, binary, "<LinearParams>");
-//  linear_params_.Read(is, binary);
-//  ExpectToken(is, binary, "<BiasParams>");
-//  bias_params_.Read(is, binary);
-//
-//  BaseFloat num_samples_history, alpha;
-//  int32 rank_in, rank_out, update_period;
-//
-//  ExpectToken(is, binary, "<RankIn>");
-//  ReadBasicType(is, binary, &rank_in);
-//  ExpectToken(is, binary, "<RankOut>");
-//  ReadBasicType(is, binary, &rank_out);
-//  if (PeekToken(is, binary) == 'O') {
-//    ExpectToken(is, binary, "<OrthonormalConstraint>");
-//    ReadBasicType(is, binary, &orthonormal_constraint_);
-//  } else {
-//    orthonormal_constraint_ = 0.0;
-//  }
-//  ExpectToken(is, binary, "<UpdatePeriod>");
-//  ReadBasicType(is, binary, &update_period);
-//  ExpectToken(is, binary, "<NumSamplesHistory>");
-//  ReadBasicType(is, binary, &num_samples_history);
-//  ExpectToken(is, binary, "<Alpha>");
-//  ReadBasicType(is, binary, &alpha);
-//
-//  preconditioner_in_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_out_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_in_.SetAlpha(alpha);
-//  preconditioner_out_.SetAlpha(alpha);
-//  preconditioner_in_.SetRank(rank_in);
-//  preconditioner_out_.SetRank(rank_out);
-//  preconditioner_in_.SetUpdatePeriod(update_period);
-//  preconditioner_out_.SetUpdatePeriod(update_period);
-//
-//  if (PeekToken(is, binary) == 'M') {
-//    // MaxChangePerSample, long ago removed; back compatibility.
-//    ExpectToken(is, binary, "<MaxChangePerSample>");
-//    BaseFloat temp;
-//    ReadBasicType(is, binary, &temp);
-//  }
-//  if (PeekToken(is, binary) == 'I') {
-//    // for back compatibility; we don't write this here any
-//    // more as it's written and read in Write/ReadUpdatableCommon
-//    ExpectToken(is, binary, "<IsGradient>");
-//    ReadBasicType(is, binary, &is_gradient_);
-//  }
-//  if (PeekToken(is, binary) == 'U') {
-//    ExpectToken(is, binary, "<UpdateCount>");
-//    // back-compatibility branch (these configs were added and then removed).
-//    double temp;
-//    ReadBasicType(is, binary, &temp);
-//    ExpectToken(is, binary, "<ActiveScalingCount>");
-//    ReadBasicType(is, binary, &temp);
-//    ExpectToken(is, binary, "<MaxChangeScaleStats>");
-//    ReadBasicType(is, binary, &temp);
-//  }
-//  std::string token;
-//  ReadToken(is, binary, &token);
-//  // the following has to handle a couple variants of
-//  if (token.find("NaturalGradientAffineComponent>") == std::string::npos)
-//    KALDI_ERR << "Expected <NaturalGradientAffineComponent> or "
-//              << "</NaturalGradientAffineComponent>, got " << token;
-//}
-//
-//
-//NaturalGradientAffineComponent::NaturalGradientAffineComponent(
-//    const CuMatrixBase<BaseFloat> &linear_params,
-//    const CuVectorBase<BaseFloat> &bias_params):
-//    AffineComponent(linear_params, bias_params, 0.001) {
-//  KALDI_ASSERT(bias_params.Dim() == linear_params.NumRows() &&
-//               bias_params.Dim() != 0);
-//
-//  // set some default natural gradient configs.
-//  preconditioner_in_.SetRank(20);
-//  preconditioner_out_.SetRank(80);
-//  preconditioner_in_.SetUpdatePeriod(4);
-//  preconditioner_out_.SetUpdatePeriod(4);
-//}
-//
-//void NaturalGradientAffineComponent::InitFromConfig(ConfigLine *cfl) {
-//  bool ok = true;
-//  std::string matrix_filename;
-//
-//  is_gradient_ = false;  // not configurable; there's no reason you'd want this
-//
-//  InitLearningRatesFromConfig(cfl);
-//
-//  if (cfl->GetValue("matrix", &matrix_filename)) {
-//    CuMatrix<BaseFloat> mat;
-//    ReadKaldiObject(matrix_filename, &mat); // will abort on failure.
-//    KALDI_ASSERT(mat.NumCols() >= 2);
-//    int32 input_dim = mat.NumCols() - 1, output_dim = mat.NumRows();
-//    linear_params_.Resize(output_dim, input_dim);
-//    bias_params_.Resize(output_dim);
-//    linear_params_.CopyFromMat(mat.Range(0, output_dim, 0, input_dim));
-//    bias_params_.CopyColFromMat(mat, input_dim);
-//    if (cfl->GetValue("input-dim", &input_dim))
-//      KALDI_ASSERT(input_dim == InputDim() &&
-//                   "input-dim mismatch vs. matrix.");
-//    if (cfl->GetValue("output-dim", &output_dim))
-//      KALDI_ASSERT(output_dim == OutputDim() &&
-//                   "output-dim mismatch vs. matrix.");
-//  } else {
-//    int32 input_dim = -1, output_dim = -1;
-//
-//    ok = ok && cfl->GetValue("input-dim", &input_dim);
-//    ok = ok && cfl->GetValue("output-dim", &output_dim);
-//    if (!ok)
-//      KALDI_ERR << "Bad initializer " << cfl->WholeLine();
-//    BaseFloat param_stddev = 1.0 / std::sqrt(input_dim),
-//        bias_stddev = 1.0, bias_mean = 0.0;
-//    cfl->GetValue("param-stddev", &param_stddev);
-//    cfl->GetValue("bias-stddev", &bias_stddev);
-//    cfl->GetValue("bias-mean", &bias_mean);
-//    linear_params_.Resize(output_dim, input_dim);
-//    bias_params_.Resize(output_dim);
-//    KALDI_ASSERT(output_dim > 0 && input_dim > 0 && param_stddev >= 0.0 &&
-//                 bias_stddev >= 0.0);
-//    linear_params_.SetRandn(); // sets to random normally distributed noise.
-//    linear_params_.Scale(param_stddev);
-//    bias_params_.SetRandn();
-//    bias_params_.Scale(bias_stddev);
-//    bias_params_.Add(bias_mean);
-//  }
-//
-//  orthonormal_constraint_ = 0.0;
-//  cfl->GetValue("orthonormal-constraint", &orthonormal_constraint_);
-//
-//  // Set natural-gradient configs.
-//  BaseFloat num_samples_history = 2000.0,
-//      alpha = 4.0;
-//  int32 rank_in = 20, rank_out = 80,
-//      update_period = 4;
-//  cfl->GetValue("num-samples-history", &num_samples_history);
-//  cfl->GetValue("alpha", &alpha);
-//  cfl->GetValue("rank-in", &rank_in);
-//  cfl->GetValue("rank-out", &rank_out);
-//  cfl->GetValue("update-period", &update_period);
-//
-//  preconditioner_in_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_out_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_in_.SetAlpha(alpha);
-//  preconditioner_out_.SetAlpha(alpha);
-//  preconditioner_in_.SetRank(rank_in);
-//  preconditioner_out_.SetRank(rank_out);
-//  preconditioner_in_.SetUpdatePeriod(update_period);
-//  preconditioner_out_.SetUpdatePeriod(update_period);
-//
-//  if (cfl->HasUnusedValues())
-//    KALDI_ERR << "Could not process these elements in initializer: "
-//              << cfl->UnusedValues();
-//  if (!ok)
-//    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
-//}
-//
+void NaturalGradientAffineComponent::InitFromConfig(ConfigLine *cfl) {
+  bool ok = true;
+  std::string matrix_filename;
+
+  is_gradient_ = false;  // not configurable; there's no reason you'd want this
+
+  InitLearningRatesFromConfig(cfl);
+
+  if (cfl->GetValue("matrix", &matrix_filename)) {
+    CuMatrix<BaseFloat> mat;
+    ReadKaldiObject(matrix_filename, &mat); // will abort on failure.
+    KALDI_ASSERT(mat.NumCols() >= 2);
+    int32 input_dim = mat.NumCols() - 1, output_dim = mat.NumRows();
+    linear_params_.Resize(output_dim, input_dim);
+    bias_params_.Resize(output_dim);
+    linear_params_.CopyFromMat(mat.Range(0, output_dim, 0, input_dim));
+    bias_params_.CopyColFromMat(mat, input_dim);
+    if (cfl->GetValue("input-dim", &input_dim))
+      KALDI_ASSERT(input_dim == InputDim() &&
+                   "input-dim mismatch vs. matrix.");
+    if (cfl->GetValue("output-dim", &output_dim))
+      KALDI_ASSERT(output_dim == OutputDim() &&
+                   "output-dim mismatch vs. matrix.");
+  } else {
+    int32 input_dim = -1, output_dim = -1;
+
+    ok = ok && cfl->GetValue("input-dim", &input_dim);
+    ok = ok && cfl->GetValue("output-dim", &output_dim);
+    if (!ok)
+      KALDI_ERR << "Bad initializer " << cfl->WholeLine();
+    BaseFloat param_stddev = 1.0 / std::sqrt(input_dim),
+        bias_stddev = 1.0, bias_mean = 0.0;
+    cfl->GetValue("param-stddev", &param_stddev);
+    cfl->GetValue("bias-stddev", &bias_stddev);
+    cfl->GetValue("bias-mean", &bias_mean);
+    linear_params_.Resize(output_dim, input_dim);
+    bias_params_.Resize(output_dim);
+    KALDI_ASSERT(output_dim > 0 && input_dim > 0 && param_stddev >= 0.0 &&
+                 bias_stddev >= 0.0);
+    linear_params_.SetRandn(); // sets to random normally distributed noise.
+    linear_params_.Scale(param_stddev);
+    bias_params_.SetRandn();
+    bias_params_.Scale(bias_stddev);
+    bias_params_.Add(bias_mean);
+  }
+
+  orthonormal_constraint_ = 0.0;
+  cfl->GetValue("orthonormal-constraint", &orthonormal_constraint_);
+
+  // Set natural-gradient configs.
+  BaseFloat num_samples_history = 2000.0,
+      alpha = 4.0;
+  int32 rank_in = 20, rank_out = 80,
+      update_period = 4;
+  cfl->GetValue("num-samples-history", &num_samples_history);
+  cfl->GetValue("alpha", &alpha);
+  cfl->GetValue("rank-in", &rank_in);
+  cfl->GetValue("rank-out", &rank_out);
+  cfl->GetValue("update-period", &update_period);
+
+  //preconditioner_in_.SetNumSamplesHistory(num_samples_history);
+  //preconditioner_out_.SetNumSamplesHistory(num_samples_history);
+  //preconditioner_in_.SetAlpha(alpha);
+  //preconditioner_out_.SetAlpha(alpha);
+  //preconditioner_in_.SetRank(rank_in);
+  //preconditioner_out_.SetRank(rank_out);
+  //preconditioner_in_.SetUpdatePeriod(update_period);
+  //preconditioner_out_.SetUpdatePeriod(update_period);
+
+  if (cfl->HasUnusedValues())
+    KALDI_ERR << "Could not process these elements in initializer: "
+              << cfl->UnusedValues();
+  if (!ok)
+    KALDI_ERR << "Bad initializer " << cfl->WholeLine();
+}
+
 //void NaturalGradientAffineComponent::Write(std::ostream &os,
 //                                           bool binary) const {
 //  WriteUpdatableCommon(os, binary);  // Write the opening tag and learning rate
@@ -2852,27 +2852,27 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //  WriteToken(os, binary, "</NaturalGradientAffineComponent>");
 //}
 //
-//std::string NaturalGradientAffineComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << AffineComponent::Info();
-//  stream << ", rank-in=" << preconditioner_in_.GetRank()
-//         << ", rank-out=" << preconditioner_out_.GetRank()
-//         << ", num-samples-history=" << preconditioner_in_.GetNumSamplesHistory()
-//         << ", update-period=" << preconditioner_in_.GetUpdatePeriod()
-//         << ", alpha=" << preconditioner_in_.GetAlpha();
-//  return stream.str();
-//}
+std::string NaturalGradientAffineComponent::Info() const {
+  std::ostringstream stream;
+  stream << AffineComponent::Info();
+  //stream << ", rank-in=" << preconditioner_in_.GetRank()
+  //       << ", rank-out=" << preconditioner_out_.GetRank()
+  //       << ", num-samples-history=" << preconditioner_in_.GetNumSamplesHistory()
+  //       << ", update-period=" << preconditioner_in_.GetUpdatePeriod()
+  //       << ", alpha=" << preconditioner_in_.GetAlpha();
+  return stream.str();
+}
 //
-//Component* NaturalGradientAffineComponent::Copy() const {
-//  return new NaturalGradientAffineComponent(*this);
-//}
+Component* NaturalGradientAffineComponent::Copy() const {
+  return new NaturalGradientAffineComponent(*this);
+}
 //
-//NaturalGradientAffineComponent::NaturalGradientAffineComponent(
-//    const NaturalGradientAffineComponent &other):
-//    AffineComponent(other),
-//    preconditioner_in_(other.preconditioner_in_),
-//    preconditioner_out_(other.preconditioner_out_) { }
-//
+NaturalGradientAffineComponent::NaturalGradientAffineComponent(
+    const NaturalGradientAffineComponent &other):
+    AffineComponent(other)/*,
+    preconditioner_in_(other.preconditioner_in_),
+    preconditioner_out_(other.preconditioner_out_) */{ }
+
 //void NaturalGradientAffineComponent::Update(
 //    const std::string &debug_info,
 //    const CuMatrixBase<BaseFloat> &in_value,
@@ -2919,30 +2919,30 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //                           in_value_precon_part, kNoTrans, 1.0);
 //}
 //
-//void NaturalGradientAffineComponent::Scale(BaseFloat scale) {
-//  if (scale == 0.0) {
-//    linear_params_.SetZero();
-//    bias_params_.SetZero();
-//  } else {
-//    linear_params_.Scale(scale);
-//    bias_params_.Scale(scale);
-//  }
-//}
-//
-//void NaturalGradientAffineComponent::Add(BaseFloat alpha, const Component &other_in) {
-//  const NaturalGradientAffineComponent *other =
-//      dynamic_cast<const NaturalGradientAffineComponent*>(&other_in);
-//  KALDI_ASSERT(other != NULL);
-//  linear_params_.AddMat(alpha, other->linear_params_);
-//  bias_params_.AddVec(alpha, other->bias_params_);
-//}
-//
+void NaturalGradientAffineComponent::Scale(BaseFloat scale) {
+  if (scale == 0.0) {
+    linear_params_.SetZero();
+    bias_params_.SetZero();
+  } else {
+    linear_params_.Scale(scale);
+    bias_params_.Scale(scale);
+  }
+}
+
+void NaturalGradientAffineComponent::Add(BaseFloat alpha, const Component &other_in) {
+  const NaturalGradientAffineComponent *other =
+      dynamic_cast<const NaturalGradientAffineComponent*>(&other_in);
+  KALDI_ASSERT(other != NULL);
+  linear_params_.AddMat(alpha, other->linear_params_);
+  bias_params_.AddVec(alpha, other->bias_params_);
+}
+
 ///// virtual
 //void NaturalGradientAffineComponent::FreezeNaturalGradient(bool freeze) {
 //  preconditioner_in_.Freeze(freeze);
 //  preconditioner_out_.Freeze(freeze);
 //}
-//
+
 //
 //void LinearComponent::Read(std::istream &is, bool binary) {
 //  std::string token = ReadUpdatableCommon(is, binary);
@@ -3207,61 +3207,61 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //}
 //
 //
-//std::string FixedAffineComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << Component::Info();
-//  PrintParameterStats(stream, "linear-params", linear_params_);
-//  PrintParameterStats(stream, "bias", bias_params_, true);
-//  return stream.str();
-//}
+std::string FixedAffineComponent::Info() const {
+  std::ostringstream stream;
+  stream << Component::Info();
+  //PrintParameterStats(stream, "linear-params", linear_params_);
+  //PrintParameterStats(stream, "bias", bias_params_, true);
+  return stream.str();
+}
 //
-//void FixedAffineComponent::Init(const CuMatrixBase<BaseFloat> &mat) {
-//  KALDI_ASSERT(mat.NumCols() > 1);
-//  linear_params_ = mat.Range(0, mat.NumRows(), 0, mat.NumCols() - 1);
-//  bias_params_.Resize(mat.NumRows());
-//  bias_params_.CopyColFromMat(mat, mat.NumCols() - 1);
-//}
+void FixedAffineComponent::Init(const CuMatrixBase<BaseFloat> &mat) {
+  KALDI_ASSERT(mat.NumCols() > 1);
+  linear_params_ = mat.Range(0, mat.NumRows(), 0, mat.NumCols() - 1);
+  bias_params_.Resize(mat.NumRows());
+  bias_params_.CopyColFromMat(mat, mat.NumCols() - 1);
+}
 //
-//void FixedAffineComponent::InitFromConfig(ConfigLine *cfl) {
-//  std::string filename;
-//  // Two forms allowed: "matrix=<rxfilename>", or "input-dim=x output-dim=y"
-//  // (for testing purposes only).
-//  if (cfl->GetValue("matrix", &filename)) {
-//    if (cfl->HasUnusedValues())
-//      KALDI_ERR << "Invalid initializer for layer of type "
-//                << Type() << ": \"" << cfl->WholeLine() << "\"";
-//
-//    bool binary;
-//    Input ki(filename, &binary);
-//    CuMatrix<BaseFloat> mat;
-//    mat.Read(ki.Stream(), binary);
-//    KALDI_ASSERT(mat.NumRows() != 0);
-//    Init(mat);
-//  } else {
-//    int32 input_dim = -1, output_dim = -1;
-//    if (!cfl->GetValue("input-dim", &input_dim) ||
-//        !cfl->GetValue("output-dim", &output_dim) || cfl->HasUnusedValues()) {
-//      KALDI_ERR << "Invalid initializer for layer of type "
-//                << Type() << ": \"" << cfl->WholeLine() << "\"";
-//    }
-//    CuMatrix<BaseFloat> mat(output_dim, input_dim + 1);
-//    mat.SetRandn();
-//    Init(mat);
-//  }
-//}
-//
+void FixedAffineComponent::InitFromConfig(ConfigLine *cfl) {
+  std::string filename;
+  // Two forms allowed: "matrix=<rxfilename>", or "input-dim=x output-dim=y"
+  // (for testing purposes only).
+  if (cfl->GetValue("matrix", &filename)) {
+    if (cfl->HasUnusedValues())
+      KALDI_ERR << "Invalid initializer for layer of type "
+                << Type() << ": \"" << cfl->WholeLine() << "\"";
+
+    bool binary;
+    Input ki(filename, &binary);
+    CuMatrix<BaseFloat> mat;
+    mat.Read(ki.Stream(), binary);
+    KALDI_ASSERT(mat.NumRows() != 0);
+    Init(mat);
+  } else {
+    int32 input_dim = -1, output_dim = -1;
+    if (!cfl->GetValue("input-dim", &input_dim) ||
+        !cfl->GetValue("output-dim", &output_dim) || cfl->HasUnusedValues()) {
+      KALDI_ERR << "Invalid initializer for layer of type "
+                << Type() << ": \"" << cfl->WholeLine() << "\"";
+    }
+    CuMatrix<BaseFloat> mat(output_dim, input_dim + 1);
+    mat.SetRandn();
+    Init(mat);
+  }
+}
+
 //
 //FixedAffineComponent::FixedAffineComponent(const AffineComponent &c):
 //    linear_params_(c.LinearParams()),
 //    bias_params_(c.BiasParams()) { }
 //
-//void* FixedAffineComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                                     const CuMatrixBase<BaseFloat> &in,
-//                                     CuMatrixBase<BaseFloat> *out) const  {
-//  out->CopyRowsFromVec(bias_params_); // Adds the bias term first.
-//  out->AddMatMat(1.0, in, kNoTrans, linear_params_, kTrans, 1.0);
-//  return NULL;
-//}
+void* FixedAffineComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                     const CuMatrixBase<BaseFloat> &in,
+                                     CuMatrixBase<BaseFloat> *out) const  {
+  out->CopyRowsFromVec(bias_params_); // Adds the bias term first.
+  out->AddMatMat(1.0, in, kNoTrans, linear_params_, kTrans, 1.0);
+  return NULL;
+}
 //
 //void FixedAffineComponent::Backprop(const std::string &debug_info,
 //                                    const ComponentPrecomputedIndexes *indexes,
@@ -3278,12 +3278,12 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //                        linear_params_, kNoTrans, 1.0);
 //}
 //
-//Component* FixedAffineComponent::Copy() const {
-//  FixedAffineComponent *ans = new FixedAffineComponent();
-//  ans->linear_params_ = linear_params_;
-//  ans->bias_params_ = bias_params_;
-//  return ans;
-//}
+Component* FixedAffineComponent::Copy() const {
+  FixedAffineComponent *ans = new FixedAffineComponent();
+  ans->linear_params_ = linear_params_;
+  ans->bias_params_ = bias_params_;
+  return ans;
+}
 //
 //void FixedAffineComponent::Write(std::ostream &os, bool binary) const {
 //  WriteToken(os, binary, "<FixedAffineComponent>");
@@ -3294,13 +3294,13 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //  WriteToken(os, binary, "</FixedAffineComponent>");
 //}
 //
-//void FixedAffineComponent::Read(std::istream &is, bool binary) {
-//  ExpectOneOrTwoTokens(is, binary, "<FixedAffineComponent>", "<LinearParams>");
-//  linear_params_.Read(is, binary);
-//  ExpectToken(is, binary, "<BiasParams>");
-//  bias_params_.Read(is, binary);
-//  ExpectToken(is, binary, "</FixedAffineComponent>");
-//}
+void FixedAffineComponent::Read(std::istream &is, bool binary) {
+  ExpectOneOrTwoTokens(is, binary, "<FixedAffineComponent>", "<LinearParams>");
+  linear_params_.Read(is, binary);
+  ExpectToken(is, binary, "<BiasParams>");
+  bias_params_.Read(is, binary);
+  ExpectToken(is, binary, "</FixedAffineComponent>");
+}
 //
 //void SumGroupComponent::Init(const std::vector<int32> &sizes) {
 //  KALDI_ASSERT(!sizes.empty());
@@ -3478,14 +3478,14 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //}
 //
 //
-//void* LogSoftmaxComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                                    const CuMatrixBase<BaseFloat> &in,
-//                                    CuMatrixBase<BaseFloat> *out) const {
-//  // Applies log softmax function to each row of the output. For each row, we do
-//  // x_i = x_i - log(sum_j exp(x_j))
-//  out->ApplyLogSoftMaxPerRow(in);
-//  return NULL;
-//}
+void* LogSoftmaxComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                    const CuMatrixBase<BaseFloat> &in,
+                                    CuMatrixBase<BaseFloat> *out) const {
+  // Applies log softmax function to each row of the output. For each row, we do
+  // x_i = x_i - log(sum_j exp(x_j))
+  out->ApplyLogSoftMaxPerRow(in);
+  return NULL;
+}
 //
 //void LogSoftmaxComponent::Backprop(const std::string &debug_info,
 //                                   const ComponentPrecomputedIndexes *indexes,
@@ -5428,55 +5428,55 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //  components_[i] = component;
 //}
 //
-//int32 LstmNonlinearityComponent::InputDim() const {
-//  int32 cell_dim = value_sum_.NumCols();
-//  return cell_dim * 5 + (use_dropout_ ? 3 : 0);
-//}
-//
-//int32 LstmNonlinearityComponent::OutputDim() const {
-//  int32 cell_dim = value_sum_.NumCols();
-//  return cell_dim * 2;
-//}
-//
-//
-//void LstmNonlinearityComponent::Read(std::istream &is, bool binary) {
-//  ReadUpdatableCommon(is, binary);  // Read opening tag and learning rate.
-//  ExpectToken(is, binary, "<Params>");
-//  params_.Read(is, binary);
-//  ExpectToken(is, binary, "<ValueAvg>");
-//  value_sum_.Read(is, binary);
-//  ExpectToken(is, binary, "<DerivAvg>");
-//  deriv_sum_.Read(is, binary);
-//  ExpectToken(is, binary, "<SelfRepairConfig>");
-//  self_repair_config_.Read(is, binary);
-//  ExpectToken(is, binary, "<SelfRepairProb>");
-//  self_repair_total_.Read(is, binary);
-//
-//  std::string tok;
-//  ReadToken(is, binary, &tok);
-//  if (tok == "<UseDropout>") {
-//    ReadBasicType(is, binary, &use_dropout_);
-//    ReadToken(is, binary, &tok);
-//  } else {
-//    use_dropout_ = false;
-//  }
-//  KALDI_ASSERT(tok == "<Count>");
-//  ReadBasicType(is, binary, &count_);
-//
-//  // For the on-disk format, we normalze value_sum_, deriv_sum_ and
-//  // self_repair_total_ by dividing by the count, but in memory they are scaled
-//  // by the count.  [for self_repair_total_, the scaling factor is count_ *
-//  // cell_dim].
-//  value_sum_.Scale(count_);
-//  deriv_sum_.Scale(count_);
-//  int32 cell_dim = params_.NumCols();
-//  self_repair_total_.Scale(count_ * cell_dim);
-//
-//  InitNaturalGradient();
-//
-//  ExpectToken(is, binary, "</LstmNonlinearityComponent>");
-//
-//}
+int32 LstmNonlinearityComponent::InputDim() const {
+  int32 cell_dim = value_sum_.NumCols();
+  return cell_dim * 5 + (use_dropout_ ? 3 : 0);
+}
+
+int32 LstmNonlinearityComponent::OutputDim() const {
+  int32 cell_dim = value_sum_.NumCols();
+  return cell_dim * 2;
+}
+
+
+void LstmNonlinearityComponent::Read(std::istream &is, bool binary) {
+  ReadUpdatableCommon(is, binary);  // Read opening tag and learning rate.
+  ExpectToken(is, binary, "<Params>");
+  params_.Read(is, binary);
+  ExpectToken(is, binary, "<ValueAvg>");
+  value_sum_.Read(is, binary);
+  ExpectToken(is, binary, "<DerivAvg>");
+  deriv_sum_.Read(is, binary);
+  ExpectToken(is, binary, "<SelfRepairConfig>");
+  self_repair_config_.Read(is, binary);
+  ExpectToken(is, binary, "<SelfRepairProb>");
+  self_repair_total_.Read(is, binary);
+
+  std::string tok;
+  ReadToken(is, binary, &tok);
+  if (tok == "<UseDropout>") {
+    ReadBasicType(is, binary, &use_dropout_);
+    ReadToken(is, binary, &tok);
+  } else {
+    use_dropout_ = false;
+  }
+  KALDI_ASSERT(tok == "<Count>");
+  ReadBasicType(is, binary, &count_);
+
+  // For the on-disk format, we normalze value_sum_, deriv_sum_ and
+  // self_repair_total_ by dividing by the count, but in memory they are scaled
+  // by the count.  [for self_repair_total_, the scaling factor is count_ *
+  // cell_dim].
+  value_sum_.Scale(count_);
+  deriv_sum_.Scale(count_);
+  int32 cell_dim = params_.NumCols();
+  self_repair_total_.Scale(count_ * cell_dim);
+
+  InitNaturalGradient();
+
+  ExpectToken(is, binary, "</LstmNonlinearityComponent>");
+
+}
 //
 //void LstmNonlinearityComponent::Write(std::ostream &os, bool binary) const {
 //  WriteUpdatableCommon(os, binary);  // Read opening tag and learning rate.
@@ -5519,124 +5519,124 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //}
 //
 //
+
+std::string LstmNonlinearityComponent::Info() const {
+  std::ostringstream stream;
+  int32 cell_dim = params_.NumCols();
+  stream << UpdatableComponent::Info() << ", cell-dim=" << cell_dim
+         << ", use-dropout=" << (use_dropout_ ? "true" : "false");
+  PrintParameterStats(stream, "w_ic", params_.Row(0));
+  PrintParameterStats(stream, "w_fc", params_.Row(1));
+  PrintParameterStats(stream, "w_oc", params_.Row(2));
+
+  // Note: some of the following code mirrors the code in
+  // UpdatableComponent::Info(), in nnet-component-itf.cc.
+  if (count_ > 0) {
+    stream << ", count=" << std::setprecision(3) << count_
+           << std::setprecision(6);
+  }
+  static const char *nonlin_names[] = { "i_t_sigmoid", "f_t_sigmoid", "c_t_tanh",
+                                        "o_t_sigmoid", "m_t_tanh" };
+  for (int32 i = 0; i < 5; i++) {
+    stream << ", " << nonlin_names[i] << "={";
+    stream << " self-repair-lower-threshold=" << self_repair_config_(i)
+           << ", self-repair-scale=" << self_repair_config_(i + 5);
+
+    if (count_ != 0) {
+      BaseFloat self_repaired_proportion =
+          self_repair_total_(i) / (count_ * cell_dim);
+      stream << ", self-repaired-proportion=" << self_repaired_proportion;
+      Vector<double> value_sum(value_sum_.Row(i)),
+          deriv_sum(deriv_sum_.Row(i));
+      Vector<BaseFloat> value_avg(value_sum), deriv_avg(deriv_sum);
+      value_avg.Scale(1.0 / count_);
+      deriv_avg.Scale(1.0 / count_);
+      stream << ", value-avg=" << SummarizeVector(value_avg)
+             << ", deriv-avg=" << SummarizeVector(deriv_avg);
+    }
+    stream << " }";
+  }
+  return stream.str();
+}
+
 //
-//std::string LstmNonlinearityComponent::Info() const {
-//  std::ostringstream stream;
-//  int32 cell_dim = params_.NumCols();
-//  stream << UpdatableComponent::Info() << ", cell-dim=" << cell_dim
-//         << ", use-dropout=" << (use_dropout_ ? "true" : "false");
-//  PrintParameterStats(stream, "w_ic", params_.Row(0));
-//  PrintParameterStats(stream, "w_fc", params_.Row(1));
-//  PrintParameterStats(stream, "w_oc", params_.Row(2));
+Component* LstmNonlinearityComponent::Copy() const {
+  return new LstmNonlinearityComponent(*this);
+}
+
+void LstmNonlinearityComponent::ZeroStats() {
+  value_sum_.SetZero();
+  deriv_sum_.SetZero();
+  self_repair_total_.SetZero();
+  count_ = 0.0;
+}
 //
-//  // Note: some of the following code mirrors the code in
-//  // UpdatableComponent::Info(), in nnet-component-itf.cc.
-//  if (count_ > 0) {
-//    stream << ", count=" << std::setprecision(3) << count_
-//           << std::setprecision(6);
-//  }
-//  static const char *nonlin_names[] = { "i_t_sigmoid", "f_t_sigmoid", "c_t_tanh",
-//                                        "o_t_sigmoid", "m_t_tanh" };
-//  for (int32 i = 0; i < 5; i++) {
-//    stream << ", " << nonlin_names[i] << "={";
-//    stream << " self-repair-lower-threshold=" << self_repair_config_(i)
-//           << ", self-repair-scale=" << self_repair_config_(i + 5);
+void LstmNonlinearityComponent::Scale(BaseFloat scale) {
+  if (scale == 0.0) {
+    params_.SetZero();
+    value_sum_.SetZero();
+    deriv_sum_.SetZero();
+    self_repair_total_.SetZero();
+    count_ = 0.0;
+  } else {
+    params_.Scale(scale);
+    value_sum_.Scale(scale);
+    deriv_sum_.Scale(scale);
+    self_repair_total_.Scale(scale);
+    count_ *= scale;
+  }
+}
+
+void LstmNonlinearityComponent::Add(BaseFloat alpha,
+                                    const Component &other_in) {
+  const LstmNonlinearityComponent *other =
+      dynamic_cast<const LstmNonlinearityComponent*>(&other_in);
+  KALDI_ASSERT(other != NULL);
+  params_.AddMat(alpha, other->params_);
+  value_sum_.AddMat(alpha, other->value_sum_);
+  deriv_sum_.AddMat(alpha, other->deriv_sum_);
+  self_repair_total_.AddVec(alpha, other->self_repair_total_);
+  count_ += alpha * other->count_;
+}
 //
-//    if (count_ != 0) {
-//      BaseFloat self_repaired_proportion =
-//          self_repair_total_(i) / (count_ * cell_dim);
-//      stream << ", self-repaired-proportion=" << self_repaired_proportion;
-//      Vector<double> value_sum(value_sum_.Row(i)),
-//          deriv_sum(deriv_sum_.Row(i));
-//      Vector<BaseFloat> value_avg(value_sum), deriv_avg(deriv_sum);
-//      value_avg.Scale(1.0 / count_);
-//      deriv_avg.Scale(1.0 / count_);
-//      stream << ", value-avg=" << SummarizeVector(value_avg)
-//             << ", deriv-avg=" << SummarizeVector(deriv_avg);
-//    }
-//    stream << " }";
-//  }
-//  return stream.str();
-//}
-//
-//
-//Component* LstmNonlinearityComponent::Copy() const {
-//  return new LstmNonlinearityComponent(*this);
-//}
-//
-//void LstmNonlinearityComponent::ZeroStats() {
-//  value_sum_.SetZero();
-//  deriv_sum_.SetZero();
-//  self_repair_total_.SetZero();
-//  count_ = 0.0;
-//}
-//
-//void LstmNonlinearityComponent::Scale(BaseFloat scale) {
-//  if (scale == 0.0) {
-//    params_.SetZero();
-//    value_sum_.SetZero();
-//    deriv_sum_.SetZero();
-//    self_repair_total_.SetZero();
-//    count_ = 0.0;
-//  } else {
-//    params_.Scale(scale);
-//    value_sum_.Scale(scale);
-//    deriv_sum_.Scale(scale);
-//    self_repair_total_.Scale(scale);
-//    count_ *= scale;
-//  }
-//}
-//
-//void LstmNonlinearityComponent::Add(BaseFloat alpha,
-//                                    const Component &other_in) {
-//  const LstmNonlinearityComponent *other =
-//      dynamic_cast<const LstmNonlinearityComponent*>(&other_in);
-//  KALDI_ASSERT(other != NULL);
-//  params_.AddMat(alpha, other->params_);
-//  value_sum_.AddMat(alpha, other->value_sum_);
-//  deriv_sum_.AddMat(alpha, other->deriv_sum_);
-//  self_repair_total_.AddVec(alpha, other->self_repair_total_);
-//  count_ += alpha * other->count_;
-//}
-//
-//void LstmNonlinearityComponent::PerturbParams(BaseFloat stddev) {
-//  CuMatrix<BaseFloat> temp_params(params_.NumRows(), params_.NumCols());
-//  temp_params.SetRandn();
-//  params_.AddMat(stddev, temp_params);
-//}
-//
-//BaseFloat LstmNonlinearityComponent::DotProduct(
-//    const UpdatableComponent &other_in) const {
-//  const LstmNonlinearityComponent *other =
-//      dynamic_cast<const LstmNonlinearityComponent*>(&other_in);
-//  KALDI_ASSERT(other != NULL);
-//  return TraceMatMat(params_, other->params_, kTrans);
-//}
-//
-//int32 LstmNonlinearityComponent::NumParameters() const {
-//  return params_.NumRows() * params_.NumCols();
-//}
-//
-//void LstmNonlinearityComponent::Vectorize(VectorBase<BaseFloat> *params) const {
-//  KALDI_ASSERT(params->Dim() == NumParameters());
-//  params->CopyRowsFromMat(params_);
-//}
-//
-//
-//void LstmNonlinearityComponent::UnVectorize(
-//    const VectorBase<BaseFloat> &params)  {
-//  KALDI_ASSERT(params.Dim() == NumParameters());
-//  params_.CopyRowsFromVec(params);
-//}
-//
-//
-//void* LstmNonlinearityComponent::Propagate(
-//    const ComponentPrecomputedIndexes *, // indexes
-//    const CuMatrixBase<BaseFloat> &in,
-//    CuMatrixBase<BaseFloat> *out) const {
-//  cu::ComputeLstmNonlinearity(in, params_, out);
-//  return NULL;
-//}
+void LstmNonlinearityComponent::PerturbParams(BaseFloat stddev) {
+  CuMatrix<BaseFloat> temp_params(params_.NumRows(), params_.NumCols());
+  temp_params.SetRandn();
+  params_.AddMat(stddev, temp_params);
+}
+
+BaseFloat LstmNonlinearityComponent::DotProduct(
+    const UpdatableComponent &other_in) const {
+  const LstmNonlinearityComponent *other =
+      dynamic_cast<const LstmNonlinearityComponent*>(&other_in);
+  KALDI_ASSERT(other != NULL);
+  return TraceMatMat(params_, other->params_, kTrans);
+}
+
+int32 LstmNonlinearityComponent::NumParameters() const {
+  return params_.NumRows() * params_.NumCols();
+}
+
+void LstmNonlinearityComponent::Vectorize(VectorBase<BaseFloat> *params) const {
+  KALDI_ASSERT(params->Dim() == NumParameters());
+  params->CopyRowsFromMat(params_);
+}
+
+
+void LstmNonlinearityComponent::UnVectorize(
+    const VectorBase<BaseFloat> &params)  {
+  KALDI_ASSERT(params.Dim() == NumParameters());
+  params_.CopyRowsFromVec(params);
+}
+
+
+void* LstmNonlinearityComponent::Propagate(
+    const ComponentPrecomputedIndexes *, // indexes
+    const CuMatrixBase<BaseFloat> &in,
+    CuMatrixBase<BaseFloat> *out) const {
+  cu::ComputeLstmNonlinearity(in, params_, out);
+  return NULL;
+}
 //
 //
 //void LstmNonlinearityComponent::Backprop(
@@ -5687,108 +5687,108 @@ void AffineComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
 //                              params_deriv);
 //  }
 //}
-//
-//LstmNonlinearityComponent::LstmNonlinearityComponent(
-//    const LstmNonlinearityComponent &other):
-//    UpdatableComponent(other),
-//    params_(other.params_),
-//    use_dropout_(other.use_dropout_),
-//    value_sum_(other.value_sum_),
-//    deriv_sum_(other.deriv_sum_),
-//    self_repair_config_(other.self_repair_config_),
-//    self_repair_total_(other.self_repair_total_),
-//    count_(other.count_),
-//    preconditioner_(other.preconditioner_) { }
-//
-//void LstmNonlinearityComponent::Init(
-//    int32 cell_dim, bool use_dropout,
-//    BaseFloat param_stddev,
-//    BaseFloat tanh_self_repair_threshold,
-//    BaseFloat sigmoid_self_repair_threshold,
-//    BaseFloat self_repair_scale) {
-//  KALDI_ASSERT(cell_dim > 0 && param_stddev >= 0.0 &&
-//               tanh_self_repair_threshold >= 0.0 &&
-//               tanh_self_repair_threshold <= 1.0 &&
-//               sigmoid_self_repair_threshold >= 0.0 &&
-//               sigmoid_self_repair_threshold <= 0.25 &&
-//               self_repair_scale >= 0.0 && self_repair_scale <= 0.1);
-//  use_dropout_ = use_dropout;
-//  params_.Resize(3, cell_dim);
-//  params_.SetRandn();
-//  params_.Scale(param_stddev);
-//  value_sum_.Resize(5, cell_dim);
-//  deriv_sum_.Resize(5, cell_dim);
-//  self_repair_config_.Resize(10);
-//  self_repair_config_.Range(0, 5).Set(sigmoid_self_repair_threshold);
-//  self_repair_config_(2) = tanh_self_repair_threshold;
-//  self_repair_config_(4) = tanh_self_repair_threshold;
-//  self_repair_config_.Range(5, 5).Set(self_repair_scale);
-//  self_repair_total_.Resize(5);
-//  count_ = 0.0;
-//  InitNaturalGradient();
-//
-//}
-//
-//void LstmNonlinearityComponent::InitNaturalGradient() {
-//  // As regards the configuration for the natural-gradient preconditioner, we
-//  // don't make it configurable from the command line-- it's unlikely that any
-//  // differences from changing this would be substantial enough to effectively
-//  // tune the configuration.  Because the preconditioning code doesn't 'see' the
-//  // derivatives from individual frames, but only averages over the minibatch,
-//  // there is a fairly small amount of data available to estimate the Fisher
-//  // information matrix, so we set the rank, update period and
-//  // num-samples-history to smaller values than normal.
-//  preconditioner_.SetRank(20);
-//  preconditioner_.SetUpdatePeriod(2);
-//  preconditioner_.SetNumSamplesHistory(1000.0);
-//}
-//
+
+LstmNonlinearityComponent::LstmNonlinearityComponent(
+    const LstmNonlinearityComponent &other):
+    UpdatableComponent(other),
+    params_(other.params_),
+    use_dropout_(other.use_dropout_),
+    value_sum_(other.value_sum_),
+    deriv_sum_(other.deriv_sum_),
+    self_repair_config_(other.self_repair_config_),
+    self_repair_total_(other.self_repair_total_),
+    count_(other.count_)
+    /*preconditioner_(other.preconditioner_)*/ { }
+
+void LstmNonlinearityComponent::Init(
+    int32 cell_dim, bool use_dropout,
+    BaseFloat param_stddev,
+    BaseFloat tanh_self_repair_threshold,
+    BaseFloat sigmoid_self_repair_threshold,
+    BaseFloat self_repair_scale) {
+  KALDI_ASSERT(cell_dim > 0 && param_stddev >= 0.0 &&
+               tanh_self_repair_threshold >= 0.0 &&
+               tanh_self_repair_threshold <= 1.0 &&
+               sigmoid_self_repair_threshold >= 0.0 &&
+               sigmoid_self_repair_threshold <= 0.25 &&
+               self_repair_scale >= 0.0 && self_repair_scale <= 0.1);
+  use_dropout_ = use_dropout;
+  params_.Resize(3, cell_dim);
+  params_.SetRandn();
+  params_.Scale(param_stddev);
+  value_sum_.Resize(5, cell_dim);
+  deriv_sum_.Resize(5, cell_dim);
+  self_repair_config_.Resize(10);
+  self_repair_config_.Range(0, 5).Set(sigmoid_self_repair_threshold);
+  self_repair_config_(2) = tanh_self_repair_threshold;
+  self_repair_config_(4) = tanh_self_repair_threshold;
+  self_repair_config_.Range(5, 5).Set(self_repair_scale);
+  self_repair_total_.Resize(5);
+  count_ = 0.0;
+  InitNaturalGradient();
+
+}
+
+void LstmNonlinearityComponent::InitNaturalGradient() {
+  // As regards the configuration for the natural-gradient preconditioner, we
+  // don't make it configurable from the command line-- it's unlikely that any
+  // differences from changing this would be substantial enough to effectively
+  // tune the configuration.  Because the preconditioning code doesn't 'see' the
+  // derivatives from individual frames, but only averages over the minibatch,
+  // there is a fairly small amount of data available to estimate the Fisher
+  // information matrix, so we set the rank, update period and
+  // num-samples-history to smaller values than normal.
+  //preconditioner_.SetRank(20);
+  //preconditioner_.SetUpdatePeriod(2);
+  //preconditioner_.SetNumSamplesHistory(1000.0);
+}
+
 ///// virtual
 //void LstmNonlinearityComponent::FreezeNaturalGradient(bool freeze) {
 //  preconditioner_.Freeze(freeze);
 //}
-//
-//void LstmNonlinearityComponent::InitFromConfig(ConfigLine *cfl) {
-//  InitLearningRatesFromConfig(cfl);
-//  bool ok = true;
-//  bool use_dropout = false;
-//  int32 cell_dim;
-//  // these self-repair thresholds are the normal defaults for tanh and sigmoid
-//  // respectively.  If, later on, we decide that we want to support different
-//  // self-repair config values for the individual sigmoid and tanh
-//  // nonlinearities, we can modify this code then.
-//  BaseFloat tanh_self_repair_threshold = 0.2,
-//      sigmoid_self_repair_threshold = 0.05,
-//      self_repair_scale = 1.0e-05;
-//  // param_stddev is the stddev of the parameters.  it may be better to
-//  // use a smaller value but this was the default in the python scripts
-//  // for a while.
-//  BaseFloat param_stddev = 1.0;
-//  ok = ok && cfl->GetValue("cell-dim", &cell_dim);
-//  cfl->GetValue("param-stddev", &param_stddev);
-//  cfl->GetValue("tanh-self-repair-threshold",
-//                &tanh_self_repair_threshold);
-//  cfl->GetValue("sigmoid-self-repair-threshold",
-//                &sigmoid_self_repair_threshold);
-//  cfl->GetValue("self-repair-scale", &self_repair_scale);
-//  cfl->GetValue("use-dropout", &use_dropout);
-//
-//  // We may later on want to make it possible to initialize the different
-//  // parameters w_ic, w_fc and w_oc with different biases.  We'll implement
-//  // that when and if it's needed.
-//
-//  if (cfl->HasUnusedValues())
-//    KALDI_ERR << "Could not process these elements in initializer: "
-//              << cfl->UnusedValues();
-//  if (ok) {
-//    Init(cell_dim, use_dropout, param_stddev, tanh_self_repair_threshold,
-//         sigmoid_self_repair_threshold, self_repair_scale);
-//  } else {
-//    KALDI_ERR << "Invalid initializer for layer of type "
-//              << Type() << ": \"" << cfl->WholeLine() << "\"";
-//  }
-//}
-//
+
+void LstmNonlinearityComponent::InitFromConfig(ConfigLine *cfl) {
+  InitLearningRatesFromConfig(cfl);
+  bool ok = true;
+  bool use_dropout = false;
+  int32 cell_dim;
+  // these self-repair thresholds are the normal defaults for tanh and sigmoid
+  // respectively.  If, later on, we decide that we want to support different
+  // self-repair config values for the individual sigmoid and tanh
+  // nonlinearities, we can modify this code then.
+  BaseFloat tanh_self_repair_threshold = 0.2,
+      sigmoid_self_repair_threshold = 0.05,
+      self_repair_scale = 1.0e-05;
+  // param_stddev is the stddev of the parameters.  it may be better to
+  // use a smaller value but this was the default in the python scripts
+  // for a while.
+  BaseFloat param_stddev = 1.0;
+  ok = ok && cfl->GetValue("cell-dim", &cell_dim);
+  cfl->GetValue("param-stddev", &param_stddev);
+  cfl->GetValue("tanh-self-repair-threshold",
+                &tanh_self_repair_threshold);
+  cfl->GetValue("sigmoid-self-repair-threshold",
+                &sigmoid_self_repair_threshold);
+  cfl->GetValue("self-repair-scale", &self_repair_scale);
+  cfl->GetValue("use-dropout", &use_dropout);
+
+  // We may later on want to make it possible to initialize the different
+  // parameters w_ic, w_fc and w_oc with different biases.  We'll implement
+  // that when and if it's needed.
+
+  if (cfl->HasUnusedValues())
+    KALDI_ERR << "Could not process these elements in initializer: "
+              << cfl->UnusedValues();
+  if (ok) {
+    Init(cell_dim, use_dropout, param_stddev, tanh_self_repair_threshold,
+         sigmoid_self_repair_threshold, self_repair_scale);
+  } else {
+    KALDI_ERR << "Invalid initializer for layer of type "
+              << Type() << ": \"" << cfl->WholeLine() << "\"";
+  }
+}
+
 //SumBlockComponent::SumBlockComponent(const SumBlockComponent &other):
 //    input_dim_(other.input_dim_), output_dim_(other.output_dim_),
 //    scale_(other.scale_) { }

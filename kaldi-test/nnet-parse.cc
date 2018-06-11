@@ -544,7 +544,7 @@ void PrintParameterStats(std::ostringstream &os,
   }
   os << std::setprecision(6);  // restore the default precision.
 }
-//
+////
 //void PrintParameterStats(std::ostringstream &os,
 //                         const std::string &name,
 //                         const CuMatrix<BaseFloat> &params,

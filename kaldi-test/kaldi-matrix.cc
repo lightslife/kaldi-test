@@ -1097,21 +1097,21 @@ void MatrixBase<double>::CopyRowsFromVec(const VectorBase<float> &rv);
 //    *my_data = *rv_data;
 //}
 //
-//template<typename Real>
-//void MatrixBase<Real>::CopyColFromVec(const VectorBase<Real> &rv,
-//                                      const MatrixIndexT col) {
-//  KALDI_ASSERT(rv.Dim() == num_rows_ &&
-//               static_cast<UnsignedMatrixIndexT>(col) <
-//               static_cast<UnsignedMatrixIndexT>(num_cols_));
-//
-//  const Real *rv_data = rv.Data();
-//  Real *col_data = data_ + col;
-//
-//  for (MatrixIndexT r = 0; r < num_rows_; r++)
-//    col_data[r * stride_] = rv_data[r];
-//}
-//
-//
+template<typename Real>
+void MatrixBase<Real>::CopyColFromVec(const VectorBase<Real> &rv,
+                                      const MatrixIndexT col) {
+  KALDI_ASSERT(rv.Dim() == num_rows_ &&
+               static_cast<UnsignedMatrixIndexT>(col) <
+               static_cast<UnsignedMatrixIndexT>(num_cols_));
+
+  const Real *rv_data = rv.Data();
+  Real *col_data = data_ + col;
+
+  for (MatrixIndexT r = 0; r < num_rows_; r++)
+    col_data[r * stride_] = rv_data[r];
+}
+
+
 //
 //template<typename Real>
 //void Matrix<Real>::RemoveRow(MatrixIndexT i) {
@@ -1219,19 +1219,19 @@ template<typename Real> void MatrixBase<Real>::Scale(Real alpha) {
   }
 }
 
-//template<typename Real>  // scales each row by scale[i].
-//void MatrixBase<Real>::MulRowsVec(const VectorBase<Real> &scale) {
-//  KALDI_ASSERT(scale.Dim() == num_rows_);
-//  MatrixIndexT M = num_rows_, N = num_cols_;
-//
-//  for (MatrixIndexT i = 0; i < M; i++) {
-//    Real this_scale = scale(i);
-//    for (MatrixIndexT j = 0; j < N; j++) {
-//      (*this)(i, j) *= this_scale;
-//    }
-//  }
-//}
-//
+template<typename Real>  // scales each row by scale[i].
+void MatrixBase<Real>::MulRowsVec(const VectorBase<Real> &scale) {
+  KALDI_ASSERT(scale.Dim() == num_rows_);
+  MatrixIndexT M = num_rows_, N = num_cols_;
+
+  for (MatrixIndexT i = 0; i < M; i++) {
+    Real this_scale = scale(i);
+    for (MatrixIndexT j = 0; j < N; j++) {
+      (*this)(i, j) *= this_scale;
+    }
+  }
+}
+
 //
 //template<typename Real>
 //void MatrixBase<Real>::MulRowsGroupMat(const MatrixBase<Real> &src) {
@@ -2099,15 +2099,15 @@ void MatrixBase<Real>::CopyFromMat(const CompressedMatrix &mat) {
 //  }
 //}
 //
-//template<typename Real>
-//void MatrixBase<Real>::ApplyFloor(Real floor_val) {
-//  MatrixIndexT num_rows = num_rows_, num_cols = num_cols_;
-//  for (MatrixIndexT i = 0; i < num_rows; i++) {
-//    Real *data = this->RowData(i);
-//    for (MatrixIndexT j = 0; j < num_cols; j++)
-//      data[j] = (data[j] < floor_val ? floor_val : data[j]);
-//  }
-//}
+template<typename Real>
+void MatrixBase<Real>::ApplyFloor(Real floor_val) {
+  MatrixIndexT num_rows = num_rows_, num_cols = num_cols_;
+  for (MatrixIndexT i = 0; i < num_rows; i++) {
+    Real *data = this->RowData(i);
+    for (MatrixIndexT j = 0; j < num_cols; j++)
+      data[j] = (data[j] < floor_val ? floor_val : data[j]);
+  }
+}
 //
 //template<typename Real>
 //void MatrixBase<Real>::ApplyCeiling(Real ceiling_val) {
@@ -2146,12 +2146,12 @@ void MatrixBase<Real>::ApplyLog() {
 //  }
 //}
 //
-//template<typename Real>
-//void MatrixBase<Real>::ApplyPow(Real power) {
-//  for (MatrixIndexT i = 0; i < num_rows_; i++) {
-//    Row(i).ApplyPow(power);
-//  }
-//}
+template<typename Real>
+void MatrixBase<Real>::ApplyPow(Real power) {
+  for (MatrixIndexT i = 0; i < num_rows_; i++) {
+    Row(i).ApplyPow(power);
+  }
+}
 //
 //template<typename Real>
 //void MatrixBase<Real>::ApplyPowAbs(Real power, bool include_sign) {
@@ -2169,20 +2169,20 @@ void MatrixBase<Real>::ApplyLog() {
 //      data[j] = (data[j] > 0 ? 1.0 : 0.0);
 //  }
 //}
-//
-//template<typename Real>
-//void MatrixBase<Real>::Heaviside(const MatrixBase<Real> &src) {
-//  KALDI_ASSERT(SameDim(*this, src));
-//  MatrixIndexT num_rows = num_rows_, num_cols = num_cols_;
-//  Real *row_data = data_;
-//  const Real *src_row_data = src.Data();
-//  for (MatrixIndexT row = 0; row < num_rows;
-//       row++,row_data += stride_, src_row_data += src.stride_) {
-//    for (MatrixIndexT col = 0; col < num_cols; col++)
-//      row_data[col] = (src_row_data[col] > 0 ? 1.0 : 0.0);
-//  }
-//}
-//
+
+template<typename Real>
+void MatrixBase<Real>::Heaviside(const MatrixBase<Real> &src) {
+  KALDI_ASSERT(SameDim(*this, src));
+  MatrixIndexT num_rows = num_rows_, num_cols = num_cols_;
+  Real *row_data = data_;
+  const Real *src_row_data = src.Data();
+  for (MatrixIndexT row = 0; row < num_rows;
+       row++,row_data += stride_, src_row_data += src.stride_) {
+    for (MatrixIndexT col = 0; col < num_cols; col++)
+      row_data[col] = (src_row_data[col] > 0 ? 1.0 : 0.0);
+  }
+}
+
 //
 //template<typename Real>
 //bool MatrixBase<Real>::Power(Real power) {

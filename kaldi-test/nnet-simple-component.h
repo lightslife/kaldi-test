@@ -355,14 +355,14 @@ class RectifiedLinearComponent: public NonlinearComponent {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                          const CuMatrixBase<BaseFloat> &in,
                          CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &, //in_value
-                        const CuMatrixBase<BaseFloat> &out_value,
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &, //in_value
+  //                      const CuMatrixBase<BaseFloat> &out_value,
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
   virtual void StoreStats(const CuMatrixBase<BaseFloat> &in_value,
                           const CuMatrixBase<BaseFloat> &out_value,
                           void *memo);
@@ -703,14 +703,14 @@ class LogSoftmaxComponent: public NonlinearComponent {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                          const CuMatrixBase<BaseFloat> &in,
                          CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &in_value,
-                        const CuMatrixBase<BaseFloat> &out_value,
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &in_value,
+  //                      const CuMatrixBase<BaseFloat> &out_value,
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
 
   virtual Component* Copy() const { return new LogSoftmaxComponent(*this); }
  private:
@@ -801,7 +801,7 @@ class NaturalGradientAffineComponent: public AffineComponent {
  public:
   virtual std::string Type() const { return "NaturalGradientAffineComponent"; }
   virtual void Read(std::istream &is, bool binary);
-  virtual void Write(std::ostream &os, bool binary) const;
+  //virtual void Write(std::ostream &os, bool binary) const;
   // this constructor does not really initialize, use InitFromConfig() or Read().
   NaturalGradientAffineComponent() { }
   void InitFromConfig(ConfigLine *cfl);
@@ -809,7 +809,7 @@ class NaturalGradientAffineComponent: public AffineComponent {
   virtual Component* Copy() const;
   virtual void Scale(BaseFloat scale);
   virtual void Add(BaseFloat alpha, const Component &other);
-  virtual void FreezeNaturalGradient(bool freeze);
+  //virtual void FreezeNaturalGradient(bool freeze);
   // copy constructor
   explicit NaturalGradientAffineComponent(
       const NaturalGradientAffineComponent &other);
@@ -825,10 +825,10 @@ class NaturalGradientAffineComponent: public AffineComponent {
 
   OnlineNaturalGradient preconditioner_out_;*/
 
-  virtual void Update(
-      const std::string &debug_info,
-      const CuMatrixBase<BaseFloat> &in_value,
-      const CuMatrixBase<BaseFloat> &out_deriv);
+//  virtual void Update(
+//      const std::string &debug_info,
+//      const CuMatrixBase<BaseFloat> &in_value,
+//      const CuMatrixBase<BaseFloat> &out_deriv);
 };
 
 /*
@@ -984,19 +984,19 @@ class FixedAffineComponent: public Component {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                          const CuMatrixBase<BaseFloat> &in,
                          CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &in_value,
-                        const CuMatrixBase<BaseFloat> &, // out_value
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &in_value,
+  //                      const CuMatrixBase<BaseFloat> &, // out_value
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
 
 
   virtual Component* Copy() const;
   virtual void Read(std::istream &is, bool binary);
-  virtual void Write(std::ostream &os, bool binary) const;
+  //virtual void Write(std::ostream &os, bool binary) const;
 
   const CuMatrix<BaseFloat> &LinearParams() const { return linear_params_; }
   const CuVector<BaseFloat> &BiasParams() const { return bias_params_; }
@@ -2198,17 +2198,17 @@ class LstmNonlinearityComponent: public UpdatableComponent {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                          const CuMatrixBase<BaseFloat> &in,
                          CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &in_value,
-                        const CuMatrixBase<BaseFloat> &, // out_value,
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update_in,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &in_value,
+  //                      const CuMatrixBase<BaseFloat> &, // out_value,
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update_in,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
 
   virtual void Read(std::istream &is, bool binary);
-  virtual void Write(std::ostream &os, bool binary) const;
+  //virtual void Write(std::ostream &os, bool binary) const;
 
   virtual Component* Copy() const;
 
@@ -2221,7 +2221,7 @@ class LstmNonlinearityComponent: public UpdatableComponent {
   virtual void Vectorize(VectorBase<BaseFloat> *params) const;
   virtual void UnVectorize(const VectorBase<BaseFloat> &params);
   virtual void ZeroStats();
-  virtual void FreezeNaturalGradient(bool freeze);
+  //virtual void FreezeNaturalGradient(bool freeze);
 
   // Some functions that are specific to this class:
   explicit LstmNonlinearityComponent(

@@ -575,45 +575,45 @@ void VectorBase<Real>::ApplyPow(Real power) {
 //  }
 //}
 //
-//template<typename Real>
-//Real VectorBase<Real>::Max() const {
-//  Real ans = - std::numeric_limits<Real>::infinity();
-//  const Real *data = data_;
-//  MatrixIndexT i, dim = dim_;
-//  for (i = 0; i + 4 <= dim; i += 4) {
-//    Real a1 = data[i], a2 = data[i+1], a3 = data[i+2], a4 = data[i+3];
-//    if (a1 > ans || a2 > ans || a3 > ans || a4 > ans) {
-//      Real b1 = (a1 > a2 ? a1 : a2), b2 = (a3 > a4 ? a3 : a4);
-//      if (b1 > ans) ans = b1;
-//      if (b2 > ans) ans = b2;
-//    }
-//  }
-//  for (; i < dim; i++)
-//    if (data[i] > ans) ans = data[i];
-//  return ans;
-//}
-//
-//template<typename Real>
-//Real VectorBase<Real>::Max(MatrixIndexT *index_out) const {
-//  if (dim_ == 0) KALDI_ERR << "Empty vector";
-//  Real ans = - std::numeric_limits<Real>::infinity();
-//  MatrixIndexT index = 0;
-//  const Real *data = data_;
-//  MatrixIndexT i, dim = dim_;
-//  for (i = 0; i + 4 <= dim; i += 4) {
-//    Real a1 = data[i], a2 = data[i+1], a3 = data[i+2], a4 = data[i+3];
-//    if (a1 > ans || a2 > ans || a3 > ans || a4 > ans) {
-//      if (a1 > ans) { ans = a1; index = i; }
-//      if (a2 > ans) { ans = a2; index = i + 1; }
-//      if (a3 > ans) { ans = a3; index = i + 2; }
-//      if (a4 > ans) { ans = a4; index = i + 3; }
-//    }
-//  }
-//  for (; i < dim; i++)
-//    if (data[i] > ans) { ans = data[i]; index = i; }
-//  *index_out = index;
-//  return ans;
-//}
+template<typename Real>
+Real VectorBase<Real>::Max() const {
+  Real ans = - std::numeric_limits<Real>::infinity();
+  const Real *data = data_;
+  MatrixIndexT i, dim = dim_;
+  for (i = 0; i + 4 <= dim; i += 4) {
+    Real a1 = data[i], a2 = data[i+1], a3 = data[i+2], a4 = data[i+3];
+    if (a1 > ans || a2 > ans || a3 > ans || a4 > ans) {
+      Real b1 = (a1 > a2 ? a1 : a2), b2 = (a3 > a4 ? a3 : a4);
+      if (b1 > ans) ans = b1;
+      if (b2 > ans) ans = b2;
+    }
+  }
+  for (; i < dim; i++)
+    if (data[i] > ans) ans = data[i];
+  return ans;
+}
+
+template<typename Real>
+Real VectorBase<Real>::Max(MatrixIndexT *index_out) const {
+  if (dim_ == 0) KALDI_ERR << "Empty vector";
+  Real ans = - std::numeric_limits<Real>::infinity();
+  MatrixIndexT index = 0;
+  const Real *data = data_;
+  MatrixIndexT i, dim = dim_;
+  for (i = 0; i + 4 <= dim; i += 4) {
+    Real a1 = data[i], a2 = data[i+1], a3 = data[i+2], a4 = data[i+3];
+    if (a1 > ans || a2 > ans || a3 > ans || a4 > ans) {
+      if (a1 > ans) { ans = a1; index = i; }
+      if (a2 > ans) { ans = a2; index = i + 1; }
+      if (a3 > ans) { ans = a3; index = i + 2; }
+      if (a4 > ans) { ans = a4; index = i + 3; }
+    }
+  }
+  for (; i < dim; i++)
+    if (data[i] > ans) { ans = data[i]; index = i; }
+  *index_out = index;
+  return ans;
+}
 
 template<typename Real>
 Real VectorBase<Real>::Min() const {
@@ -870,17 +870,17 @@ void VectorBase<Real>::ApplyFloor(Real floor_val, MatrixIndexT *floored_count) {
 //  return max + Log(sum);
 //}
 //
-//template<typename Real>
-//Real VectorBase<Real>::ApplyLogSoftMax() {
-//  Real max = this->Max(), sum = 0.0;
-//  for (MatrixIndexT i = 0; i < dim_; i++) {
-//    sum += Exp((data_[i] -= max));
-//  }
-//  sum = Log(sum);
-//  this->Add(-1.0 * sum);
-//  return max + sum;
-//}
-//
+template<typename Real>
+Real VectorBase<Real>::ApplyLogSoftMax() {
+  Real max = this->Max(), sum = 0.0;
+  for (MatrixIndexT i = 0; i < dim_; i++) {
+    sum += Exp((data_[i] -= max));
+  }
+  sum = Log(sum);
+  this->Add(-1.0 * sum);
+  return max + sum;
+}
+
 //#ifdef HAVE_MKL
 //template<>
 //void VectorBase<float>::Tanh(const VectorBase<float> &src) {
@@ -1296,30 +1296,30 @@ void Vector<Real>::Swap(Vector<Real> *other) {
   std::swap(this->dim_, other->dim_);
 }
 //
-//
-//template<typename Real>
-//void VectorBase<Real>::AddDiagMat2(
-//    Real alpha, const MatrixBase<Real> &M,
-//    MatrixTransposeType trans, Real beta) {
-//  if (trans == kNoTrans) {
-//    KALDI_ASSERT(this->dim_ == M.NumRows());
-//    MatrixIndexT rows = this->dim_, cols = M.NumCols(),
-//           mat_stride = M.Stride();
-//    Real *data = this->data_;
-//    const Real *mat_data = M.Data();
-//    for (MatrixIndexT i = 0; i < rows; i++, mat_data += mat_stride, data++)
-//      *data = beta * *data + alpha * cblas_Xdot(cols,mat_data,1,mat_data,1);
-//  } else {
-//    KALDI_ASSERT(this->dim_ == M.NumCols());
-//    MatrixIndexT rows = M.NumRows(), cols = this->dim_,
-//           mat_stride = M.Stride();
-//    Real *data = this->data_;
-//    const Real *mat_data = M.Data();
-//    for (MatrixIndexT i = 0; i < cols; i++, mat_data++, data++)
-//      *data = beta * *data + alpha * cblas_Xdot(rows, mat_data, mat_stride,
-//                                                 mat_data, mat_stride);
-//  }
-//}
+
+template<typename Real>
+void VectorBase<Real>::AddDiagMat2(
+    Real alpha, const MatrixBase<Real> &M,
+    MatrixTransposeType trans, Real beta) {
+  if (trans == kNoTrans) {
+    KALDI_ASSERT(this->dim_ == M.NumRows());
+    MatrixIndexT rows = this->dim_, cols = M.NumCols(),
+           mat_stride = M.Stride();
+    Real *data = this->data_;
+    const Real *mat_data = M.Data();
+    for (MatrixIndexT i = 0; i < rows; i++, mat_data += mat_stride, data++)
+      *data = beta * *data + alpha * cblas_Xdot(cols,mat_data,1,mat_data,1);
+  } else {
+    KALDI_ASSERT(this->dim_ == M.NumCols());
+    MatrixIndexT rows = M.NumRows(), cols = this->dim_,
+           mat_stride = M.Stride();
+    Real *data = this->data_;
+    const Real *mat_data = M.Data();
+    for (MatrixIndexT i = 0; i < cols; i++, mat_data++, data++)
+      *data = beta * *data + alpha * cblas_Xdot(rows, mat_data, mat_stride,
+                                                 mat_data, mat_stride);
+  }
+}
 //
 //template<typename Real>
 //void VectorBase<Real>::AddDiagMatMat(

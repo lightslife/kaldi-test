@@ -99,20 +99,20 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new TanhComponent();
   //} else if (component_type == "SoftmaxComponent") {
   //  ans = new SoftmaxComponent();
-  //} else if (component_type == "LogSoftmaxComponent") {
-  //  ans = new LogSoftmaxComponent();
-  //} else if (component_type == "RectifiedLinearComponent") {
-  //  ans = new RectifiedLinearComponent();
-  //} else if (component_type == "NormalizeComponent") {
-  //  ans = new NormalizeComponent();
+  } else if (component_type == "LogSoftmaxComponent") {
+    ans = new LogSoftmaxComponent();
+  } else if (component_type == "RectifiedLinearComponent") {
+    ans = new RectifiedLinearComponent();
+  } else if (component_type == "NormalizeComponent") {
+    ans = new NormalizeComponent();
   //} else if (component_type == "PnormComponent") {
   //  ans = new PnormComponent();
   } else if (component_type == "AffineComponent") {
     ans = new AffineComponent();
   //} else if (component_type == "LinearComponent") {
   //  ans = new LinearComponent();
-  //} else if (component_type == "NaturalGradientAffineComponent") {
-  //  ans = new NaturalGradientAffineComponent();
+  } else if (component_type == "NaturalGradientAffineComponent") {
+    ans = new NaturalGradientAffineComponent();
   //} else if (component_type == "PerElementScaleComponent") {
   //  ans = new PerElementScaleComponent();
   //} else if (component_type == "NaturalGradientPerElementScaleComponent") {
@@ -121,8 +121,8 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new PerElementOffsetComponent();
   //} else if (component_type == "SumGroupComponent") {
   //  ans = new SumGroupComponent();
-  //} else if (component_type == "FixedAffineComponent") {
-  //  ans = new FixedAffineComponent();
+  } else if (component_type == "FixedAffineComponent") {
+    ans = new FixedAffineComponent();
   //} else if (component_type == "FixedScaleComponent") {
   //  ans = new FixedScaleComponent();
   //} else if (component_type == "FixedBiasComponent") {
@@ -163,10 +163,10 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new DropoutMaskComponent();
   //} else if (component_type == "GeneralDropoutComponent") {
   //  ans = new GeneralDropoutComponent();
-  //} else if (component_type == "BackpropTruncationComponent") {
-    //ans = new BackpropTruncationComponent();
-  //} else if (component_type == "LstmNonlinearityComponent") {
-  //  ans = new LstmNonlinearityComponent();
+  } else if (component_type == "BackpropTruncationComponent") {
+    ans = new BackpropTruncationComponent();
+  } else if (component_type == "LstmNonlinearityComponent") {
+    ans = new LstmNonlinearityComponent();
   //} else if (component_type == "BatchNormComponent") {
   //  ans = new BatchNormComponent();
   //} else if (component_type == "TimeHeightConvolutionComponent") {
@@ -334,33 +334,33 @@ std::string UpdatableComponent::Info() const {
   return stream.str();
 }
 
-//void NonlinearComponent::StoreStatsInternal(
-//    const CuMatrixBase<BaseFloat> &out_value,
-//    const CuMatrixBase<BaseFloat> *deriv) {
-//  KALDI_ASSERT(out_value.NumCols() == dim_);
-//
-//  // Check we have the correct dimensions.
-//  if (value_sum_.Dim() != dim_ ||
-//      (deriv != NULL && deriv_sum_.Dim() != dim_)) {
-//    if (value_sum_.Dim() != dim_) {
-//      value_sum_.Resize(dim_);
-//      count_ = 0.0;
-//    }
-//    if (deriv != NULL && deriv_sum_.Dim() != dim_) {
-//      deriv_sum_.Resize(dim_);
-//      count_ = 0.0;
-//      value_sum_.SetZero();
-//    }
-//  }
-//  count_ += out_value.NumRows();
-//  CuVector<BaseFloat> temp(dim_);
-//  temp.AddRowSumMat(1.0, out_value, 0.0);
-//  value_sum_.AddVec(1.0, temp);
-//  if (deriv != NULL) {
-//    temp.AddRowSumMat(1.0, *deriv, 0.0);
-//    deriv_sum_.AddVec(1.0, temp);
-//  }
-//}
+void NonlinearComponent::StoreStatsInternal(
+    const CuMatrixBase<BaseFloat> &out_value,
+    const CuMatrixBase<BaseFloat> *deriv) {
+  KALDI_ASSERT(out_value.NumCols() == dim_);
+
+  // Check we have the correct dimensions.
+  if (value_sum_.Dim() != dim_ ||
+      (deriv != NULL && deriv_sum_.Dim() != dim_)) {
+    if (value_sum_.Dim() != dim_) {
+      value_sum_.Resize(dim_);
+      count_ = 0.0;
+    }
+    if (deriv != NULL && deriv_sum_.Dim() != dim_) {
+      deriv_sum_.Resize(dim_);
+      count_ = 0.0;
+      value_sum_.SetZero();
+    }
+  }
+  count_ += out_value.NumRows();
+  CuVector<BaseFloat> temp(dim_);
+  temp.AddRowSumMat(1.0, out_value, 0.0);
+  value_sum_.AddVec(1.0, temp);
+  if (deriv != NULL) {
+    temp.AddRowSumMat(1.0, *deriv, 0.0);
+    deriv_sum_.AddVec(1.0, temp);
+  }
+}
 //
 //void NonlinearComponent::StoreBackpropStats(
 //    const CuMatrixBase<BaseFloat> &out_deriv) {
