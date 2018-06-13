@@ -896,61 +896,61 @@ void MatrixBase<float>::CopyFromMat(const MatrixBase<float> & M,
 template
 void MatrixBase<double>::CopyFromMat(const MatrixBase<double> & M,
                                      MatrixTransposeType Trans);
+//
+//// Specialize the template for CopyFromSp for float, float.
+//template<>
+//template<>
+//void MatrixBase<float>::CopyFromSp(const SpMatrix<float> & M) {
+//  KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
+//  MatrixIndexT num_rows = num_rows_, stride = stride_;
+//  const float *Mdata = M.Data();
+//  float *row_data = data_, *col_data = data_;
+//  for (MatrixIndexT i = 0; i < num_rows; i++) {
+//    cblas_scopy(i+1, Mdata, 1, row_data, 1); // copy to the row.
+//    cblas_scopy(i, Mdata, 1, col_data, stride); // copy to the column.
+//    Mdata += i+1;
+//    row_data += stride;
+//    col_data += 1;
+//  }
+//}
+//
+//// Specialize the template for CopyFromSp for double, double.
+//template<>
+//template<>
+//void MatrixBase<double>::CopyFromSp(const SpMatrix<double> & M) {
+//  KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
+//  MatrixIndexT num_rows = num_rows_, stride = stride_;
+//  const double *Mdata = M.Data();
+//  double *row_data = data_, *col_data = data_;
+//  for (MatrixIndexT i = 0; i < num_rows; i++) {
+//    cblas_dcopy(i+1, Mdata, 1, row_data, 1); // copy to the row.
+//    cblas_dcopy(i, Mdata, 1, col_data, stride); // copy to the column.
+//    Mdata += i+1;
+//    row_data += stride;
+//    col_data += 1;
+//  }
+//}
 
-// Specialize the template for CopyFromSp for float, float.
-template<>
-template<>
-void MatrixBase<float>::CopyFromSp(const SpMatrix<float> & M) {
-  KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
-  MatrixIndexT num_rows = num_rows_, stride = stride_;
-  const float *Mdata = M.Data();
-  float *row_data = data_, *col_data = data_;
-  for (MatrixIndexT i = 0; i < num_rows; i++) {
-    cblas_scopy(i+1, Mdata, 1, row_data, 1); // copy to the row.
-    cblas_scopy(i, Mdata, 1, col_data, stride); // copy to the column.
-    Mdata += i+1;
-    row_data += stride;
-    col_data += 1;
-  }
-}
-
-// Specialize the template for CopyFromSp for double, double.
-template<>
-template<>
-void MatrixBase<double>::CopyFromSp(const SpMatrix<double> & M) {
-  KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
-  MatrixIndexT num_rows = num_rows_, stride = stride_;
-  const double *Mdata = M.Data();
-  double *row_data = data_, *col_data = data_;
-  for (MatrixIndexT i = 0; i < num_rows; i++) {
-    cblas_dcopy(i+1, Mdata, 1, row_data, 1); // copy to the row.
-    cblas_dcopy(i, Mdata, 1, col_data, stride); // copy to the column.
-    Mdata += i+1;
-    row_data += stride;
-    col_data += 1;
-  }
-}
-
-
-template<typename Real>
-template<typename OtherReal>
-void MatrixBase<Real>::CopyFromSp(const SpMatrix<OtherReal> & M) {
-  KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
-  // MORE EFFICIENT IF LOWER TRIANGULAR!  Reverse code otherwise.
-  for (MatrixIndexT i = 0; i < num_rows_; i++) {
-    for (MatrixIndexT j = 0; j < i; j++) {
-      (*this)(j, i)  = (*this)(i, j) = M(i, j);
-    }
-    (*this)(i, i) = M(i, i);
-  }
-}
-
-// Instantiate this function
-template
-void MatrixBase<float>::CopyFromSp(const SpMatrix<double> & M);
-template
-void MatrixBase<double>::CopyFromSp(const SpMatrix<float> & M);
-
+//
+//template<typename Real>
+//template<typename OtherReal>
+//void MatrixBase<Real>::CopyFromSp(const SpMatrix<OtherReal> & M) {
+//  KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
+//  // MORE EFFICIENT IF LOWER TRIANGULAR!  Reverse code otherwise.
+//  for (MatrixIndexT i = 0; i < num_rows_; i++) {
+//    for (MatrixIndexT j = 0; j < i; j++) {
+//      (*this)(j, i)  = (*this)(i, j) = M(i, j);
+//    }
+//    (*this)(i, i) = M(i, i);
+//  }
+//}
+//
+//// Instantiate this function
+//template
+//void MatrixBase<float>::CopyFromSp(const SpMatrix<double> & M);
+//template
+//void MatrixBase<double>::CopyFromSp(const SpMatrix<float> & M);
+//
 
 template<typename Real>
 template<typename OtherReal>

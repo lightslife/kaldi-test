@@ -159,8 +159,8 @@ class CuVectorBase {
   void AddMatVec(const Real alpha, const CuMatrixBase<Real> &M,
                  MatrixTransposeType trans, const CuVectorBase<Real> &v,
                  const Real beta);
-  void AddVecVec(Real alpha, const CuVectorBase<Real> &v,
-                 const CuVectorBase<Real> &r, Real beta);
+  //void AddVecVec(Real alpha, const CuVectorBase<Real> &v,
+  //               const CuVectorBase<Real> &r, Real beta);
 
   void AddSpVec(const Real alpha, const CuSpMatrix<Real> &S,
                 const CuVectorBase<Real> &v, const Real beta);

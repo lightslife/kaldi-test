@@ -143,8 +143,8 @@ class MatrixBase {
   void CopyFromMat(const CompressedMatrix &M);
 
   /// Copy given spmatrix. (no resize is done).
-  template<typename OtherReal>
-  void CopyFromSp(const SpMatrix<OtherReal> &M);
+  //template<typename OtherReal>
+  //void CopyFromSp(const SpMatrix<OtherReal> &M);
 
   /// Copy given tpmatrix. (no resize is done).
   template<typename OtherReal>
@@ -641,16 +641,16 @@ class MatrixBase {
   //                  const MatrixBase<Real>& C, MatrixTransposeType transC,
   //                  const Real beta);
 
-  /// this <-- beta*this + alpha*SpA*B.
-  // This and the routines below are really
-  // stubs that need to be made more efficient.
-  void AddSpMat(const Real alpha,
-                const SpMatrix<Real>& A,
-                const MatrixBase<Real>& B, MatrixTransposeType transB,
-                const Real beta) {
-    Matrix<Real> M(A);
-    return AddMatMat(alpha, M, kNoTrans, B, transB, beta);
-  }
+  ///// this <-- beta*this + alpha*SpA*B.
+  //// This and the routines below are really
+  //// stubs that need to be made more efficient.
+  //void AddSpMat(const Real alpha,
+  //              const SpMatrix<Real>& A,
+  //              const MatrixBase<Real>& B, MatrixTransposeType transB,
+  //              const Real beta) {
+  //  Matrix<Real> M(A);
+  //  return AddMatMat(alpha, M, kNoTrans, B, transB, beta);
+  //}
   /// this <-- beta*this + alpha*A*B.
   void AddTpMat(const Real alpha,
                 const TpMatrix<Real>& A, MatrixTransposeType transA,
@@ -659,14 +659,14 @@ class MatrixBase {
     Matrix<Real> M(A);
     return AddMatMat(alpha, M, transA, B, transB, beta);
   }
-  /// this <-- beta*this + alpha*A*B.
-  void AddMatSp(const Real alpha,
-                const MatrixBase<Real>& A, MatrixTransposeType transA,
-                const SpMatrix<Real>& B,
-                const Real beta) {
-    Matrix<Real> M(B);
-    return AddMatMat(alpha, A, transA, M, kNoTrans, beta);
-  }
+  ///// this <-- beta*this + alpha*A*B.
+  //void AddMatSp(const Real alpha,
+  //              const MatrixBase<Real>& A, MatrixTransposeType transA,
+  //              const SpMatrix<Real>& B,
+  //              const Real beta) {
+  //  Matrix<Real> M(B);
+  //  return AddMatMat(alpha, A, transA, M, kNoTrans, beta);
+  //}
   ///// this <-- beta*this + alpha*A*B*C.
   //void AddSpMatSp(const Real alpha,
   //                const SpMatrix<Real> &A,
@@ -813,13 +813,13 @@ class Matrix : public MatrixBase<Real> {
   explicit Matrix(const MatrixBase<OtherReal> & M,
                     MatrixTransposeType trans = kNoTrans);
 
-  /// Copy constructor taking SpMatrix...
-  /// It is symmetric, so no option for transpose, and NumRows == Cols
-  template<typename OtherReal>
-  explicit Matrix(const SpMatrix<OtherReal> & M) : MatrixBase<Real>() {
-    Resize(M.NumRows(), M.NumRows(), kUndefined);
-    this->CopyFromSp(M);
-  }
+  ///// Copy constructor taking SpMatrix...
+  ///// It is symmetric, so no option for transpose, and NumRows == Cols
+  //template<typename OtherReal>
+  //explicit Matrix(const SpMatrix<OtherReal> & M) : MatrixBase<Real>() {
+  //  Resize(M.NumRows(), M.NumRows(), kUndefined);
+  //  this->CopyFromSp(M);
+  //}
 
   /// Constructor from CompressedMatrix
   explicit Matrix(const CompressedMatrix &C);

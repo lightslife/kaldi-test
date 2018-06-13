@@ -221,7 +221,7 @@ void BatchNormComponent::ComputeDerived() {
     count_ = 1.0;
     stats_sum_.SetRandn();
     stats_sumsq_.SetRandn();
-    stats_sumsq_.AddVecVec(1.0, stats_sum_, stats_sum_, 1.0);
+   // stats_sumsq_.AddVecVec(1.0, stats_sum_, stats_sum_, 1.0);
   }
 
   offset_.Resize(block_dim_);
@@ -231,7 +231,7 @@ void BatchNormComponent::ComputeDerived() {
   // now offset_ is -mean.
   scale_.CopyFromVec(stats_sumsq_);
   scale_.Scale(1.0 / count_);
-  scale_.AddVecVec(-1.0, offset_, offset_, 1.0);
+  //scale_.AddVecVec(-1.0, offset_, offset_, 1.0);
   // now scale_ is variance.
   // Mathematically the ApplyFloor statement should be a no-op; this is in case
   // of numerical roundoff.

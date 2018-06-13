@@ -31,46 +31,8 @@ namespace kaldi {
 	int cblas_Xaxpy(::size_t  sz, const double alpha,  const double* mData, int a, double *data_, int b);
 
 
-
-	//void MatrixBase<float>::CopyFromSp(const SpMatrix<float> & M) {
-	//	KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
-	//	MatrixIndexT num_rows = num_rows_, stride = stride_;
-	//	const float *Mdata = M.Data();
-	//	float *row_data = data_, *col_data = data_;
-	//	for (MatrixIndexT i = 0; i < num_rows; i++) {
-	//		cblas_scopy(i + 1, Mdata, 1, row_data, 1); // copy to the row.
-	//		cblas_scopy(i, Mdata, 1, col_data, stride); // copy to the column.
-	//		Mdata += i + 1;
-	//		row_data += stride;
-	//		col_data += 1;
-	//	}
-	//}
-
-
-	int cblas_scopy(int i, const float* mData, int a, float *rowData, int b);
-	int cblas_scopy(int i, const double* mData, int a, double *rowData, int b);
-
-
-	//void MatrixBase<double>::CopyFromSp(const SpMatrix<double> & M) {
-	//	KALDI_ASSERT(num_rows_ == M.NumRows() && num_cols_ == num_rows_);
-	//	MatrixIndexT num_rows = num_rows_, stride = stride_;
-	//	const double *Mdata = M.Data();
-	//	double *row_data = data_, *col_data = data_;
-	//	for (MatrixIndexT i = 0; i < num_rows; i++) {
-	//		cblas_dcopy(i + 1, Mdata, 1, row_data, 1); // copy to the row.
-	//		cblas_dcopy(i, Mdata, 1, col_data, stride); // copy to the column.
-	//		Mdata += i + 1;
-	//		row_data += stride;
-	//		col_data += 1;
-	//	}
-	//}
-
-	int cblas_dcopy(int i, const float* mData, int a, float *rowData, int b);
-	int cblas_dcopy(int i, const double* mData, int a, double *rowData, int b);
-
-
-
-
+ 
+ 
 
 	//template<typename Real> void MatrixBase<Real>::Scale(Real alpha) {
 	//	if (alpha == 1.0) return;
@@ -130,28 +92,14 @@ namespace kaldi {
 	//	else {
 
 
-	int cblas_Xdot(int acols, const float*aData, int a, float * bData, int bStride);
-	int cblas_Xdot(int acols, const double*aData, int a, double * bData, int bStride);
+	float cblas_Xdot(int dim, const float*aData, int a, const float * bData, int bStride);
+	double cblas_Xdot(int dim, const double*aData, int a, const double * bData, int bStride);
 
 
+ 
 
 
-
-
-	//template<typename Real>
-	//void VectorBase<Real>::AddVecVec(Real alpha, const VectorBase<Real> &v,
-	//	const VectorBase<Real> &r, Real beta) {
-	//	KALDI_ASSERT(v.data_ != this->data_ && r.data_ != this->data_);
-	//	// We pretend that v is a band-diagonal matrix.
-	//	KALDI_ASSERT(dim_ == v.dim_ && dim_ == r.dim_);
-	//	cblas_Xgbmv(kNoTrans, dim_, dim_, 0, 0, alpha, v.data_, 1,
-	//		r.data_, 1, beta, this->data_, 1);
-	//}
-
-	int cblas_Xgbmv(int kNoTrans, int aDim, int rDim, int a, int b, float alpha, const float * aData, int c, const float * rData, int d, float beta, float * data_, int e);
-
-	int cblas_Xgbmv(int kNoTrans, int aDim, int rDim, int a, int b, double alpha, const double * aData, int c, const double * rData, int d, double beta, double *data_, int e);
-
+ 
 
 	//void MatrixBase<double>::AddVecVec(const double alpha,
 	//	const VectorBase<double> &a,
@@ -165,16 +113,6 @@ namespace kaldi {
 	int cblas_Xger(int aDim, int rbDim, float alpha, const float * aData, int a, const float * rbData, int b, float *data_, int stride);
 	int cblas_Xger(int aDim, int rbDim, double alpha, const double * aData, int a, const double * rbData, int b, double *data_, int stride);
 
-	//template<typename Real>
-	//Real VecVec(const VectorBase<Real> &a,
-	//	const VectorBase<Real> &b) {
-	//	MatrixIndexT adim = a.Dim();
-	//	KALDI_ASSERT(adim == b.Dim());
-	//	return cblas_Xdot(adim, a.Data(), 1, b.Data(), 1);
-	//}
-
-	int cblas_Xdot(int aDim, const float * aData, int a,  const float *bData, int b);
-	int cblas_Xdot(int aDim, const double * aData, int a,  const double *bData, int b);
 
 
  // template<typename Real>

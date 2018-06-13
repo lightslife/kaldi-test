@@ -235,8 +235,8 @@ class VectorBase {
 
   /// Add element-by-element product of vectlrs:
   //  this <-- alpha * v .* r + beta*this .
-  void AddVecVec(Real alpha, const VectorBase<Real> &v,
-                 const VectorBase<Real> &r, Real beta);
+  //void AddVecVec(Real alpha, const VectorBase<Real> &v,
+  //               const VectorBase<Real> &r, Real beta);
 
   /// Add element-by-element quotient of two vectors.
   ///  this <---- alpha*v/r + beta*this

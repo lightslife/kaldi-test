@@ -529,28 +529,28 @@ void CuVectorBase<Real>::AddMatVec(const Real alpha,
 //    Vec().AddSpVec(alpha,M.Mat(),v.Vec(),beta);
 //  }
 //}
-
-template<typename Real>
-void CuVectorBase<Real>::AddVecVec(Real alpha, const CuVectorBase<Real> &v,
-                                   const CuVectorBase<Real> &r, Real beta) {
-  KALDI_ASSERT((dim_ == v.dim_ && dim_ == r.dim_));
-  KALDI_ASSERT(this != &v && this != &r);
-#if HAVE_CUDA == 1
-  if (CuDevice::Instantiate().Enabled()) {
-    if (dim_ == 0) return;
-    CuTimer tim;
-    int dimBlock(CU1DBLOCK);
-    int dimGrid(n_blocks(dim_,CU1DBLOCK));
-
-    cuda_add_vec_vec(dimGrid, dimBlock, alpha, data_, v.Data(), r.Data(), beta, dim_);
-    CU_SAFE_CALL(cudaGetLastError());
-    CuDevice::Instantiate().AccuProfile("CuVectorBase::AddVecVec", tim);
-  } else
-#endif
-  {
-    Vec().AddVecVec(alpha, v.Vec(), r.Vec(), beta);
-  }
-}
+//
+//template<typename Real>
+//void CuVectorBase<Real>::AddVecVec(Real alpha, const CuVectorBase<Real> &v,
+//                                   const CuVectorBase<Real> &r, Real beta) {
+//  KALDI_ASSERT((dim_ == v.dim_ && dim_ == r.dim_));
+//  KALDI_ASSERT(this != &v && this != &r);
+//#if HAVE_CUDA == 1
+//  if (CuDevice::Instantiate().Enabled()) {
+//    if (dim_ == 0) return;
+//    CuTimer tim;
+//    int dimBlock(CU1DBLOCK);
+//    int dimGrid(n_blocks(dim_,CU1DBLOCK));
+//
+//    cuda_add_vec_vec(dimGrid, dimBlock, alpha, data_, v.Data(), r.Data(), beta, dim_);
+//    CU_SAFE_CALL(cudaGetLastError());
+//    CuDevice::Instantiate().AccuProfile("CuVectorBase::AddVecVec", tim);
+//  } else
+//#endif
+//  {
+//    Vec().AddVecVec(alpha, v.Vec(), r.Vec(), beta);
+//  }
+//}
 //
 //
 //template<typename Real>
