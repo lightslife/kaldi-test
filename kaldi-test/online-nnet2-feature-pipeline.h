@@ -124,7 +124,7 @@ struct OnlineNnet2FeaturePipelineConfig {
 /// command line, as well as for easiter multithreaded operation.
 struct OnlineNnet2FeaturePipelineInfo {
   OnlineNnet2FeaturePipelineInfo():
-      feature_type("mfcc"), add_pitch(false) { }
+      feature_type("mfcc"), add_pitch(false),use_ivectors(false) { }
 
   OnlineNnet2FeaturePipelineInfo(
       const OnlineNnet2FeaturePipelineConfig &config);
@@ -147,7 +147,7 @@ struct OnlineNnet2FeaturePipelineInfo {
   // If the user specified --ivector-extraction-config, we assume we're using
   // iVectors as an extra input to the neural net.  Actually, we don't
   // anticipate running this setup without iVectors.
-  bool use_ivectors;
+  bool use_ivectors=false;
   //OnlineIvectorExtractionInfo ivector_extractor_info;
 
   // Config for weighting silence in iVector adaptation.
