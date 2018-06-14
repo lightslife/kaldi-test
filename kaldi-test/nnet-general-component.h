@@ -735,17 +735,17 @@ class DropoutMaskComponent: public RandomComponent {
                           CuMatrixBase<BaseFloat> *out) const;
   // backprop does nothing, there is nothing to backprop to and nothing
   // to update.
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &, // in_value
-                        const CuMatrixBase<BaseFloat> &, // out_value
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const { }
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &, // in_value
+  //                      const CuMatrixBase<BaseFloat> &, // out_value
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const { }
 
   virtual void Read(std::istream &is, bool binary);
-  virtual void Write(std::ostream &os, bool binary) const;
+  //virtual void Write(std::ostream &os, bool binary) const;
 
   virtual Component* Copy() const;
 

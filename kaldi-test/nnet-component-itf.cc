@@ -109,8 +109,8 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new PnormComponent();
   } else if (component_type == "AffineComponent") {
     ans = new AffineComponent();
-  //} else if (component_type == "LinearComponent") {
-  //  ans = new LinearComponent();
+  } else if (component_type == "LinearComponent") {
+    ans = new LinearComponent();
   } else if (component_type == "NaturalGradientAffineComponent") {
     ans = new NaturalGradientAffineComponent();
   //} else if (component_type == "PerElementScaleComponent") {
@@ -159,16 +159,16 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new ConstantComponent();
   //} else if (component_type == "DropoutComponent") {
   //  ans = new DropoutComponent();
-  //} else if (component_type == "DropoutMaskComponent") {
-  //  ans = new DropoutMaskComponent();
+  } else if (component_type == "DropoutMaskComponent") {
+    ans = new DropoutMaskComponent();
   //} else if (component_type == "GeneralDropoutComponent") {
   //  ans = new GeneralDropoutComponent();
   } else if (component_type == "BackpropTruncationComponent") {
     ans = new BackpropTruncationComponent();
   } else if (component_type == "LstmNonlinearityComponent") {
     ans = new LstmNonlinearityComponent();
-  //} else if (component_type == "BatchNormComponent") {
-  //  ans = new BatchNormComponent();
+  } else if (component_type == "BatchNormComponent") {
+    ans = new BatchNormComponent();
   //} else if (component_type == "TimeHeightConvolutionComponent") {
   //  ans = new TimeHeightConvolutionComponent();
   //} else if (component_type == "RestrictedAttentionComponent") {

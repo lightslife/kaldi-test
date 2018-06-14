@@ -22,6 +22,9 @@ int main()
 	typedef kaldi::int32 int32;
 	typedef kaldi::int64 int64;
 
+
+
+
 	std::string nnet3_rxfilename = "final.mdl";
 	TransitionModel trans_model;
 	nnet3::AmNnetSimple am_nnet;
@@ -50,16 +53,20 @@ int main()
 		&am_nnet);
  
 
-	const char * name = "HCLG.fst";
-	std::filebuf file;
-	file.open("HCLG.fst", std::ios::in | std::ios::binary);
-	std::istream is(&file);
 
-	Wfst *wfst;
-	wfst->ReadHead(is);
-	wfst->wfstRead(is);
 
 	OnlineNnet2FeaturePipeline feature_pipeline(feature_info);
+
+
+
+	const char * name = "HCLG.fst.vector";
+	std::filebuf file;
+	file.open(name, std::ios::in | std::ios::binary);
+	std::istream is(&file);
+
+	Wfst *wfst = new Wfst();
+	wfst->ReadHead(is);
+	wfst->wfstRead(is);
 	SingleUtteranceNnet3Decoder decoder(decoder_opts, trans_model,
 		decodable_info,
 		wfst, &feature_pipeline);

@@ -545,54 +545,54 @@ void PrintParameterStats(std::ostringstream &os,
   os << std::setprecision(6);  // restore the default precision.
 }
 ////
-//void PrintParameterStats(std::ostringstream &os,
-//                         const std::string &name,
-//                         const CuMatrix<BaseFloat> &params,
-//                         bool include_mean,
-//                         bool include_row_norms,
-//                         bool include_column_norms,
-//                         bool include_singular_values) {
-//  os << std::setprecision(4);
-//  os << ", " << name << '-';
-//  int32 dim = params.NumRows() * params.NumCols();
-//  if (include_mean) {
-//    BaseFloat mean = params.Sum() / dim,
-//        stddev = std::sqrt(TraceMatMat(params, params, kTrans) / dim -
-//                           mean * mean);
-//    os << "{mean,stddev}=" << mean << ',' << stddev;
-//  } else {
-//    BaseFloat rms = std::sqrt(TraceMatMat(params, params, kTrans) / dim);
-//    os << "rms=" << rms;
-//  }
-//  os << std::setprecision(6);  // restore the default precision.
-//
-//  if (include_row_norms) {
-//    CuVector<BaseFloat> row_norms(params.NumRows());
-//    row_norms.AddDiagMat2(1.0, params, kNoTrans, 0.0);
-//    row_norms.ApplyPow(0.5);
-//    Vector<BaseFloat> row_norms_cpu;
-//    row_norms.Swap(&row_norms_cpu);
-//    os << ", " << name << "-row-norms="
-//       << SummarizeVector(row_norms_cpu);
-//  }
-//  if (include_column_norms) {
-//    CuVector<BaseFloat> col_norms(params.NumCols());
-//    col_norms.AddDiagMat2(1.0, params, kTrans, 0.0);
-//    col_norms.ApplyPow(0.5);
-//    Vector<BaseFloat> col_norms_cpu;
-//    col_norms.Swap(&col_norms_cpu);
-//    os << ", " << name << "-col-norms="
-//       << SummarizeVector(col_norms_cpu);
-//  }
-//  if (include_singular_values) {
-//    Matrix<BaseFloat> params_cpu(params);
-//    Vector<BaseFloat> s(std::min(params.NumRows(), params.NumCols()));
-//    //params_cpu.Svd(&s);
-//    std::string singular_values_str = SummarizeVector(s);
-//    os << ", " << name << "-singular-values=" << singular_values_str;
-//    std::ostringstream name_os;
-//  }
-//}
+void PrintParameterStats(std::ostringstream &os,
+                         const std::string &name,
+                         const CuMatrix<BaseFloat> &params,
+                         bool include_mean,
+                         bool include_row_norms,
+                         bool include_column_norms,
+                         bool include_singular_values) {
+  os << std::setprecision(4);
+  os << ", " << name << '-';
+  int32 dim = params.NumRows() * params.NumCols();
+  if (include_mean) {
+    BaseFloat mean = params.Sum() / dim,
+        stddev = std::sqrt(TraceMatMat(params, params, kTrans) / dim -
+                           mean * mean);
+    os << "{mean,stddev}=" << mean << ',' << stddev;
+  } else {
+    BaseFloat rms = std::sqrt(TraceMatMat(params, params, kTrans) / dim);
+    os << "rms=" << rms;
+  }
+  os << std::setprecision(6);  // restore the default precision.
+
+  if (include_row_norms) {
+    CuVector<BaseFloat> row_norms(params.NumRows());
+    row_norms.AddDiagMat2(1.0, params, kNoTrans, 0.0);
+    row_norms.ApplyPow(0.5);
+    Vector<BaseFloat> row_norms_cpu;
+    row_norms.Swap(&row_norms_cpu);
+    os << ", " << name << "-row-norms="
+       << SummarizeVector(row_norms_cpu);
+  }
+  if (include_column_norms) {
+    CuVector<BaseFloat> col_norms(params.NumCols());
+    col_norms.AddDiagMat2(1.0, params, kTrans, 0.0);
+    col_norms.ApplyPow(0.5);
+    Vector<BaseFloat> col_norms_cpu;
+    col_norms.Swap(&col_norms_cpu);
+    os << ", " << name << "-col-norms="
+       << SummarizeVector(col_norms_cpu);
+  }
+  if (include_singular_values) {
+    Matrix<BaseFloat> params_cpu(params);
+    Vector<BaseFloat> s(std::min(params.NumRows(), params.NumCols()));
+    //params_cpu.Svd(&s);
+    std::string singular_values_str = SummarizeVector(s);
+    os << ", " << name << "-singular-values=" << singular_values_str;
+    std::ostringstream name_os;
+  }
+}
 ////
 
 void ParseConfigLines(const std::vector<std::string> &lines,

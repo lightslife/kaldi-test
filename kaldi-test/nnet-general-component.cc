@@ -1388,103 +1388,103 @@ void BackpropTruncationComponent::Add(BaseFloat alpha,
 //
 //
 //
-//std::string DropoutMaskComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << Type()
-//         << ", output-dim=" << output_dim_
-//         << ", dropout-proportion=" << dropout_proportion_;
-//  if (continuous_)
-//    stream << ", continuous=true";
-//  return stream.str();
-//}
-//
-//DropoutMaskComponent::DropoutMaskComponent():
-//    output_dim_(-1), dropout_proportion_(0.5), continuous_(false) { }
-//
-//DropoutMaskComponent::DropoutMaskComponent(
-//    const DropoutMaskComponent &other):
-//    output_dim_(other.output_dim_),
-//    dropout_proportion_(other.dropout_proportion_),
-//    continuous_(other.continuous_) { }
-//
-//void* DropoutMaskComponent::Propagate(
-//    const ComponentPrecomputedIndexes *indexes,
-//    const CuMatrixBase<BaseFloat> &in,
-//    CuMatrixBase<BaseFloat> *out) const {
-//  KALDI_ASSERT(in.NumRows() == 0 && out->NumCols() == output_dim_);
-//  BaseFloat dropout_proportion = dropout_proportion_;
-//  KALDI_ASSERT(dropout_proportion >= 0.0 && dropout_proportion <= 1.0);
-//
-//  if (dropout_proportion == 0) {
-//    out->Set(1.0);
-//    return NULL;
-//  }
-//
-//  if (continuous_) {
-//    if (test_mode_) {
-//      out->Set(1.0);
-//    } else {
-//      const_cast<CuRand<BaseFloat>&>(random_generator_).RandUniform(out);
-//      out->Scale(dropout_proportion * 4.0);
-//      // make the expected value 1.0.
-//      out->Add(1.0 - (2.0 * dropout_proportion));
-//    }
-//    return NULL;
-//  }
-//
-//  if (test_mode_) {
-//    out->Set(1.0 - dropout_proportion);
-//    return NULL;
-//  }
-//
-//  const_cast<CuRand<BaseFloat>&>(random_generator_).RandUniform(out);
-//  out->Add(-dropout_proportion);
-//  out->ApplyHeaviside();
-//
-//  if (out->NumCols() == 2 || out->NumCols() == 3) {
-//    // This is a kind of special case relevant to LSTms.
-//    // To generate data where it's never the case that both of the dimensions
-//    // for a row are zero, we generate uniformly distributed data (call this u_i),
-//    // and for row i, set (*out)(i, 0) = (0 if u_i < dropout_proportion else 1)
-//    //                and (*out)(i, 1) = (0 if u_i > 1-dropout_proportion else 1)
-//    int32 num_rows = out->NumRows();
-//    // later we may make this a bit more efficient.
-//    CuVector<BaseFloat> temp(num_rows, kUndefined);
-//    const_cast<CuRand<BaseFloat>&>(random_generator_).RandUniform(&temp);
-//    temp.Add(-dropout_proportion);
-//    out->CopyColFromVec(temp, 0);
-//    temp.Add(-1.0 + (2.0 * dropout_proportion));
-//    // Now, 'temp' contains the original uniformly-distributed data plus
-//    // -(1 - dropout_proportion).
-//    temp.Scale(-1.0);
-//    out->CopyColFromVec(temp, 1);
-//    out->ApplyHeaviside();
-//  }
-//  return NULL;
-//}
-//
-//
-//void DropoutMaskComponent::Read(std::istream &is, bool binary) {
-//  ExpectOneOrTwoTokens(is, binary, "<DropoutMaskComponent>", "<OutputDim>");
-//  ReadBasicType(is, binary, &output_dim_);
-//  ExpectToken(is, binary, "<DropoutProportion>");
-//  ReadBasicType(is, binary, &dropout_proportion_);
-//  if (PeekToken(is, binary) == 'T') {
-//    ExpectToken(is, binary, "<TestMode>");
-//    ReadBasicType(is, binary, &test_mode_);  // read test mode
-//  } else {
-//    test_mode_ = false;
-//  }
-//  if (PeekToken(is, binary) == 'C') {
-//    ExpectToken(is, binary, "<Continuous>");
-//    continuous_ = true;
-//  } else {
-//    continuous_ = false;
-//  }
-//  ExpectToken(is, binary, "</DropoutMaskComponent>");
-//}
-//
-//
+std::string DropoutMaskComponent::Info() const {
+  std::ostringstream stream;
+  stream << Type()
+         << ", output-dim=" << output_dim_
+         << ", dropout-proportion=" << dropout_proportion_;
+  if (continuous_)
+    stream << ", continuous=true";
+  return stream.str();
+}
+
+DropoutMaskComponent::DropoutMaskComponent():
+    output_dim_(-1), dropout_proportion_(0.5), continuous_(false) { }
+
+DropoutMaskComponent::DropoutMaskComponent(
+    const DropoutMaskComponent &other):
+    output_dim_(other.output_dim_),
+    dropout_proportion_(other.dropout_proportion_),
+    continuous_(other.continuous_) { }
+
+void* DropoutMaskComponent::Propagate(
+    const ComponentPrecomputedIndexes *indexes,
+    const CuMatrixBase<BaseFloat> &in,
+    CuMatrixBase<BaseFloat> *out) const {
+  KALDI_ASSERT(in.NumRows() == 0 && out->NumCols() == output_dim_);
+  BaseFloat dropout_proportion = dropout_proportion_;
+  KALDI_ASSERT(dropout_proportion >= 0.0 && dropout_proportion <= 1.0);
+
+  if (dropout_proportion == 0) {
+    out->Set(1.0);
+    return NULL;
+  }
+
+  if (continuous_) {
+    if (test_mode_) {
+      out->Set(1.0);
+    } else {
+      const_cast<CuRand<BaseFloat>&>(random_generator_).RandUniform(out);
+      out->Scale(dropout_proportion * 4.0);
+      // make the expected value 1.0.
+      out->Add(1.0 - (2.0 * dropout_proportion));
+    }
+    return NULL;
+  }
+
+  if (test_mode_) {
+    out->Set(1.0 - dropout_proportion);
+    return NULL;
+  }
+
+  const_cast<CuRand<BaseFloat>&>(random_generator_).RandUniform(out);
+  out->Add(-dropout_proportion);
+  out->ApplyHeaviside();
+
+  if (out->NumCols() == 2 || out->NumCols() == 3) {
+    // This is a kind of special case relevant to LSTms.
+    // To generate data where it's never the case that both of the dimensions
+    // for a row are zero, we generate uniformly distributed data (call this u_i),
+    // and for row i, set (*out)(i, 0) = (0 if u_i < dropout_proportion else 1)
+    //                and (*out)(i, 1) = (0 if u_i > 1-dropout_proportion else 1)
+    int32 num_rows = out->NumRows();
+    // later we may make this a bit more efficient.
+    CuVector<BaseFloat> temp(num_rows, kUndefined);
+    const_cast<CuRand<BaseFloat>&>(random_generator_).RandUniform(&temp);
+    temp.Add(-dropout_proportion);
+    out->CopyColFromVec(temp, 0);
+    temp.Add(-1.0 + (2.0 * dropout_proportion));
+    // Now, 'temp' contains the original uniformly-distributed data plus
+    // -(1 - dropout_proportion).
+    temp.Scale(-1.0);
+    out->CopyColFromVec(temp, 1);
+    out->ApplyHeaviside();
+  }
+  return NULL;
+}
+
+
+void DropoutMaskComponent::Read(std::istream &is, bool binary) {
+  ExpectOneOrTwoTokens(is, binary, "<DropoutMaskComponent>", "<OutputDim>");
+  ReadBasicType(is, binary, &output_dim_);
+  ExpectToken(is, binary, "<DropoutProportion>");
+  ReadBasicType(is, binary, &dropout_proportion_);
+  if (PeekToken(is, binary) == 'T') {
+    ExpectToken(is, binary, "<TestMode>");
+    ReadBasicType(is, binary, &test_mode_);  // read test mode
+  } else {
+    test_mode_ = false;
+  }
+  if (PeekToken(is, binary) == 'C') {
+    ExpectToken(is, binary, "<Continuous>");
+    continuous_ = true;
+  } else {
+    continuous_ = false;
+  }
+  ExpectToken(is, binary, "</DropoutMaskComponent>");
+}
+
+
 //void DropoutMaskComponent::Write(std::ostream &os, bool binary) const {
 //  WriteToken(os, binary, "<DropoutMaskComponent>");
 //  WriteToken(os, binary, "<OutputDim>");
@@ -1498,22 +1498,22 @@ void BackpropTruncationComponent::Add(BaseFloat alpha,
 //  WriteToken(os, binary, "</DropoutMaskComponent>");
 //}
 //
-//Component* DropoutMaskComponent::Copy() const {
-//  return new DropoutMaskComponent(*this);
-//}
-//
-//void DropoutMaskComponent::InitFromConfig(ConfigLine *cfl) {
-//  output_dim_ = 0;
-//  bool ok = cfl->GetValue("output-dim", &output_dim_);
-//  KALDI_ASSERT(ok && output_dim_ > 0);
-//  dropout_proportion_ = 0.5;
-//  cfl->GetValue("dropout-proportion", &dropout_proportion_);
-//  continuous_ = false;
-//  cfl->GetValue("continuous", &continuous_);
-//  test_mode_ = false;
-//  cfl->GetValue("test-mode", &test_mode_);
-//}
-//
+Component* DropoutMaskComponent::Copy() const {
+  return new DropoutMaskComponent(*this);
+}
+
+void DropoutMaskComponent::InitFromConfig(ConfigLine *cfl) {
+  output_dim_ = 0;
+  bool ok = cfl->GetValue("output-dim", &output_dim_);
+  KALDI_ASSERT(ok && output_dim_ > 0);
+  dropout_proportion_ = 0.5;
+  cfl->GetValue("dropout-proportion", &dropout_proportion_);
+  continuous_ = false;
+  cfl->GetValue("continuous", &continuous_);
+  test_mode_ = false;
+  cfl->GetValue("test-mode", &test_mode_);
+}
+
 //
 //std::string GeneralDropoutComponent::Info() const {
 //  std::ostringstream stream;

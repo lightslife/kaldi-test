@@ -2939,111 +2939,111 @@ void NaturalGradientAffineComponent::Add(BaseFloat alpha, const Component &other
 
 ///// virtual
 //void NaturalGradientAffineComponent::FreezeNaturalGradient(bool freeze) {
-//  preconditioner_in_.Freeze(freeze);
-//  preconditioner_out_.Freeze(freeze);
+//  //preconditioner_in_.Freeze(freeze);
+//  //preconditioner_out_.Freeze(freeze);
 //}
 
-//
-//void LinearComponent::Read(std::istream &is, bool binary) {
-//  std::string token = ReadUpdatableCommon(is, binary);
-//  KALDI_ASSERT(token == "");
-//  ExpectToken(is, binary, "<Params>");
-//  params_.Read(is, binary);
-//  if (PeekToken(is, binary) == 'O') {
-//    ExpectToken(is, binary, "<OrthonormalConstraint>");
-//    ReadBasicType(is, binary, &orthonormal_constraint_);
-//  } else {
-//    orthonormal_constraint_ = 0.0;
-//  }
-//  ExpectToken(is, binary, "<UseNaturalGradient>");
-//  ReadBasicType(is, binary, &use_natural_gradient_);
-//
-//  // Read various natural-gradient-related configs.
-//  int32 rank_in,  rank_out, update_period;
-//  BaseFloat alpha, num_samples_history;
-//  ExpectToken(is, binary, "<RankInOut>");
-//  ReadBasicType(is, binary, &rank_in);
-//  ReadBasicType(is, binary, &rank_out);
-//  ExpectToken(is, binary, "<Alpha>");
-//  ReadBasicType(is, binary, &alpha);
-//  ExpectToken(is, binary, "<NumSamplesHistory>");
-//  ReadBasicType(is, binary, &num_samples_history);
-//  ExpectToken(is, binary, "<UpdatePeriod>");
-//  ReadBasicType(is, binary, &update_period);
-//
-//  preconditioner_in_.SetAlpha(alpha);
-//  preconditioner_out_.SetAlpha(alpha);
-//  preconditioner_in_.SetRank(rank_in);
-//  preconditioner_out_.SetRank(rank_out);
-//  preconditioner_in_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_out_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_in_.SetUpdatePeriod(update_period);
-//  preconditioner_out_.SetUpdatePeriod(update_period);
-//
-//  ExpectToken(is, binary, "</LinearComponent>");
-//}
-//
-//void LinearComponent::InitFromConfig(ConfigLine *cfl) {
-//  bool ok = true;
-//  std::string matrix_filename;
-//  is_gradient_ = false;  // not configurable; there's no reason you'd want this
-//
-//  InitLearningRatesFromConfig(cfl);
-//
-//  int32 input_dim = -1, output_dim = -1;
-//  if (cfl->GetValue("matrix", &matrix_filename)) {
-//    ReadKaldiObject(matrix_filename, &params_); // will abort on failure.
-//    KALDI_ASSERT(params_.NumRows() != 0);
-//    if (cfl->GetValue("input-dim", &input_dim))
-//      KALDI_ASSERT(input_dim == InputDim() &&
-//                   "input-dim mismatch vs. matrix.");
-//    if (cfl->GetValue("output-dim", &output_dim))
-//      KALDI_ASSERT(output_dim == OutputDim() &&
-//                   "output-dim mismatch vs. matrix.");
-//  } else {
-//    ok = ok && cfl->GetValue("input-dim", &input_dim);
-//    ok = ok && cfl->GetValue("output-dim", &output_dim);
-//    if (!ok)
-//      KALDI_ERR << "Bad initializer " << cfl->WholeLine();
-//    BaseFloat param_stddev = 1.0 / std::sqrt(input_dim);
-//    cfl->GetValue("param-stddev", &param_stddev);
-//    params_.Resize(output_dim, input_dim);
-//    KALDI_ASSERT(output_dim > 0 && input_dim > 0 && param_stddev >= 0.0);
-//    params_.SetRandn(); // sets to random normally distributed noise.
-//    params_.Scale(param_stddev);
-//  }
-//  // Read various natural-gradient-related configs.
-//  int32 rank_in = 20, rank_out = 80, update_period = 4;
-//  BaseFloat alpha = 4.0,
-//      num_samples_history = 2000.0;
-//
-//  use_natural_gradient_ = true;
-//
-//  cfl->GetValue("num-samples-history", &num_samples_history);
-//  cfl->GetValue("alpha", &alpha);
-//  cfl->GetValue("rank-in", &rank_in);
-//  cfl->GetValue("rank-out", &rank_out);
-//  cfl->GetValue("update-period", &update_period);
-//  cfl->GetValue("use-natural-gradient", &use_natural_gradient_);
-//
-//  preconditioner_in_.SetAlpha(alpha);
-//  preconditioner_out_.SetAlpha(alpha);
-//  preconditioner_in_.SetRank(rank_in);
-//  preconditioner_out_.SetRank(rank_out);
-//  preconditioner_in_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_out_.SetNumSamplesHistory(num_samples_history);
-//  preconditioner_in_.SetUpdatePeriod(update_period);
-//  preconditioner_out_.SetUpdatePeriod(update_period);
-//
-//  orthonormal_constraint_ = 0.0;
-//  cfl->GetValue("orthonormal-constraint", &orthonormal_constraint_);
-//
-//  if (cfl->HasUnusedValues())
-//    KALDI_ERR << "Could not process these elements in initializer: "
-//              << cfl->UnusedValues();
-//}
-//
-//
+
+void LinearComponent::Read(std::istream &is, bool binary) {
+  std::string token = ReadUpdatableCommon(is, binary);
+  KALDI_ASSERT(token == "");
+  ExpectToken(is, binary, "<Params>");
+  params_.Read(is, binary);
+  if (PeekToken(is, binary) == 'O') {
+    ExpectToken(is, binary, "<OrthonormalConstraint>");
+    ReadBasicType(is, binary, &orthonormal_constraint_);
+  } else {
+    orthonormal_constraint_ = 0.0;
+  }
+  ExpectToken(is, binary, "<UseNaturalGradient>");
+  ReadBasicType(is, binary, &use_natural_gradient_);
+
+  // Read various natural-gradient-related configs.
+  int32 rank_in,  rank_out, update_period;
+  BaseFloat alpha, num_samples_history;
+  ExpectToken(is, binary, "<RankInOut>");
+  ReadBasicType(is, binary, &rank_in);
+  ReadBasicType(is, binary, &rank_out);
+  ExpectToken(is, binary, "<Alpha>");
+  ReadBasicType(is, binary, &alpha);
+  ExpectToken(is, binary, "<NumSamplesHistory>");
+  ReadBasicType(is, binary, &num_samples_history);
+  ExpectToken(is, binary, "<UpdatePeriod>");
+  ReadBasicType(is, binary, &update_period);
+
+  //preconditioner_in_.SetAlpha(alpha);
+  //preconditioner_out_.SetAlpha(alpha);
+  //preconditioner_in_.SetRank(rank_in);
+  //preconditioner_out_.SetRank(rank_out);
+  //preconditioner_in_.SetNumSamplesHistory(num_samples_history);
+  //preconditioner_out_.SetNumSamplesHistory(num_samples_history);
+  //preconditioner_in_.SetUpdatePeriod(update_period);
+  //preconditioner_out_.SetUpdatePeriod(update_period);
+
+  ExpectToken(is, binary, "</LinearComponent>");
+}
+
+void LinearComponent::InitFromConfig(ConfigLine *cfl) {
+  bool ok = true;
+  std::string matrix_filename;
+  is_gradient_ = false;  // not configurable; there's no reason you'd want this
+
+  InitLearningRatesFromConfig(cfl);
+
+  int32 input_dim = -1, output_dim = -1;
+  if (cfl->GetValue("matrix", &matrix_filename)) {
+    ReadKaldiObject(matrix_filename, &params_); // will abort on failure.
+    KALDI_ASSERT(params_.NumRows() != 0);
+    if (cfl->GetValue("input-dim", &input_dim))
+      KALDI_ASSERT(input_dim == InputDim() &&
+                   "input-dim mismatch vs. matrix.");
+    if (cfl->GetValue("output-dim", &output_dim))
+      KALDI_ASSERT(output_dim == OutputDim() &&
+                   "output-dim mismatch vs. matrix.");
+  } else {
+    ok = ok && cfl->GetValue("input-dim", &input_dim);
+    ok = ok && cfl->GetValue("output-dim", &output_dim);
+    if (!ok)
+      KALDI_ERR << "Bad initializer " << cfl->WholeLine();
+    BaseFloat param_stddev = 1.0 / std::sqrt(input_dim);
+    cfl->GetValue("param-stddev", &param_stddev);
+    params_.Resize(output_dim, input_dim);
+    KALDI_ASSERT(output_dim > 0 && input_dim > 0 && param_stddev >= 0.0);
+    params_.SetRandn(); // sets to random normally distributed noise.
+    params_.Scale(param_stddev);
+  }
+  // Read various natural-gradient-related configs.
+  int32 rank_in = 20, rank_out = 80, update_period = 4;
+  BaseFloat alpha = 4.0,
+      num_samples_history = 2000.0;
+
+  use_natural_gradient_ = true;
+
+  cfl->GetValue("num-samples-history", &num_samples_history);
+  cfl->GetValue("alpha", &alpha);
+  cfl->GetValue("rank-in", &rank_in);
+  cfl->GetValue("rank-out", &rank_out);
+  cfl->GetValue("update-period", &update_period);
+  cfl->GetValue("use-natural-gradient", &use_natural_gradient_);
+
+  //preconditioner_in_.SetAlpha(alpha);
+  //preconditioner_out_.setalpha(alpha);
+  //preconditioner_in_.setrank(rank_in);
+  //preconditioner_out_.setrank(rank_out);
+  //preconditioner_in_.setnumsampleshistory(num_samples_history);
+  //preconditioner_out_.setnumsampleshistory(num_samples_history);
+  //preconditioner_in_.setupdateperiod(update_period);
+  //preconditioner_out_.setupdateperiod(update_period);
+
+  orthonormal_constraint_ = 0.0;
+  cfl->GetValue("orthonormal-constraint", &orthonormal_constraint_);
+
+  if (cfl->HasUnusedValues())
+    KALDI_ERR << "Could not process these elements in initializer: "
+              << cfl->UnusedValues();
+}
+
+
 //void LinearComponent::Write(std::ostream &os,
 //                            bool binary) const {
 //  WriteUpdatableCommon(os, binary);  // Write the opening tag and learning rate
@@ -3072,34 +3072,34 @@ void NaturalGradientAffineComponent::Add(BaseFloat alpha, const Component &other
 //  WriteBasicType(os, binary, update_period);
 //  WriteToken(os, binary, "</LinearComponent>");
 //}
+
+std::string LinearComponent::Info() const {
+  std::ostringstream stream;
+  stream << UpdatableComponent::Info();
+  PrintParameterStats(stream, "params", params_,
+                      false, // include_mean
+                      true, // include_row_norms
+                      true, // include_column_norms
+                      GetVerboseLevel() >= 2); // include_singular_values
+  if (orthonormal_constraint_ != 0.0)
+    stream << ", orthonormal-constraint=" << orthonormal_constraint_;
+  stream << ", use-natural-gradient="
+	  << (use_natural_gradient_ ? "true" : "false");
+         ////<< ", rank-in=" << preconditioner_in_.GetRank()
+         ////<< ", rank-out=" << preconditioner_out_.GetRank()
+         //<< ", num-samples-history="
+         ////<< preconditioner_in_.GetNumSamplesHistory()
+         //<< ", update-period=" << preconditioner_in_.GetUpdatePeriod()
+         //<< ", alpha=" << preconditioner_in_.GetAlpha();
+  return stream.str();
+}
 //
-//std::string LinearComponent::Info() const {
-//  std::ostringstream stream;
-//  stream << UpdatableComponent::Info();
-//  PrintParameterStats(stream, "params", params_,
-//                      false, // include_mean
-//                      true, // include_row_norms
-//                      true, // include_column_norms
-//                      GetVerboseLevel() >= 2); // include_singular_values
-//  if (orthonormal_constraint_ != 0.0)
-//    stream << ", orthonormal-constraint=" << orthonormal_constraint_;
-//  stream << ", use-natural-gradient="
-//         << (use_natural_gradient_ ? "true" : "false")
-//         << ", rank-in=" << preconditioner_in_.GetRank()
-//         << ", rank-out=" << preconditioner_out_.GetRank()
-//         << ", num-samples-history="
-//         << preconditioner_in_.GetNumSamplesHistory()
-//         << ", update-period=" << preconditioner_in_.GetUpdatePeriod()
-//         << ", alpha=" << preconditioner_in_.GetAlpha();
-//  return stream.str();
-//}
-//
-//void* LinearComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                                 const CuMatrixBase<BaseFloat> &in,
-//                                 CuMatrixBase<BaseFloat> *out) const {
-//  out->AddMatMat(1.0, in, kNoTrans, params_, kTrans, 1.0);
-//  return NULL;
-//}
+void* LinearComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                 const CuMatrixBase<BaseFloat> &in,
+                                 CuMatrixBase<BaseFloat> *out) const {
+  out->AddMatMat(1.0, in, kNoTrans, params_, kTrans, 1.0);
+  return NULL;
+}
 //
 //void LinearComponent::Backprop(const std::string &debug_info,
 //                               const ComponentPrecomputedIndexes *indexes,
@@ -3140,72 +3140,72 @@ void NaturalGradientAffineComponent::Add(BaseFloat alpha, const Component &other
 //}
 //
 //
-//Component* LinearComponent::Copy() const {
-//  return new LinearComponent(*this);
-//}
+Component* LinearComponent::Copy() const {
+  return new LinearComponent(*this);
+}
+
+LinearComponent::LinearComponent(
+    const LinearComponent &other):
+    UpdatableComponent(other),
+    params_(other.params_),
+    orthonormal_constraint_(other.orthonormal_constraint_),
+    use_natural_gradient_(other.use_natural_gradient_)/*,
+    preconditioner_in_(other.preconditioner_in_),
+    preconditioner_out_(other.preconditioner_out_)*/ { }
+
+LinearComponent::LinearComponent(const CuMatrix<BaseFloat> &params):
+    params_(params),
+    orthonormal_constraint_(0.0),
+    use_natural_gradient_(true) {
+  // Set defaults for natural gradient.
+  //preconditioner_in_.SetRank(40);
+  //preconditioner_out_.SetRank(80);
+  //preconditioner_in_.SetUpdatePeriod(4);
+  //preconditioner_out_.SetUpdatePeriod(4);
+  // the component-level defaults of alpha and num_samples_history, at 4.0 and
+  // 2000.0, are the same as in the NaturalGradientOnline code, so there is no
+  // need to set those here.
+}
 //
-//LinearComponent::LinearComponent(
-//    const LinearComponent &other):
-//    UpdatableComponent(other),
-//    params_(other.params_),
-//    orthonormal_constraint_(other.orthonormal_constraint_),
-//    use_natural_gradient_(other.use_natural_gradient_),
-//    preconditioner_in_(other.preconditioner_in_),
-//    preconditioner_out_(other.preconditioner_out_) { }
+void LinearComponent::Scale(BaseFloat scale) {
+  if (scale == 0.0) params_.SetZero();
+  else params_.Scale(scale);
+}
+
+void LinearComponent::Add(BaseFloat alpha, const Component &other_in) {
+  const LinearComponent *other =
+      dynamic_cast<const LinearComponent*>(&other_in);
+  KALDI_ASSERT(other != NULL);
+  params_.AddMat(alpha, other->params_);
+}
+
+void LinearComponent::PerturbParams(BaseFloat stddev) {
+  CuMatrix<BaseFloat> temp_params(params_);
+  temp_params.SetRandn();
+  params_.AddMat(stddev, temp_params);
+}
+int32 LinearComponent::NumParameters() const {
+  return params_.NumRows() * params_.NumCols();
+}
+void LinearComponent::Vectorize(VectorBase<BaseFloat> *params) const {
+  KALDI_ASSERT(params->Dim() == this->NumParameters());
+  params->CopyRowsFromMat(params_);
+}
+void LinearComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
+  KALDI_ASSERT(params.Dim() == this->NumParameters());
+  params_.CopyRowsFromVec(params);
+}
+BaseFloat LinearComponent::DotProduct(const UpdatableComponent &other_in) const {
+  const LinearComponent *other =
+      dynamic_cast<const LinearComponent*>(&other_in);
+  return TraceMatMat(params_, other->params_, kTrans);
+}
 //
-//LinearComponent::LinearComponent(const CuMatrix<BaseFloat> &params):
-//    params_(params),
-//    orthonormal_constraint_(0.0),
-//    use_natural_gradient_(true) {
-//  // Set defaults for natural gradient.
-//  preconditioner_in_.SetRank(40);
-//  preconditioner_out_.SetRank(80);
-//  preconditioner_in_.SetUpdatePeriod(4);
-//  preconditioner_out_.SetUpdatePeriod(4);
-//  // the component-level defaults of alpha and num_samples_history, at 4.0 and
-//  // 2000.0, are the same as in the NaturalGradientOnline code, so there is no
-//  // need to set those here.
-//}
-//
-//void LinearComponent::Scale(BaseFloat scale) {
-//  if (scale == 0.0) params_.SetZero();
-//  else params_.Scale(scale);
-//}
-//
-//void LinearComponent::Add(BaseFloat alpha, const Component &other_in) {
-//  const LinearComponent *other =
-//      dynamic_cast<const LinearComponent*>(&other_in);
-//  KALDI_ASSERT(other != NULL);
-//  params_.AddMat(alpha, other->params_);
-//}
-//
-//void LinearComponent::PerturbParams(BaseFloat stddev) {
-//  CuMatrix<BaseFloat> temp_params(params_);
-//  temp_params.SetRandn();
-//  params_.AddMat(stddev, temp_params);
-//}
-//int32 LinearComponent::NumParameters() const {
-//  return params_.NumRows() * params_.NumCols();
-//}
-//void LinearComponent::Vectorize(VectorBase<BaseFloat> *params) const {
-//  KALDI_ASSERT(params->Dim() == this->NumParameters());
-//  params->CopyRowsFromMat(params_);
-//}
-//void LinearComponent::UnVectorize(const VectorBase<BaseFloat> &params) {
-//  KALDI_ASSERT(params.Dim() == this->NumParameters());
-//  params_.CopyRowsFromVec(params);
-//}
-//BaseFloat LinearComponent::DotProduct(const UpdatableComponent &other_in) const {
-//  const LinearComponent *other =
-//      dynamic_cast<const LinearComponent*>(&other_in);
-//  return TraceMatMat(params_, other->params_, kTrans);
-//}
-//
-//void LinearComponent::FreezeNaturalGradient(bool freeze) {
-//  preconditioner_in_.Freeze(freeze);
-//  preconditioner_out_.Freeze(freeze);
-//}
-//
+void LinearComponent::FreezeNaturalGradient(bool freeze) {
+  //preconditioner_in_.Freeze(freeze);
+  //preconditioner_out_.Freeze(freeze);
+}
+
 //
 std::string FixedAffineComponent::Info() const {
   std::ostringstream stream;

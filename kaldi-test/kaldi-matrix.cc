@@ -1165,18 +1165,18 @@ void Matrix<Real>::Destroy() {
 //  }
 //}
 //
-//template<typename Real>
-//Real MatrixBase<Real>::Sum() const {
-//  double sum = 0.0;
-//
-//  for (MatrixIndexT i = 0; i < num_rows_; i++) {
-//    for (MatrixIndexT j = 0; j < num_cols_; j++) {
-//      sum += (*this)(i, j);
-//    }
-//  }
-//
-//  return (Real)sum;
-//}
+template<typename Real>
+Real MatrixBase<Real>::Sum() const {
+  double sum = 0.0;
+
+  for (MatrixIndexT i = 0; i < num_rows_; i++) {
+    for (MatrixIndexT j = 0; j < num_cols_; j++) {
+      sum += (*this)(i, j);
+    }
+  }
+
+  return (Real)sum;
+}
 //
 //template<typename Real> void MatrixBase<Real>::Max(const MatrixBase<Real> &A) {
 //  KALDI_ASSERT(A.NumRows() == NumRows() && A.NumCols() == NumCols());
@@ -1314,17 +1314,17 @@ void MatrixBase<Real>::MulRowsVec(const VectorBase<Real> &scale) {
 //  }
 //}
 //
-//template<typename Real>  // scales each column by scale[i].
-//void MatrixBase<Real>::MulColsVec(const VectorBase<Real> &scale) {
-//  KALDI_ASSERT(scale.Dim() == num_cols_);
-//  for (MatrixIndexT i = 0; i < num_rows_; i++) {
-//    for (MatrixIndexT j = 0; j < num_cols_; j++) {
-//      Real this_scale = scale(j);
-//      (*this)(i, j) *= this_scale;
-//    }
-//  }
-//}
-//
+template<typename Real>  // scales each column by scale[i].
+void MatrixBase<Real>::MulColsVec(const VectorBase<Real> &scale) {
+  KALDI_ASSERT(scale.Dim() == num_cols_);
+  for (MatrixIndexT i = 0; i < num_rows_; i++) {
+    for (MatrixIndexT j = 0; j < num_cols_; j++) {
+      Real this_scale = scale(j);
+      (*this)(i, j) *= this_scale;
+    }
+  }
+}
+
 template<typename Real>
 void MatrixBase<Real>::SetZero() {
   if (num_cols_ == stride_)
@@ -1362,17 +1362,17 @@ void MatrixBase<Real>::SetRandn() {
     if (nc != num_cols_) row_data[nc] = static_cast<Real>(kaldi::RandGauss(&rstate));
   }
 }
-//
-//template<typename Real>
-//void MatrixBase<Real>::SetRandUniform() {
-//  kaldi::RandomState rstate;
-//  for (MatrixIndexT row = 0; row < num_rows_; row++) {
-//    Real *row_data = this->RowData(row);
-//    for (MatrixIndexT col = 0; col < num_cols_; col++, row_data++) {
-//      *row_data = static_cast<Real>(kaldi::RandUniform(&rstate));
-//    }
-//  }
-//}
+
+template<typename Real>
+void MatrixBase<Real>::SetRandUniform() {
+  kaldi::RandomState rstate;
+  for (MatrixIndexT row = 0; row < num_rows_; row++) {
+    Real *row_data = this->RowData(row);
+    for (MatrixIndexT col = 0; col < num_cols_; col++, row_data++) {
+      *row_data = static_cast<Real>(kaldi::RandUniform(&rstate));
+    }
+  }
+}
 
 template<typename Real>
 void MatrixBase<Real>::Write(std::ostream &os, bool binary) const {
@@ -1671,16 +1671,16 @@ SubMatrix<Real>::SubMatrix(Real *data,
   }
 }
 //
-//
-//template<typename Real>
-//void MatrixBase<Real>::Add(const Real alpha) {
-//  Real *data = data_;
-//  MatrixIndexT stride = stride_;
-//  for (MatrixIndexT r = 0; r < num_rows_; r++)
-//    for (MatrixIndexT c = 0; c < num_cols_; c++)
-//      data[c + stride*r] += alpha;
-//}
-//
+
+template<typename Real>
+void MatrixBase<Real>::Add(const Real alpha) {
+  Real *data = data_;
+  MatrixIndexT stride = stride_;
+  for (MatrixIndexT r = 0; r < num_rows_; r++)
+    for (MatrixIndexT c = 0; c < num_cols_; c++)
+      data[c + stride*r] += alpha;
+}
+
 //template<typename Real>
 //void MatrixBase<Real>::AddToDiag(const Real alpha) {
 //  Real *data = data_;
@@ -2159,16 +2159,16 @@ void MatrixBase<Real>::ApplyPow(Real power) {
 //    Row(i).ApplyPowAbs(power, include_sign);
 //  }
 //}
-//
-//template<typename Real>
-//void MatrixBase<Real>::ApplyHeaviside() {
-//  MatrixIndexT num_rows = num_rows_, num_cols = num_cols_;
-//  for (MatrixIndexT i = 0; i < num_rows; i++) {
-//    Real *data = this->RowData(i);
-//    for (MatrixIndexT j = 0; j < num_cols; j++)
-//      data[j] = (data[j] > 0 ? 1.0 : 0.0);
-//  }
-//}
+
+template<typename Real>
+void MatrixBase<Real>::ApplyHeaviside() {
+  MatrixIndexT num_rows = num_rows_, num_cols = num_cols_;
+  for (MatrixIndexT i = 0; i < num_rows; i++) {
+    Real *data = this->RowData(i);
+    for (MatrixIndexT j = 0; j < num_cols; j++)
+      data[j] = (data[j] > 0 ? 1.0 : 0.0);
+  }
+}
 
 template<typename Real>
 void MatrixBase<Real>::Heaviside(const MatrixBase<Real> &src) {

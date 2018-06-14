@@ -57,59 +57,59 @@ namespace kaldi {
 //#endif
 //
 //
-//template<typename Real>
-//void CuRand<Real>::RandUniform(CuMatrixBase<Real> *tgt) {
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    CuTimer tim;
-//    // Better use 'tmp' matrix, 'tgt' can be a window into a larger matrix,
-//    // so we should not use it to generate random numbers over whole stride.
-//    // Use the option kStrideEqualNumCols to ensure consistency
-//    // (because when memory is nearly exhausted, the stride of CudaMallocPitch
-//    // may vary).
-//    CuMatrix<Real> tmp(tgt->NumRows(), tgt->NumCols(), kUndefined,
-//                       kStrideEqualNumCols);
-//    size_t s = static_cast<size_t>(tmp.NumRows()) * static_cast<size_t>(tmp.Stride());
-//    CURAND_SAFE_CALL(curandGenerateUniformWrap(gen_, tmp.Data(), s));
-//    tgt->CopyFromMat(tmp);
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    tgt->Mat().SetRandUniform();
-//  }
-//}
-//
-//template<typename Real>
-//void CuRand<Real>::RandUniform(CuMatrix<Real> *tgt) {
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    CuTimer tim;
-//    // Here we don't need to use 'tmp' matrix,
-//    size_t s = static_cast<size_t>(tgt->NumRows()) * static_cast<size_t>(tgt->Stride());
-//    CURAND_SAFE_CALL(curandGenerateUniformWrap(gen_, tgt->Data(), s));
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    tgt->Mat().SetRandUniform();
-//  }
-//}
-//
-//template<typename Real>
-//void CuRand<Real>::RandUniform(CuVectorBase<Real> *tgt) {
-//#if HAVE_CUDA == 1
-//  if (CuDevice::Instantiate().Enabled()) {
-//    CuTimer tim;
-//    CURAND_SAFE_CALL(curandGenerateUniformWrap(gen_, tgt->Data(), tgt->Dim()));
-//    CuDevice::Instantiate().AccuProfile(__func__, tim);
-//  } else
-//#endif
-//  {
-//    tgt->Vec().SetRandUniform();
-//  }
-//}
-//
+template<typename Real>
+void CuRand<Real>::RandUniform(CuMatrixBase<Real> *tgt) {
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    CuTimer tim;
+    // Better use 'tmp' matrix, 'tgt' can be a window into a larger matrix,
+    // so we should not use it to generate random numbers over whole stride.
+    // Use the option kStrideEqualNumCols to ensure consistency
+    // (because when memory is nearly exhausted, the stride of CudaMallocPitch
+    // may vary).
+    CuMatrix<Real> tmp(tgt->NumRows(), tgt->NumCols(), kUndefined,
+                       kStrideEqualNumCols);
+    size_t s = static_cast<size_t>(tmp.NumRows()) * static_cast<size_t>(tmp.Stride());
+    CURAND_SAFE_CALL(curandGenerateUniformWrap(gen_, tmp.Data(), s));
+    tgt->CopyFromMat(tmp);
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    tgt->Mat().SetRandUniform();
+  }
+}
+
+template<typename Real>
+void CuRand<Real>::RandUniform(CuMatrix<Real> *tgt) {
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    CuTimer tim;
+    // Here we don't need to use 'tmp' matrix,
+    size_t s = static_cast<size_t>(tgt->NumRows()) * static_cast<size_t>(tgt->Stride());
+    CURAND_SAFE_CALL(curandGenerateUniformWrap(gen_, tgt->Data(), s));
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    tgt->Mat().SetRandUniform();
+  }
+}
+
+template<typename Real>
+void CuRand<Real>::RandUniform(CuVectorBase<Real> *tgt) {
+#if HAVE_CUDA == 1
+  if (CuDevice::Instantiate().Enabled()) {
+    CuTimer tim;
+    CURAND_SAFE_CALL(curandGenerateUniformWrap(gen_, tgt->Data(), tgt->Dim()));
+    CuDevice::Instantiate().AccuProfile(__func__, tim);
+  } else
+#endif
+  {
+    tgt->Vec().SetRandUniform();
+  }
+}
+
 template<typename Real>
 void CuRand<Real>::RandGaussian(CuMatrixBase<Real> *tgt) {
 #if HAVE_CUDA == 1

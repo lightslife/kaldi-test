@@ -192,20 +192,20 @@ class BatchNormComponent: public Component {
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
                          const CuMatrixBase<BaseFloat> &in,
                          CuMatrixBase<BaseFloat> *out) const;
-  virtual void Backprop(const std::string &debug_info,
-                        const ComponentPrecomputedIndexes *indexes,
-                        const CuMatrixBase<BaseFloat> &in_value,
-                        const CuMatrixBase<BaseFloat> &out_value,
-                        const CuMatrixBase<BaseFloat> &out_deriv,
-                        void *memo,
-                        Component *, // to_update,
-                        CuMatrixBase<BaseFloat> *in_deriv) const;
+  //virtual void Backprop(const std::string &debug_info,
+  //                      const ComponentPrecomputedIndexes *indexes,
+  //                      const CuMatrixBase<BaseFloat> &in_value,
+  //                      const CuMatrixBase<BaseFloat> &out_value,
+  //                      const CuMatrixBase<BaseFloat> &out_deriv,
+  //                      void *memo,
+  //                      Component *, // to_update,
+  //                      CuMatrixBase<BaseFloat> *in_deriv) const;
 
   virtual void Read(std::istream &is, bool binary); // This Read function
   // requires that the Component has the correct type.
 
   /// Write component to stream
-  virtual void Write(std::ostream &os, bool binary) const;
+  //virtual void Write(std::ostream &os, bool binary) const;
   virtual Component* Copy() const { return new BatchNormComponent(*this); }
 
   virtual void Scale(BaseFloat scale);
