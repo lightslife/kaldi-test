@@ -124,6 +124,13 @@ int main()
 	}
 	decoder.FinalizeDecoding();
 
+	std::vector<int> olabel;
+	decoder.GetBestPath(true, &olabel);
+
+
+
+	int xx = 0;
+
     return 0;
 }
 

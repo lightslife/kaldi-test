@@ -663,7 +663,7 @@ namespace kaldi {
 			//LatticeArc arc;
 			StateId arcState = -1;
 			iter = TraceBackBestPath(iter, &arcState);
-			if (arcState != -1)
+			if (arcState != -1 && arcState!=0)
 				(*olabel).push_back(arcState);
 			//arc.nextstate = state;
 			//StateId new_state = olat->AddState();
@@ -707,7 +707,8 @@ namespace kaldi {
 			}
 		}
 		else {
-			*istateId = 0;
+			if(istateId !=NULL)
+				*istateId = 0;
 			*ostateId = 0;
 			//oarc->weight = LatticeWeight::One(); // zero costs.
 		}

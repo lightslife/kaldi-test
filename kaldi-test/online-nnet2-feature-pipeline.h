@@ -63,7 +63,7 @@ namespace kaldi {
 /// directly, it reads in the names of configuration classes.
 struct OnlineNnet2FeaturePipelineConfig {
   std::string feature_type;  // "plp" or "mfcc" or "fbank"
-  std::string mfcc_config;
+  std::string mfcc_config="mfcc.conf";
   std::string plp_config;
   std::string fbank_config;
 

@@ -109,7 +109,7 @@ OnlineNnet2FeaturePipeline::OnlineNnet2FeaturePipeline(
     //final_feature_ = new OnlineAppendFeature(feature_plus_optional_pitch_,
     //                                         ivector_feature_);
   } else {
-    //ivector_feature_ = NULL;
+    ivector_feature_ = NULL;
     final_feature_ = feature_plus_optional_pitch_;
   }
   dim_ = final_feature_->Dim();

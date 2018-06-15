@@ -29,7 +29,7 @@ namespace kaldi {
 								 // example in the function DecodeUtteranceLatticeFaster.
 
 		LatticeFasterDecoderConfig() : beam(16.0),
-			max_active(std::numeric_limits<int32>::max()),
+			max_active(10000),
 			min_active(200),
 			lattice_beam(10.0),
 			prune_interval(25),

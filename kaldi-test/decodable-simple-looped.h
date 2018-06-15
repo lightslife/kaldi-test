@@ -53,9 +53,9 @@ struct NnetSimpleLoopedComputationOptions {
   NnetComputeOptions compute_config;
   NnetSimpleLoopedComputationOptions():
       extra_left_context_initial(0),
-      frame_subsampling_factor(1),
+      frame_subsampling_factor(3),
       frames_per_chunk(20),
-      acoustic_scale(0.1),
+      acoustic_scale(1),
       debug_computation(false) { }
 
   void Check() const {
