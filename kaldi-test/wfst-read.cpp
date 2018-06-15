@@ -22,17 +22,25 @@ namespace kaldi {
 	int Wfst::wfstRead(std::istream &strm) {
 		startState = fsthead.start_;
 		numStates = fsthead.numstates_;
+		int StateSize = numStates * sizeof(State);
+		pStates = (void*) malloc(StateSize);
+
+
 		for (int64 j = 0; j < fsthead.numstates_; j++) {
-			State *state = new State();
+			State *state = ( State*)pStates+j;
 			strm.read(reinterpret_cast<char *>(&((*state).final)), sizeof((*state).final));
 			int64 narcs;
 			strm.read(reinterpret_cast<char*>(&narcs), sizeof(narcs));
+
+			state->num_arc = (int)narcs;
+
+			state->arcs = (void*)malloc(state->num_arc * sizeof(Arc));
 			for (int i = 0; i < narcs; i++) {
-				Arc arc;
-				ReadArc(strm, &arc);
-				(*state).arcs.push_back(arc);
+				Arc *temp_arc = (Arc*)(state->arcs) + i;
+				ReadArc(strm, temp_arc);
+				//(*state).arcs.push_back(arc);
 			}
-			pStates.push_back(state);
+			//pStates.push_back(state);
 		}
 		return 0;
 	}

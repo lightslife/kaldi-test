@@ -355,7 +355,9 @@ namespace kaldi {
 			StateId state = final_toks->key;
 			Token *tok = final_toks->val;
 			const Elem *next = final_toks->tail;
-			BaseFloat final_cost = fst_->pStates[state]->final;   /* fst_.Final(state).Value();*/
+			State* pState =(State*)( fst_->pStates)+state;
+
+			BaseFloat final_cost = pState->final;   /* fst_.Final(state).Value();*/
 			BaseFloat cost = tok->tot_cost,
 				cost_with_final = cost + final_cost;
 			best_cost = std::min(cost, best_cost);
@@ -587,11 +589,13 @@ namespace kaldi {
 			StateId state = best_elem->key;
 			Token *tok = best_elem->val;
 			cost_offset = -tok->tot_cost;
-			for (int x = 0; x<(fst_->pStates)[state]->arcs.size(); x++) {
-				const Arc arc = (fst_->pStates)[state]->arcs[x];
-				if (arc.ilabel != 0) {  // propagate..
-					BaseFloat new_weight = arc.weight + cost_offset -
-						decodable->LogLikelihood(frame, arc.ilabel) + tok->tot_cost;
+			State* pState = (State*)fst_->pStates + state;
+
+			for (int x = 0; x < pState->num_arc; x++) {
+				const Arc *arc = (Arc*)pState->arcs +x;
+				if (arc->ilabel != 0) {  // propagate..
+					BaseFloat new_weight = arc->weight + cost_offset -
+						decodable->LogLikelihood(frame, arc->ilabel) + tok->tot_cost;
 					if (new_weight + adaptive_beam < next_cutoff)
 						next_cutoff = new_weight + adaptive_beam;
 				}
@@ -611,13 +615,15 @@ namespace kaldi {
 			// loop this way because we delete "e" as we go.
 			StateId state = e->key;
 			Token *tok = e->val;
+			State* pState = (State*)fst_->pStates + state;
+
 			if (tok->tot_cost <= cur_cutoff) {
-				for (int x = 0; x<(fst_->pStates)[state]->arcs.size(); x++) {
-					const Arc arc = (fst_->pStates)[state]->arcs[x];
-					if (arc.ilabel != 0) {  // propagate..
+				for (int x = 0; x<pState->num_arc; x++) {
+					const Arc *arc = (Arc*)(pState->arcs)+x;
+					if (arc->ilabel != 0) {  // propagate..
 						BaseFloat ac_cost = cost_offset -
-							decodable->LogLikelihood(frame, arc.ilabel),
-							graph_cost = arc.weight,
+							decodable->LogLikelihood(frame, arc->ilabel),
+							graph_cost = arc->weight,
 							cur_cost = tok->tot_cost,
 							tot_cost = cur_cost + ac_cost + graph_cost;
 						if (tot_cost > next_cutoff) continue;
@@ -625,12 +631,12 @@ namespace kaldi {
 							next_cutoff = tot_cost + adaptive_beam; // prune by best current token
 																	// Note: the frame indexes into active_toks_ are one-based,
 																	// hence the + 1.
-						Token *next_tok = FindOrAddToken(arc.nextstate,
+						Token *next_tok = FindOrAddToken(arc->nextstate,
 							frame + 1, tot_cost, tok, NULL);
 						// NULL: no change indicator needed
 
 						// Add ForwardLink from tok to next_tok (put on head of list tok->links)
-						tok->links = new ForwardLink(next_tok, arc.ilabel, arc.olabel,
+						tok->links = new ForwardLink(next_tok, arc->ilabel, arc->olabel,
 							graph_cost, ac_cost, tok->links);
 					}
 				} // for all arcs
@@ -747,23 +753,25 @@ namespace kaldi {
 			// but since most states are emitting it's not a huge issue.
 			tok->DeleteForwardLinks(); // necessary when re-visiting
 			tok->links = NULL;
-			for (int x = 0; x<(fst_->pStates)[state]->arcs.size(); x++) {
-				const Arc arc = (fst_->pStates)[state]->arcs[x];
-				if (arc.ilabel == 0) {  // propagate nonemitting only...
-					BaseFloat graph_cost = arc.weight,
+
+			State* pState = (State*)fst_->pStates + state;
+			for (int x = 0; x<pState->num_arc; x++) {
+				const Arc *arc = (Arc*)(pState->arcs)+x;
+				if (arc->ilabel == 0) {  // propagate nonemitting only...
+					BaseFloat graph_cost = arc->weight,
 						tot_cost = cur_cost + graph_cost;
 					if (tot_cost < cutoff) {
 						bool changed;
 
-						Token *new_tok = FindOrAddToken(arc.nextstate, frame + 1, tot_cost,
+						Token *new_tok = FindOrAddToken(arc->nextstate, frame + 1, tot_cost,
 							tok, &changed);
 
-						tok->links = new ForwardLink(new_tok, 0, arc.olabel,
+						tok->links = new ForwardLink(new_tok, 0, arc->olabel,
 							graph_cost, 0, tok->links);
 
 						// "changed" tells us whether the new token has a different
 						// cost from before, or is new [if so, add into queue].
-						if (changed) queue_.push_back(arc.nextstate);
+						if (changed) queue_.push_back(arc->nextstate);
 					}
 				}
 			} // for all arcs

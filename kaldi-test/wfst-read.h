@@ -25,10 +25,9 @@ namespace kaldi {
 		StateId nextstate;
 	};
 
-	class State {
-	public:
-		std::vector<Arc> arcs;
-		int64 num_arc;
+	struct State {
+		void* arcs;
+		int num_arc;
 		float final;
 	};
 
@@ -47,7 +46,7 @@ namespace kaldi {
 			int64 numarcs_;
 
 		};
-		std::vector<State*> pStates;
+		void * pStates;
 		int64 startState;
 		int64 numStates;
 		FstHead fsthead;
