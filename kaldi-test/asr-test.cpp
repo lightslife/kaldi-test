@@ -18,7 +18,7 @@
 #include <iostream>
 #include<locale>  
 #include <codecvt>
-
+using namespace kaldi;
 int outputText(std::vector<std::wstring> wordSymbol, std::vector<int> olabel) {
 
 	std::locale china("chs");
@@ -28,6 +28,80 @@ int outputText(std::vector<std::wstring> wordSymbol, std::vector<int> olabel) {
 		std::wcout << wordSymbol[idState] << " ";
 	}
 	std::cout << std::endl;
+	return 0;
+}
+struct AsrShareOpt {
+	kaldi::OnlineNnet2FeaturePipelineInfo *feature_info;
+	kaldi::OnlineNnet2FeaturePipelineConfig feature_opts;
+	kaldi::nnet3::NnetSimpleLoopedComputationOptions decodable_opts;
+	kaldi::LatticeFasterDecoderConfig decoder_opts;
+	kaldi::OnlineEndpointConfig endpoint_opts;
+	kaldi::nnet3::DecodableNnetSimpleLoopedInfo decodable_info;
+};
+
+struct AsrShareResource {
+	kaldi::Wfst *wfst;
+	kaldi::nnet3::AmNnetSimple *am_nnet;
+	kaldi::TransitionModel *trans_model;
+	std::vector<std::wstring> *wordSymbol;
+};
+struct WaveDataInfo {
+	int chunk_length;
+	BaseFloat traceback_period_secs;
+	int sample_rate;
+};
+int asrSegment(bool more_data,AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource ,WaveDataInfo *waveDataInfo) {
+	kaldi::OnlineNnet2FeaturePipeline feature_pipeline(*(asrShareOpt->feature_info));
+
+	kaldi::SingleUtteranceNnet3Decoder decoder(asrShareOpt->decoder_opts, *asrShareResource->trans_model,
+		asrShareOpt->decodable_info,
+		asrShareResource->wfst, &feature_pipeline);
+	Vector<BaseFloat> wave_part = Vector<BaseFloat>(waveDataInfo->chunk_length);
+	BaseFloat last_traceback = 0.0;
+	BaseFloat num_seconds_decoded = 0.0;
+
+	while (true) {
+
+	//more_data = filter->audio_source->Read(&wave_part);
+		 
+	feature_pipeline.AcceptWaveform(waveDataInfo->sample_rate, wave_part);
+	if (!more_data) {
+		feature_pipeline.InputFinished();
+	}
+
+	 decoder.AdvanceDecoding();
+	 num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+	//waveDataInfo->total_time_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+	
+	if (!more_data) {
+		break;
+		}
+ 
+		//partial result
+		if ((num_seconds_decoded - last_traceback > waveDataInfo->traceback_period_secs)
+			&& (decoder.NumFramesDecoded() > 0)) {
+			bool end_of_utterance = true;
+			std::vector<int> olabel;
+			decoder.GetBestPath(end_of_utterance, &olabel);
+			outputText(*asrShareResource->wordSymbol, olabel);
+		}
+	}
+
+	//final result
+	if (num_seconds_decoded > 0.1) {
+		decoder.FinalizeDecoding();
+		bool end_of_utterance = true;
+		std::vector<int> olabel;
+		decoder.GetBestPath(end_of_utterance, &olabel);
+		outputText(*asrShareResource->wordSymbol, olabel);
+	}
+	return 0;
+}
+int asrOnlineLoop(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo) {
+	bool more_data = true;
+	while (more_data) {
+		asrSegment(more_data,asrShareOpt, asrShareResource, waveDataInfo);
+	}
 	return 0;
 }
 
