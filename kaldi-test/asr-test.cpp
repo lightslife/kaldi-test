@@ -13,6 +13,24 @@
 #include "online-endpoint.h"
 #include "online-nnet3-decoding.h"
 #include "wave-reader.h"
+#include <fstream>
+#include <vector>
+#include <iostream>
+#include<locale>  
+#include <codecvt>
+
+int outputText(std::vector<std::wstring> wordSymbol, std::vector<int> olabel) {
+
+	std::locale china("chs");
+	std::wcout.imbue(china);
+	for (int i = olabel.size() - 1; i >= 0; i--) {
+		int idState = olabel[i];
+		std::wcout << wordSymbol[idState] << " ";
+	}
+	std::cout << std::endl;
+	return 0;
+}
+
 int main()
 {
 
@@ -22,6 +40,22 @@ int main()
 	typedef kaldi::int32 int32;
 	typedef kaldi::int64 int64;
 
+
+	std::ifstream wordsFile("words.txt");
+	//if (!wordsFile.is_open());
+	//return -1;
+	std::string temp;
+	std::vector<std::wstring> wordSymbol;
+	std::locale china("chs");
+	std::wcout.imbue(china);
+	std::wstring wtemp;
+	std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
+
+	while (std::getline(wordsFile, temp)) {
+		wtemp = strCnv.from_bytes(temp);
+		wordSymbol.push_back(wtemp);
+		//std::wcout << wtemp << std::endl;
+	}
 
 
 
@@ -127,6 +161,7 @@ int main()
 	std::vector<int> olabel;
 	decoder.GetBestPath(true, &olabel);
 
+	outputText(wordSymbol, olabel);
 
 
 	int xx = 0;
