@@ -330,6 +330,12 @@
     <ClInclude Include="online-nnet3-decoding.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="asr-test-api.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="outputText.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -540,6 +546,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="online-nnet3-decoding.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="asr-test-api.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="outputText.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

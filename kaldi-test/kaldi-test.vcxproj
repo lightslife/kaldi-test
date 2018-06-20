@@ -185,6 +185,7 @@
     <ClInclude Include="kaldi-semaphore.h" />
     <ClInclude Include="kaldi-table-inl.h" />
     <ClInclude Include="kaldi-table.h" />
+    <ClInclude Include="asr-test-api.h" />
     <ClInclude Include="kaldi-types.h" />
     <ClInclude Include="kaldi-utils.h" />
     <ClInclude Include="kaldi-vector-inl.h" />
@@ -223,6 +224,7 @@
     <ClInclude Include="online-nnet3-decoding.h" />
     <ClInclude Include="optimization.h" />
     <ClInclude Include="options-itf.h" />
+    <ClInclude Include="outputText.h" />
     <ClInclude Include="packed-matrix.h" />
     <ClInclude Include="parse-options.h" />
     <ClInclude Include="signal.h" />
@@ -245,6 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="am-nnet-simple.cc" />
+    <ClCompile Include="asr-test-api.cpp" />
     <ClCompile Include="cblas-function.cpp" />
     <ClCompile Include="compressed-matrix.cc" />
     <ClCompile Include="cu-array.cc" />
@@ -300,6 +303,7 @@
     <ClCompile Include="online-nnet2-feature-pipeline.cc" />
     <ClCompile Include="online-nnet3-decoding.cc" />
     <ClCompile Include="optimization.cc" />
+    <ClCompile Include="outputText.cpp" />
     <ClCompile Include="packed-matrix.cc" />
     <ClCompile Include="parse-options.cc" />
     <ClCompile Include="qr.cc" />
