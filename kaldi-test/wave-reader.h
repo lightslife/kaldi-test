@@ -53,7 +53,7 @@
 #include "kaldi-types.h"
 #include "kaldi-vector.h"
 #include "kaldi-matrix.h"
-
+#include <queue>
 
 namespace kaldi {
 
@@ -114,7 +114,7 @@ class WaveData {
   /// in this case it will destroy what was there before.
   /// "is" should be opened in binary mode.
   void Read(std::istream &is);
-
+  void ReadQueue(std::istream &is,std::queue<short> *waveData);
   /// Write() will throw on error.   os should be opened in binary mode.
   void Write(std::ostream &os) const;
 

@@ -7,16 +7,17 @@
 #include "decodable-simple-looped.h"
 #include "lattice-faster-online-decoder.h"
 #include "wfst-read.h"
+#include <queue>
 
 namespace kaldi {
 
 	struct AsrShareOpt {
 		kaldi::OnlineNnet2FeaturePipelineInfo *feature_info;
-		kaldi::OnlineNnet2FeaturePipelineConfig feature_opts;
-		kaldi::nnet3::NnetSimpleLoopedComputationOptions decodable_opts;
-		kaldi::LatticeFasterDecoderConfig decoder_opts;
-		kaldi::OnlineEndpointConfig endpoint_opts;
-		kaldi::nnet3::DecodableNnetSimpleLoopedInfo decodable_info;
+		kaldi::OnlineNnet2FeaturePipelineConfig *feature_opts;
+		kaldi::nnet3::NnetSimpleLoopedComputationOptions *decodable_opts;
+		kaldi::LatticeFasterDecoderConfig *decoder_opts;
+		kaldi::OnlineEndpointConfig *endpoint_opts;
+		kaldi::nnet3::DecodableNnetSimpleLoopedInfo *decodable_info;
 	};
 
 	struct AsrShareResource {
@@ -29,6 +30,7 @@ namespace kaldi {
 		int chunk_length;
 		BaseFloat traceback_period_secs;
 		int sample_rate;
+		std::queue<short> waveQueue;
 	};
 
 	int asrSegment(bool more_data, AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo);

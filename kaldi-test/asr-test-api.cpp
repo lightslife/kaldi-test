@@ -7,12 +7,12 @@
 namespace kaldi {
 
 
-	int asrSegment(bool more_data, AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo) {
+	int asrSegment(bool *more_data, AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo) {
 
 		OnlineNnet2FeaturePipeline feature_pipeline(*(asrShareOpt->feature_info));
 
-		SingleUtteranceNnet3Decoder decoder(asrShareOpt->decoder_opts, *asrShareResource->trans_model,
-			asrShareOpt->decodable_info,
+		SingleUtteranceNnet3Decoder decoder(*asrShareOpt->decoder_opts, *asrShareResource->trans_model,
+			*asrShareOpt->decodable_info,
 			asrShareResource->wfst, &feature_pipeline);
 		Vector<BaseFloat> wave_part = Vector<BaseFloat>(waveDataInfo->chunk_length);
 		BaseFloat last_traceback = 0.0;
@@ -20,10 +20,10 @@ namespace kaldi {
 
 		while (true) {
 
-			//more_data = filter->audio_source->Read(&wave_part);
+			*more_data = wave_part.ReadFromQueue(&(waveDataInfo->waveQueue));
 
 			feature_pipeline.AcceptWaveform(waveDataInfo->sample_rate, wave_part);
-			if (!more_data) {
+			if (!*more_data) {
 				feature_pipeline.InputFinished();
 			}
 
@@ -31,12 +31,12 @@ namespace kaldi {
 			num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 			//waveDataInfo->total_time_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 
-			if (!more_data) {
+			if (!*more_data) {
 				break;
 			}
 			//endpoint
 			bool do_endpoint = true;
-			if (do_endpoint && decoder.EndpointDetected(asrShareOpt->endpoint_opts))
+			if (do_endpoint && (decoder.NumFramesDecoded() > 0) &&decoder.EndpointDetected(*asrShareOpt->endpoint_opts))
 				break;
 			//partial result
 			if ((num_seconds_decoded - last_traceback > waveDataInfo->traceback_period_secs)
@@ -60,14 +60,14 @@ namespace kaldi {
 
 			//³¤¶Î¾²Òô
 			if (resultText.size() == 0)
-				more_data = false;
+				*more_data = false;
 		}
 		return 0;
 	}
 	int asrOnlineLoop(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo) {
 		bool more_data = true;
 		while (more_data) {
-			asrSegment(more_data, asrShareOpt, asrShareResource, waveDataInfo);
+			asrSegment(&more_data, asrShareOpt, asrShareResource, waveDataInfo);
 		}
 		return 0;
 	}

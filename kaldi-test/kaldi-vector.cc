@@ -1080,6 +1080,38 @@ void VectorBase<double>::AddVec(const double alpha, const VectorBase<float> &v);
 //
 
 template<typename Real>
+bool  VectorBase<Real>::ReadFromQueue(std::queue<short> *waveQueue) {
+
+	int size = waveQueue->size();
+	bool more_data = false;
+
+	if (size > dim_) {//数据足够一次
+		for (int i = 0; i < dim_; i++) {
+			
+			data_[i] =(float) waveQueue->front();
+			waveQueue->pop();
+		}
+		return true;
+	}
+	else if(more_data){
+		//sleep
+		return false;
+		//break;
+	}
+	else {//剩下的数据
+		for (int i = 0; i < size; i++) {
+			data_[i] = (float)waveQueue->front();
+			waveQueue->pop();
+		}
+		return false;
+	}
+
+
+
+
+}
+
+template<typename Real>
 void VectorBase<Real>::Read(std::istream & is,  bool binary, bool add) {
   if (add) {
     Vector<Real> tmp(Dim());
@@ -1100,6 +1132,8 @@ void VectorBase<Real>::Read(std::istream & is,  bool binary, bool add) {
               << Dim() << " vs. " << tmp.Dim();
   CopyFromVec(tmp);
 }
+
+
 
 
 template<typename Real>

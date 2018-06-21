@@ -124,7 +124,7 @@ struct OnlineEndpointRule {
 };
 
 struct OnlineEndpointConfig {
-  std::string silence_phones; /// e.g. 1:2:3:4, colon separated list of phones
+  std::string silence_phones="1:2:3:4:5:6:7:8:9:10"; /// e.g. 1:2:3:4, colon separated list of phones
                               /// that we consider as silence for purposes of
                               /// endpointing.
 

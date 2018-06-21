@@ -27,7 +27,7 @@
 #define KALDI_MATRIX_KALDI_VECTOR_H_ 1
 
 #include "matrix-common.h"
-
+#include <queue>
 namespace kaldi {
 
 /// \addtogroup matrix_group
@@ -346,6 +346,9 @@ class VectorBase {
   /// Throws exception on failure
   void Read(std::istream & in, bool binary, bool add = false);
 
+
+  bool ReadFromQueue(std::queue<short> *waveQueue);
+
   /// Writes to C++ stream (option to write in binary).
   void Write(std::ostream &Out, bool binary) const;
 
@@ -440,6 +443,7 @@ class Vector: public VectorBase<Real> {
   /// Read function using C++ streams.  Can also add to existing contents
   /// of matrix.
   void Read(std::istream & in, bool binary, bool add = false);
+ 
 
   /// Set vector to a specified size (can be zero).
   /// The value of the new data depends on resize_type:

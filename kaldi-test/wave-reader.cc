@@ -322,6 +322,59 @@ void WaveData::Read(std::istream &is) {
 }
 
 
+void WaveData::ReadQueue(std::istream &is,std::queue<short> *waveData) {
+	const uint32 kBlockSize = 1024 * 1024;
+
+	WaveInfo header;
+	header.Read(is);
+
+	data_.Resize(0, 0);  // clear the data.
+	samp_freq_ = header.SampFreq();
+
+	std::vector<char> buffer;
+	uint32 bytes_to_go = header.IsStreamed() ? kBlockSize : header.DataBytes();
+
+	// Once in a while header.DataBytes() will report an insane value;
+	// read the file to the end
+	while (is && bytes_to_go > 0) {
+		uint32 block_bytes = std::min(bytes_to_go, kBlockSize);
+		uint32 offset = buffer.size();
+		buffer.resize(offset + block_bytes);
+		is.read(&buffer[offset], block_bytes);
+		uint32 bytes_read = is.gcount();
+		buffer.resize(offset + bytes_read);
+		if (!header.IsStreamed())
+			bytes_to_go -= bytes_read;
+	}
+
+	if (is.bad())
+		KALDI_ERR << "WaveData: file read error";
+
+	if (buffer.size() == 0)
+		KALDI_ERR << "WaveData: empty file (no data)";
+
+	if (!header.IsStreamed() && buffer.size() < header.DataBytes()) {
+		KALDI_WARN << "Expected " << header.DataBytes() << " bytes of wave data, "
+			<< "but read only " << buffer.size() << " bytes. "
+			<< "Truncated file?";
+	}
+
+	uint16 *data_ptr = reinterpret_cast<uint16*>(&buffer[0]);
+
+	// The matrix is arranged row per channel, column per sample.
+	data_.Resize(header.NumChannels(),
+		buffer.size() / header.BlockAlign());
+	for (uint32 i = 0; i < data_.NumCols(); ++i) {
+		for (uint32 j = 0; j < data_.NumRows(); ++j) {
+			int16 k = *data_ptr++;
+			if (header.ReverseBytes())
+				KALDI_SWAP2(k);
+			//data_(j, i) = k;
+			waveData->push(k);
+		}
+	}
+}
+
 // Write 16-bit PCM.
 
 // note: the WAVE chunk contains 2 subchunks.
