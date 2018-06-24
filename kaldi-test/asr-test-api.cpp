@@ -65,10 +65,13 @@ namespace kaldi {
 		return 0;
 	}
 	int asrOnlineLoop(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo) {
+		Timer timer;
 		bool more_data = true;
 		while (more_data) {
 			asrSegment(&more_data, asrShareOpt, asrShareResource, waveDataInfo);
 		}
+		std::cout <<"used time ="<< timer.Elapsed() << std::endl;
+
 		return 0;
 	}
 
