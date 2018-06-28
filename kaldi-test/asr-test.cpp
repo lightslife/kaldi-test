@@ -27,152 +27,37 @@ int main()
 
 
 	using namespace kaldi;
-
 	typedef kaldi::int32 int32;
 	typedef kaldi::int64 int64;
 
-	//读入词表
-	std::vector<std::wstring> wordSymbol;
-	readSymbol("words.txt", &wordSymbol);
 
+	AsrShareResource asrShareResource;
+	AsrShareOpt asrShareOpt ;
+	WaveDataInfo waveDataInfo ;
 
-
-	WaveDataInfo waveDataInfo;
-
-	//waveDataInfo.waveQueue = NULL;
+	//模拟语音送入，可以使用连个线程分开送语音和识别
 	WaveData wave_data;
 	const char * wavename = "test.wav";
 	std::filebuf wavefile;
 	wavefile.open(wavename, std::ios::in | std::ios::binary);
-	std::istream iswave(&wavefile);
-	//wave_data.Read(iswave);
-
-	// get the data for channel zero (if the signal is not mono, we only
-	// take the first channel).
-	
-
+	std::istream iswave(&wavefile);	 
 	wave_data.ReadQueue(iswave, &(waveDataInfo.waveQueue));
 
-	//SubVector<BaseFloat> data(wave_data.Data(), 0);
-
-
-	//加载声学模型
-	std::string nnet3_rxfilename = "final.mdl";
-	TransitionModel trans_model;
-	nnet3::AmNnetSimple am_nnet;
-	{
-		bool binary;
-		Input ki(nnet3_rxfilename, &binary);
-		trans_model.Read(ki.Stream(), binary);
-		am_nnet.Read(ki.Stream(), binary);
-		SetBatchnormTestMode(true, &(am_nnet.GetNnet()));
-		SetDropoutTestMode(true, &(am_nnet.GetNnet()));
-		//nnet3::CollapseModel(nnet3::CollapseModelConfig(), &(am_nnet.GetNnet()));
-	}
-
-
-
-	OnlineNnet2FeaturePipelineConfig feature_opts;
-	nnet3::NnetSimpleLoopedComputationOptions decodable_opts;
-	LatticeFasterDecoderConfig decoder_opts;
-	OnlineEndpointConfig endpoint_opts;
-
-	BaseFloat chunk_length_secs = 0.18;
-	bool do_endpointing = false;
-	bool online = true;
-
-	OnlineNnet2FeaturePipelineInfo feature_info(feature_opts);
-	nnet3::DecodableNnetSimpleLoopedInfo decodable_info(decodable_opts,
-		&am_nnet);
  
 
-	OnlineNnet2FeaturePipeline feature_pipeline(feature_info);
 
+	//加载资源，共享资源
+	asrLoadResource("words.txt", "final.mdl", "HCLG.fst.vector", &asrShareResource);
+	asrSetWaveInfo(&waveDataInfo);
+	asrSetShareOpt(&asrShareOpt, &asrShareResource);
 
-	const char * name = "HCLG.fst.vector";
-	std::filebuf file;
-	file.open(name, std::ios::in | std::ios::binary);
-	std::istream is(&file);
-
-	Wfst *wfst = new Wfst();
-	wfst->ReadHead(is);
-	wfst->wfstRead(is);
-	SingleUtteranceNnet3Decoder decoder(decoder_opts, trans_model,
-		decodable_info,
-		wfst, &feature_pipeline);
-
-
-
-	AsrShareOpt asrShareOpt;
-	AsrShareResource asrShareResource;
-	//WaveDataInfo waveDataInfo;
-
-	asrShareOpt.decodable_info = &decodable_info;
-	asrShareOpt.decodable_opts = &decodable_opts;
-	asrShareOpt.decoder_opts = &decoder_opts;
-	asrShareOpt.endpoint_opts = &endpoint_opts;
-	asrShareOpt.feature_info = &feature_info;
-	asrShareOpt.feature_opts = &feature_opts;
-
-	asrShareResource.am_nnet = &am_nnet;
-	asrShareResource.trans_model = &trans_model;
-	asrShareResource.wfst = wfst;
-	asrShareResource.wordSymbol = &wordSymbol;
-
-	waveDataInfo.chunk_length = 400;
-	waveDataInfo.sample_rate = 8000;
-	waveDataInfo.traceback_period_secs = 0.25;
-	
-
-
-
+ 
+	//开始识别
 	asrOnlineLoop(&asrShareOpt, &asrShareResource, &waveDataInfo);
 
 
-	//BaseFloat samp_freq = wave_data.SampFreq();
-	//int32 chunk_length;
-	//if (chunk_length_secs > 0) {
-	//	chunk_length = int32(samp_freq * chunk_length_secs);
-	//	if (chunk_length == 0) chunk_length = 1;
-	//}
-	//else {
-	//	chunk_length = std::numeric_limits<int32>::max();
-	//}
 
-	//int32 samp_offset = 0;
-	//std::vector<std::pair<int32, BaseFloat> > delta_weights;
-
-	//while (samp_offset < data.Dim()) {
-	//	int32 samp_remaining = data.Dim() - samp_offset;
-	//	int32 num_samp = chunk_length < samp_remaining ? chunk_length
-	//		: samp_remaining;
-
-	//	SubVector<BaseFloat> wave_part(data, samp_offset, num_samp);
-	//	feature_pipeline.AcceptWaveform(samp_freq, wave_part);
-
-	//	samp_offset += num_samp;
-	//	//decoding_timer.WaitUntil(samp_offset / samp_freq);
-	//	if (samp_offset == data.Dim()) {
-	//		// no more input. flush out last frames
-	//		feature_pipeline.InputFinished();
-	//	}
-
-	//	decoder.AdvanceDecoding();
-
-	//	if (do_endpointing && decoder.EndpointDetected(endpoint_opts)) {
-	//		break;
-	//	}
-	//}
-	//decoder.FinalizeDecoding();
-
-	//std::vector<int> olabel;
-	//decoder.GetBestPath(true, &olabel);
-	//std::vector<std::wstring> resultText;
-	//outputText(wordSymbol, olabel, &resultText);
-
-
-	int xx = 0;
-
+	system("pause");
     return 0;
 }
 

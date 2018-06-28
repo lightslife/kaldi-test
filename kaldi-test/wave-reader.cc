@@ -370,7 +370,7 @@ void WaveData::ReadQueue(std::istream &is,std::queue<short> *waveData) {
 			if (header.ReverseBytes())
 				KALDI_SWAP2(k);
 			//data_(j, i) = k;
-			waveData->push(k);
+			(*waveData).push(k);
 		}
 	}
 }

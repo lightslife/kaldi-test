@@ -1,10 +1,10 @@
 
 #include "stdafx.h"
 #include "cblas-function.h"
-#define SSE_OPT
-#ifdef  SSE_OPT
+#define SSE
+#ifdef  SSE
 #include <xmmintrin.h>
-#endif //  SSE_OPT
+#endif //  SSE
 #include "matrix-common.h"
 namespace kaldi {
 
@@ -34,17 +34,17 @@ namespace kaldi {
 				}
 			}
 		}else   if (transA == kNoTrans && transB == kTrans) {
-#ifdef  SSE_OPT
+#ifdef  SSE //进行sse优化
 			int k, k_loop = aCols - 3;
 			int j, j_loop = nCols - 3;
-			const float *pa, *pb;
+			const float *pa, *pb0;
 			const float *pb1, *pb2,*pb3;
 			float *pout, *pout1;
 
-			float sum[4], sum1[4], sum2[4], sum3[4];
+			float sum0[4], sum1[4], sum2[4], sum3[4];
 
-			float temp, temp1, temp2, temp3;
-			__m128 x, y, z;
+			float temp0, temp1, temp2, temp3;
+			__m128 x0, y0, z0;
 			__m128 y1, z1;
 			__m128 y2, z2;
 			__m128 y3, z3;
@@ -52,52 +52,52 @@ namespace kaldi {
 			pout = data;
 
 			for (int i = 0; i < nRows; i++) {
-				pb = bData;
-				pb1 = pb + bStride;
+				pb0 = bData;
+				pb1 = pb0 + bStride;
 				pb2 = pb1 + bStride;
 				pb3 = pb2 + bStride;
 				pout1 = pout;
 				for (j = 0; j < j_loop; j += 4) {
-					z = _mm_setzero_ps();
+					z0 = _mm_setzero_ps();
 					z1 = _mm_setzero_ps();
 					z2 = _mm_setzero_ps();
 					z3 = _mm_setzero_ps();
 					for (k = 0; k < k_loop; k += 4) {
-						x = _mm_load_ps(pa + k);
-						y = _mm_load_ps(pb + k);
-						y = _mm_mul_ps(x, y);
-						z = _mm_add_ps(z, y);
+						x0 = _mm_load_ps(pa + k);
+						y0 = _mm_load_ps(pb0 + k);
+						y0 = _mm_mul_ps(x0, y0);
+						z0 = _mm_add_ps(z0, y0);
 
 						y1 = _mm_load_ps(pb1 + k);
-						y1 = _mm_mul_ps(x, y1);
+						y1 = _mm_mul_ps(x0, y1);
 						z1 = _mm_add_ps(z1, y1);
 
 						y2 = _mm_load_ps(pb2 + k);
-						y2 = _mm_mul_ps(x, y2);
+						y2 = _mm_mul_ps(x0, y2);
 						z2 = _mm_add_ps(z2, y2);
 
 						y3 = _mm_load_ps(pb3 + k);
-						y3 = _mm_mul_ps(x, y3);
+						y3 = _mm_mul_ps(x0, y3);
 						z3 = _mm_add_ps(z3, y3);
 					}
-					temp = temp1 = temp2 = temp3 = 0.0f;
+					temp0 = temp1 = temp2 = temp3 = 0.0f;
 					for (; k < aCols; k++) {
-						temp += pa[k] * pb[k];
+						temp0 += pa[k] * pb0[k];
 						temp1 += pa[k] * pb1[k];
 						temp2 += pa[k] * pb2[k];
 						temp3 += pa[k] * pb3[k];
 					}
-					_mm_storeu_ps(sum, z);
+					_mm_storeu_ps(sum0, z0);
 					_mm_storeu_ps(sum1, z1);
 					_mm_storeu_ps(sum2, z2);
 					_mm_storeu_ps(sum3, z3);
 					for (k = 0; k < 4; k++) {
-						temp += sum[k];
+						temp0 += sum0[k];
 						temp1 += sum1[k];
 						temp2 += sum2[k];
 						temp3 += sum3[k];
 					}
-					(*pout1) = beta*(*pout1) + alpha*temp;
+					(*pout1) = beta*(*pout1) + alpha*temp0;
 					pout1++;
 
 					(*pout1) = beta*(*pout1) + alpha*temp1;
@@ -107,41 +107,33 @@ namespace kaldi {
 					(*pout1) = beta*(*pout1) + alpha*temp3;
 					pout1++;
 
-					pb = pb3 + bStride;
-					pb1 = pb + bStride;
+					pb0 = pb3 + bStride;
+					pb1 = pb0 + bStride;
 					pb2 = pb1 + bStride;
 					pb3 = pb2 + bStride;
 				}
 				for (; j < nCols; j++) {
-					z = _mm_setzero_ps();
+					z0 = _mm_setzero_ps();
 					for (k = 0; k < k_loop; k += 4) {
-						x = _mm_loadu_ps(pa + k);
-						y = _mm_loadu_ps(pb + k);
-						y = _mm_mul_ps(x, y);
-						z = _mm_add_ps(z, y);
+						x0 = _mm_loadu_ps(pa + k);
+						y0 = _mm_loadu_ps(pb0 + k);
+						y0 = _mm_mul_ps(x0, y0);
+						z0 = _mm_add_ps(z0, y0);
 					}
 					for (; k < aCols; k++) {
-						temp += aData[i*aStride + k] * bData[j*bStride + k];
+						temp0 += aData[i*aStride + k] * bData[j*bStride + k];
 					}
-					_mm_storeu_ps(sum, z);
+					_mm_storeu_ps(sum0, z0);
 					for (k = 0; k < 4; k++) {
-						temp += sum[k];
+						temp0 += sum0[k];
 					}
-					*(pout1) = beta* (*pout1) + alpha*temp;
+					*(pout1) = beta* (*pout1) + alpha*temp0;
 					pout1++;
-					pb = pb + bStride;
+					pb0 = pb0 + bStride;
 				}
 				pout += stride;
 				pa = pa + aStride;
 			}
-
-
-
-
-
-
-
-
 
 #elif
 			for (int i = 0; i < nRows; i++) {
@@ -154,7 +146,7 @@ namespace kaldi {
 				}
 		}
 
-#endif //  SSE_OPT
+#endif //  SSE
 
 
 		}else //  if (transA == kTrans && transB == kNoTrans)

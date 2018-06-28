@@ -15,10 +15,12 @@ namespace kaldi {
 		std::wcout.imbue(china);
 		for (int i = olabel.size() - 1; i >= 0; i--) {
 			int idState = olabel[i];
-			resultText->push_back(wordSymbol[idState]);
-			std::wcout << wordSymbol[idState] << " ";
+			if (idState > 11) {
+				resultText->push_back(wordSymbol[idState]);
+				std::wcout << wordSymbol[idState] ;
+			}
 		}
-		std::cout << std::endl;
+		std::cout <<'\r';
 		return 0;
 	}
 
