@@ -119,7 +119,7 @@ namespace kaldi {
 
 
 		waveDataInfo->chunk_length = 400;
-		waveDataInfo->sample_rate = 8000;
+		waveDataInfo->sample_rate = 16000;
 		waveDataInfo->traceback_period_secs = 0.25;
 		return 0;
 	}

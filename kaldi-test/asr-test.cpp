@@ -35,9 +35,9 @@ int main()
 	AsrShareOpt asrShareOpt ;
 	WaveDataInfo waveDataInfo ;
 
-	//模拟语音送入，可以使用连个线程分开送语音和识别
+	//模拟语音送入，可以使用两个线程分开送语音和识别
 	WaveData wave_data;
-	const char * wavename = "test.wav";
+	const char * wavename = "test3.wav";
 	std::filebuf wavefile;
 	wavefile.open(wavename, std::ios::in | std::ios::binary);
 	std::istream iswave(&wavefile);	 
