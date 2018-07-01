@@ -37,7 +37,7 @@ int main()
 
 	//模拟语音送入，可以使用两个线程分开送语音和识别
 	WaveData wave_data;
-	const char * wavename = "test3.wav";
+	const char * wavename = "../8k-model/test.wav";
 	std::filebuf wavefile;
 	wavefile.open(wavename, std::ios::in | std::ios::binary);
 	std::istream iswave(&wavefile);	 
@@ -47,7 +47,7 @@ int main()
 
 
 	//加载资源，共享资源
-	asrLoadResource("words.txt", "final.mdl", "HCLG.fst.vector", &asrShareResource);
+	asrLoadResource("words.txt", "../8k-model/final.mdl", "../8k-model/HCLG.fst.vector", &asrShareResource);
 	asrSetWaveInfo(&waveDataInfo);
 	asrSetShareOpt(&asrShareOpt, &asrShareResource);
 

@@ -49,7 +49,7 @@ struct FrameExtractionOptions {
   // edges, it's pow((0.5 - 0.5*cos(n/N*2*pi)), 0.85)
   // I just don't think the Hamming window makes sense as a windowing function.
   FrameExtractionOptions():
-      samp_freq(16000),
+      samp_freq(8000),
       frame_shift_ms(10.0),
       frame_length_ms(25.0),
       dither(1.0),
