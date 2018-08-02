@@ -99,6 +99,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="am-nnet-simple.h" />
+    <ClInclude Include="asr-test-api.h" />
     <ClInclude Include="basic-filebuf.h" />
     <ClInclude Include="cblas-function.h" />
     <ClInclude Include="common-utils.h" />
@@ -185,7 +187,7 @@
     <ClInclude Include="kaldi-semaphore.h" />
     <ClInclude Include="kaldi-table-inl.h" />
     <ClInclude Include="kaldi-table.h" />
-    <ClInclude Include="asr-test-api.h" />
+    <ClInclude Include="asr-segment.h" />
     <ClInclude Include="kaldi-types.h" />
     <ClInclude Include="kaldi-utils.h" />
     <ClInclude Include="kaldi-vector-inl.h" />
@@ -238,6 +240,7 @@
     <ClInclude Include="table-types.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="text-utils.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="tp-matrix.h" />
     <ClInclude Include="transition-model.h" />
@@ -247,6 +250,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="am-nnet-simple.cc" />
+    <ClCompile Include="asr-segment.cpp" />
     <ClCompile Include="asr-test-api.cpp" />
     <ClCompile Include="cblas-function.cpp" />
     <ClCompile Include="compressed-matrix.cc" />

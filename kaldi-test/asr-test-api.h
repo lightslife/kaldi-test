@@ -1,45 +1,35 @@
+#ifndef __ASR_TEST_API_H__
+#define __ASR_TEST_API_H__
+
 #pragma once
-#ifndef _ASR_TEST_API_H__
-#define _ASR_TEST_API_H__
+#include "stdafx.h"
 
-#include "online-nnet2-feature-pipeline.h"
-#include "online-endpoint.h"
-#include "decodable-simple-looped.h"
-#include "lattice-faster-online-decoder.h"
-#include "wfst-read.h"
-#include <queue>
 
-namespace kaldi {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	typedef struct AsrShareOpt {
-		kaldi::OnlineNnet2FeaturePipelineInfo *feature_info;
-		kaldi::OnlineNnet2FeaturePipelineConfig *feature_opts;
-		kaldi::nnet3::NnetSimpleLoopedComputationOptions *decodable_opts;
-		kaldi::LatticeFasterDecoderConfig *decoder_opts;
-		kaldi::OnlineEndpointConfig *endpoint_opts;
-		kaldi::nnet3::DecodableNnetSimpleLoopedInfo *decodable_info;
-	}AsrShareOpt, *AsrShareOptPst;
+	int test();
 
-	typedef struct AsrShareResource {
-		kaldi::Wfst *wfst;
-		kaldi::nnet3::AmNnetSimple *am_nnet;
-		kaldi::TransitionModel *trans_model;
-		std::vector<std::wstring> wordSymbol;
-	}AsrShareResource, *AsrShareResourcePst;
+	//资源初始化
+	int asr_online_resource_init(
+								void **pHandle,
+								const char*acModel ,
+								const char*wordsFile ,
+								const char*decoderGraph 
+								);
 
-	typedef struct WaveDataInfo {
-		int chunk_length;
-		BaseFloat traceback_period_secs;
-		int sample_rate;
-		std::queue<short> waveQueue;
-	}WaveDataInfo, *WaveDataInfoPst;
-	 
-	int asrSegment(bool *more_data, AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo);
-	int asrOnlineLoop(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo *waveDataInfo);
+	int asr_online_start_server();
+	int asr_online_consumer_init();
+	int asr_online_consumer_decode();
+	int asr_online_consumer_finish();
+	int asr_online_stop_server();
+	int asr_online_release_resource();
 
-	int asrLoadResource(const char* wordsName, const char*modelName,const char* wfstName, AsrShareResource *asrShareResource);
-	int asrSetWaveInfo(WaveDataInfo *waveDataInfo);
-	int asrSetShareOpt(AsrShareOpt *asrShareOpt, AsrShareResource* asrShareResource);
 
-}//namespace
-#endif // !_ASR_TEST_API_H__
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif //__ASR_TEST_API_H__
