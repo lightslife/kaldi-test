@@ -118,7 +118,7 @@ namespace kaldi {
 	int asrSetWaveInfo(WaveDataInfo_old *waveDataInfo) {
 
 
-		waveDataInfo->chunk_length = 400;
+		waveDataInfo->chunk_length = 4000;
 		waveDataInfo->sample_rate = 16000;  //8k-model
 		waveDataInfo->traceback_period_secs = 0.25;
 		return 0;

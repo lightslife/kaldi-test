@@ -323,6 +323,10 @@ void WaveData::Read(std::istream &is) {
 
 
 void WaveData::ReadQueue(std::istream &is,std::queue<short> *waveData) {
+
+
+
+
 	const uint32 kBlockSize = 1024 * 1024;
 
 	WaveInfo header;
