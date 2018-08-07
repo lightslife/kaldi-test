@@ -1079,6 +1079,13 @@ void VectorBase<double>::AddVec(const double alpha, const VectorBase<float> &v);
 //void VectorBase<double>::AddVec2(const double alpha, const VectorBase<float> &v);
 //
 
+
+template<typename Real>
+int  VectorBase<Real>::ReadFromSpliceData(const float *data, int length) {
+	memcpy(data_, data, length);
+	return 0;
+}
+
 template<typename Real>
 bool  VectorBase<Real>::ReadFromQueue(std::queue<short> *waveQueue) {
 

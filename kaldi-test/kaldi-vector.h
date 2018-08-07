@@ -348,6 +348,7 @@ class VectorBase {
 
 
   bool ReadFromQueue(std::queue<short> *waveQueue);
+  int  ReadFromSpliceData(const float *data, int length);
 
   /// Writes to C++ stream (option to write in binary).
   void Write(std::ostream &Out, bool binary) const;

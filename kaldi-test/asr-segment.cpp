@@ -65,6 +65,70 @@ namespace kaldi {
 		}
 		return 0;
 	}
+
+
+	int asrSegmentSplice(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveSpliceData waveSpliceData, DecoderSaveState *decoderState, WaveDataInfo *waveDataInfo) {
+
+		OnlineNnet2FeaturePipeline *feature_pipeline = decoderState->feature_pipeline;
+
+		SingleUtteranceNnet3Decoder *decoder = decoderState->decoder;
+
+		Vector<BaseFloat> wave_part = Vector<BaseFloat>(waveSpliceData.length);
+		BaseFloat last_traceback = 0.0;
+		BaseFloat num_seconds_decoded = 0.0;
+
+		int &num_process = waveSpliceData.num_record;
+
+		bool to_final = false;
+		while (true) {
+			wave_part.ReadFromSpliceData(waveSpliceData.data, waveSpliceData.length);
+
+			//*more_data = wave_part.ReadFromQueue(&(waveDataInfo->waveQueue));
+
+			feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
+			if (num_process== waveDataInfo->num_pushed && waveDataInfo->eos) {
+				feature_pipeline->InputFinished();
+				to_final = true;
+			}
+
+			decoder->AdvanceDecoding();
+			num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+			//waveDataInfo->total_time_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+
+			if (to_final) {
+				break;
+			}
+			//endpoint
+			bool do_endpoint = true;
+			if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected(*asrShareOpt->endpoint_opts))
+				break;
+			//partial result
+			if ((num_seconds_decoded - last_traceback > waveDataInfo->traceback_period_secs)
+				&& (decoder->NumFramesDecoded() > 0)) {
+				bool end_of_utterance = true;
+				std::vector<int> olabel;
+				std::vector<std::wstring> resultText;
+				decoder->GetBestPath(end_of_utterance, &olabel);
+				outputText(asrShareResource->wordSymbol, olabel, &resultText);
+			}
+		}
+
+		//final result
+		if (num_seconds_decoded > 0.1) {
+			decoder->FinalizeDecoding();
+			bool end_of_utterance = true;
+			std::vector<int> olabel;
+			std::vector<std::wstring> resultText;
+			decoder->GetBestPath(end_of_utterance, &olabel);
+			outputText(asrShareResource->wordSymbol, olabel, &resultText);
+			std::cout << std::endl;
+			//³¤¶Î¾²Òô
+			if (resultText.size() == 0)
+				waveDataInfo->flag_end = true;
+		}
+		return 0;
+	}
+
 	int asrOnlineLoop(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo_old *waveDataInfo) {
 		Timer timer;
 		bool more_data = true;
@@ -118,7 +182,7 @@ namespace kaldi {
 	int asrSetWaveInfo(WaveDataInfo_old *waveDataInfo) {
 
 
-		waveDataInfo->chunk_length = 4000;
+		waveDataInfo->chunk_length = 6000;
 		waveDataInfo->sample_rate = 16000;  //8k-model
 		waveDataInfo->traceback_period_secs = 0.25;
 		return 0;

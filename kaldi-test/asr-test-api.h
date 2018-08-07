@@ -1,9 +1,6 @@
 #ifndef __ASR_TEST_API_H__
 #define __ASR_TEST_API_H__
 
-#pragma once
-#include "stdafx.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +16,7 @@ extern "C" {
 								const char*decoderGraph 
 								);
 
-	int asr_online_start_server();
+	int asr_online_start_server(void *pHandle,int num_thread);
 	int asr_online_consumer_init();
 	int asr_online_consumer_decode();
 	int asr_online_consumer_finish();

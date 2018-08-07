@@ -8,7 +8,11 @@
 #include "lattice-faster-online-decoder.h"
 #include "wfst-read.h"
 #include <queue>
-
+#include "online-nnet3-decoding.h"
+#include <map>
+#include <vector>
+#include <string>
+#include "ThreadPool.h"
 namespace kaldi {
 
 	typedef struct AsrShareOpt {
@@ -27,10 +31,6 @@ namespace kaldi {
 		std::vector<std::wstring> wordSymbol;
 	}AsrShareResource, *AsrShareResourcePst;
 
-	typedef struct Asr_Init_RESOURCE_STRU {
-		AsrShareResource asrShareResource;
-		AsrShareOpt asrShareOpt;
-	}Asr_Init_RESOURCE_STRU, *Asr_Init_RESOURCE_PST;
 
 
 	typedef struct WaveDataInfo_old {
@@ -44,10 +44,16 @@ namespace kaldi {
 	struct WaveSpliceData {
 		int length;
 		float *data;
+		int num_record;
 
 		WaveSpliceData(WaveSpliceData &src) {
 			this->data = (float*)malloc(length*sizeof(float));
 			memcpy(this->data, src.data, length*sizeof(float));
+		}
+
+		WaveSpliceData& operator =(const WaveSpliceData& src) {
+			this->data = (float*)malloc(length * sizeof(float));
+			memcpy(this->data, src.data, length * sizeof(float));
 		}
 
 		~WaveSpliceData() {
@@ -63,19 +69,34 @@ namespace kaldi {
 		BaseFloat traceback_period_secs;
 		int sample_rate;
 		int num_pushed;
+		bool eos;//客户端主动结束
+		bool flag_end; //长静音，引擎识别结束。
 
 	};
 
 
 	struct DecoderSaveState {
-		//SingleUtteranceNnet3Decoder *decoder;//something wrong.
+		SingleUtteranceNnet3Decoder *decoder;//something wrong.
 		OnlineNnet2FeaturePipeline *feature_pipeline;
+		int num_done;
 	};
 	struct ONE_CONSUMER {
-		WaveDataInfo *waveDataInfo;
+		WaveDataInfo waveDataInfo;
 		DecoderSaveState *decoderSaveState;
-		std::queue<WaveSpliceData>  *waveData;
+		std::queue<WaveSpliceData> waveData;
 	};
+
+	typedef struct Asr_Init_RESOURCE_STRU {
+		AsrShareResource asrShareResource;
+		AsrShareOpt asrShareOpt;
+		ThreadPool *pool;
+		std::map<std::string, ONE_CONSUMER> *task_all;
+		int stop; //0 stands for not need   ;      1 stands for need stop            ; 2 stands for stop done;
+	}Asr_Init_RESOURCE_STRU, *Asr_Init_RESOURCE_PST;
+
+
+
+	int asrSegmentSplice(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveSpliceData waveSpliceData, DecoderSaveState *decoderState, WaveDataInfo *waveDataInfo);
 
 
 	int asrSegment(bool *more_data, AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveDataInfo_old *waveDataInfo);
