@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "asr-test-api.h"
- 
+#include "asr-segment.h"
 int main()
 {
 
@@ -15,7 +15,7 @@ int main()
 	const char*decoderGraph = "../16k-model/HCLG.fst.vector";
 	asr_online_resource_init(&pHandle, acModel, wordsFile, decoderGraph);
 
-
+	asr_online_start_server(pHandle, 2);
 
 
 	//模拟语音送入，可以使用两个线程分开送语音和识别

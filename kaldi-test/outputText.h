@@ -5,7 +5,7 @@
 
 namespace kaldi {
 
-	int outputText(std::vector<std::wstring> wordSymbol, std::vector<int> olabel, std::vector<std::wstring> *resultText);
+	int outputText(std::vector<std::wstring> *wordSymbol, std::vector<int> olabel, std::vector<std::wstring> *resultText);
 	int readSymbol(const char* filename, std::vector<std::wstring> *wordSymbol);
 
 

@@ -28,7 +28,7 @@ namespace kaldi {
 		kaldi::Wfst *wfst;
 		kaldi::nnet3::AmNnetSimple *am_nnet;
 		kaldi::TransitionModel *trans_model;
-		std::vector<std::wstring> wordSymbol;
+		std::vector<std::wstring> *wordSymbol;
 	}AsrShareResource, *AsrShareResourcePst;
 
 
@@ -46,7 +46,7 @@ namespace kaldi {
 		float *data;
 		int num_record;
 
-		WaveSpliceData(WaveSpliceData &src) {
+		WaveSpliceData(const WaveSpliceData &src) {
 			this->data = (float*)malloc(length*sizeof(float));
 			memcpy(this->data, src.data, length*sizeof(float));
 		}
@@ -87,8 +87,8 @@ namespace kaldi {
 	};
 
 	typedef struct Asr_Init_RESOURCE_STRU {
-		AsrShareResource asrShareResource;
-		AsrShareOpt asrShareOpt;
+		AsrShareResource *asrShareResource;
+		AsrShareOpt *asrShareOpt;
 		ThreadPool *pool;
 		std::map<std::string, ONE_CONSUMER> *task_all;
 		int stop; //0 stands for not need   ;      1 stands for need stop            ; 2 stands for stop done;

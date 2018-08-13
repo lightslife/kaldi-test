@@ -67,7 +67,7 @@ namespace kaldi {
 	}
 
 
-	int asrSegmentSplice(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, WaveSpliceData waveSpliceData, DecoderSaveState *decoderState, WaveDataInfo *waveDataInfo) {
+	int asrSegmentSplice(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, const WaveSpliceData waveSpliceData, DecoderSaveState *decoderState, WaveDataInfo *waveDataInfo) {
 
 		OnlineNnet2FeaturePipeline *feature_pipeline = decoderState->feature_pipeline;
 
@@ -77,7 +77,7 @@ namespace kaldi {
 		BaseFloat last_traceback = 0.0;
 		BaseFloat num_seconds_decoded = 0.0;
 
-		int &num_process = waveSpliceData.num_record;
+		int num_process = waveSpliceData.num_record;
 
 		bool to_final = false;
 		while (true) {
@@ -143,8 +143,9 @@ namespace kaldi {
 	int asrLoadResource(const char* wordsName, const char*modelName, const char* wfstName, AsrShareResource *asrShareResource) {
 
 		//∂¡»Î¥ ±Ì
-		//std::vector<std::wstring> wordSymbol;
-		readSymbol(wordsName, &(asrShareResource->wordSymbol)  );
+		std::vector<std::wstring> *wordSymbol =new std::vector<std::wstring>();
+		asrShareResource->wordSymbol = wordSymbol;
+		readSymbol(wordsName, asrShareResource->wordSymbol  );
 
 
 

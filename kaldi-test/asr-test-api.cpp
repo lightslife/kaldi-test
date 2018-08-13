@@ -1,5 +1,6 @@
 #include "stdafx.h"
-
+#include <thread>
+#include <chrono>
 #include "asr-test-api.h"
 #include "kaldi-types.h"
 #include <iostream>
@@ -21,7 +22,7 @@
 using namespace kaldi;
 typedef kaldi::int32 int32;
 typedef kaldi::int64 int64;
-
+template std::map<std::string, ONE_CONSUMER>;
 
 
 int test()
@@ -102,10 +103,14 @@ int asr_online_resource_init(
 	const char*decoderGraph
 ) {
 	Asr_Init_RESOURCE_STRU *asr_Resource = new Asr_Init_RESOURCE_STRU();
+	AsrShareResource *asrShareResource =new AsrShareResource();
+	AsrShareOpt *asrShareOpt=new AsrShareOpt();
+	asr_Resource->asrShareResource = asrShareResource;
+	asr_Resource->asrShareOpt = asrShareOpt;
 
-	asrLoadResource(wordsFile, acModel, decoderGraph, &(asr_Resource->asrShareResource));
+	asrLoadResource(wordsFile, acModel, decoderGraph, (asr_Resource->asrShareResource));
 
-	asrSetShareOpt(&(asr_Resource->asrShareOpt), &(asr_Resource->asrShareResource));
+	asrSetShareOpt((asr_Resource->asrShareOpt), (asr_Resource->asrShareResource));
 
 	*pHandle = asr_Resource;
 
@@ -113,46 +118,56 @@ int asr_online_resource_init(
 
 }
 
+void server_asr(void *pHandle) {
+	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
+	ThreadPool &pool = *asr_Resource->pool;
+
+	std::map<std::string, ONE_CONSUMER> &task_all = *(asr_Resource->task_all);
+	std::map<std::string, ONE_CONSUMER>::iterator iterMap;
+	int &stop = asr_Resource->stop;
+
+	while (stop == 0 || task_all.size() > 0) {
+		for (; iterMap != task_all.end(); ++iterMap) {
+			std::string key = iterMap->first;
+
+			WaveDataInfo &waveDataInfo = task_all[key].waveDataInfo;
+
+			if (waveDataInfo.flag_end) {
+				//释放资源
+				task_all.erase(iterMap);
+				break;
+			}
+
+			if (task_all[key].waveData.size() == 0) {
+				continue;
+
+			}
+
+			WaveSpliceData &wave_splice = task_all[key].waveData.front();
+			DecoderSaveState *decoder_splice = task_all[key].decoderSaveState;
+
+			if (wave_splice.num_record == decoder_splice->num_done) {
+
+				pool.enqueue(asrSegmentSplice, asr_Resource->asrShareOpt, asr_Resource->asrShareResource, wave_splice, decoder_splice, &waveDataInfo);
+
+				task_all[key].waveData.pop();
+			}
+		}//map size loop
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}//while loop
+
+	stop = 2;
+}
+
+
 int asr_online_start_server(void *pHandle, int num_thread) {
 	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
 	ThreadPool *pool = new ThreadPool(num_thread);
 	asr_Resource->pool = pool;
 
-
-	std::map<std::string, ONE_CONSUMER> *task_all = asr_Resource->task_all;
-	std::map<std::string, ONE_CONSUMER>::iterator iterMap;
-	int &stop = asr_Resource->stop;
-
-	while (stop == 0 || task_all->size() > 0) {
-
-		for (; iterMap != task_all->end(); ++iterMap){
-			WaveDataInfo &waveDataInfo = iterMap->second.waveDataInfo;
-			
-			if (iterMap->second.waveData.size() == 0) {
-				if (waveDataInfo.flag_end) {
-					//释放资源
-					task_all->erase(iterMap);
-					break;
-				}
-				else {
-					continue;
-				}
-			}
-
-			const WaveSpliceData &wave_splice = (iterMap->second.waveData).front();
-			DecoderSaveState *decoder_splice = iterMap->second.decoderSaveState;
-			 
-			if (wave_splice.num_record == decoder_splice->num_done) {
-				//pool->enqueue(asrSegmentSplice, asr_Resource->asrShareOpt, asr_Resource->asrShareResource,wave_splice,decoder_splice,waveDataInfo);
-				(iterMap->second.waveData).pop();
-			}
-
-
-		}//map size loop
-
-	}
-
-
+	std::thread server_pool(server_asr, pHandle);
+	server_pool.detach();
 
 	return 0;
 }

@@ -9,15 +9,15 @@
 namespace kaldi {
 
 
-	int outputText(std::vector<std::wstring> wordSymbol, std::vector<int> olabel,std::vector<std::wstring> *resultText) {
+	int outputText(std::vector<std::wstring> *wordSymbol, std::vector<int> olabel,std::vector<std::wstring> *resultText) {
 
 		std::locale china("chs");
 		std::wcout.imbue(china);
 		for (int i = olabel.size() - 1; i >= 0; i--) {
 			int idState = olabel[i];
 			if (idState > 11) {
-				resultText->push_back(wordSymbol[idState]);
-				std::wcout << wordSymbol[idState] ;
+				resultText->push_back((*wordSymbol)[idState]);
+				std::wcout << (*wordSymbol)[idState] ;
 			}
 		}
 		std::cout <<'\r';
