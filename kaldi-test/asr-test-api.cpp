@@ -118,21 +118,23 @@ int asr_online_resource_init(
 
 }
 
-void server_asr(void *pHandle) {
+void server_asr_pool(void *pHandle) {
 	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
 	ThreadPool &pool = *asr_Resource->pool;
 
 	std::map<std::string, ONE_CONSUMER> &task_all = *(asr_Resource->task_all);
-	std::map<std::string, ONE_CONSUMER>::iterator iterMap;
+	std::map<std::string, ONE_CONSUMER>::const_iterator iterMap;
 	int &stop = asr_Resource->stop;
 
 	while (stop == 0 || task_all.size() > 0) {
+		iterMap = task_all.begin();
+
 		for (; iterMap != task_all.end(); ++iterMap) {
 			std::string key = iterMap->first;
 
-			WaveDataInfo &waveDataInfo = task_all[key].waveDataInfo;
+			WaveDataInfo *&waveDataInfo = task_all[key].waveDataInfo;
 
-			if (waveDataInfo.flag_end) {
+			if (waveDataInfo->flag_end) {
 				//ÊÍ·Å×ÊÔ´
 				task_all.erase(iterMap);
 				break;
@@ -148,7 +150,7 @@ void server_asr(void *pHandle) {
 
 			if (wave_splice.num_record == decoder_splice->num_done) {
 
-				pool.enqueue(asrSegmentSplice, asr_Resource->asrShareOpt, asr_Resource->asrShareResource, wave_splice, decoder_splice, &waveDataInfo);
+				pool.enqueue(asrSegmentSplice, asr_Resource->asrShareOpt, asr_Resource->asrShareResource, wave_splice, decoder_splice, waveDataInfo);
 
 				task_all[key].waveData.pop();
 			}
@@ -164,10 +166,51 @@ void server_asr(void *pHandle) {
 int asr_online_start_server(void *pHandle, int num_thread) {
 	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
 	ThreadPool *pool = new ThreadPool(num_thread);
-	asr_Resource->pool = pool;
+	std::map<std::string, ONE_CONSUMER> *task_all = new std::map<std::string, ONE_CONSUMER>();
+	std::mutex *mtxMap = new std::mutex();
 
-	std::thread server_pool(server_asr, pHandle);
+	asr_Resource->pool = pool;
+	asr_Resource->task_all = task_all;
+	asr_Resource->mtxMap = mtxMap;
+	std::thread server_pool(server_asr_pool, pHandle);
 	server_pool.detach();
 
+	return 0;
+}
+
+int asr_online_consumer_init(const char *userId, void *pHandle) {
+	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
+	std::unique_lock<std::mutex> lock(*asr_Resource->mtxMap);
+
+	std::map<std::string, ONE_CONSUMER> *task_all = asr_Resource->task_all;
+
+	ONE_CONSUMER one_people_task;
+
+	//(*task_all)[userId].decoderSaveState = new DecoderSaveState();
+	//(*task_all)[userId].waveDataInfo = new WaveDataInfo();
+
+
+	OnlineNnet2FeaturePipeline *feature_pipeline = new OnlineNnet2FeaturePipeline(*(asr_Resource->asrShareOpt->feature_info));
+	SingleUtteranceNnet3Decoder *decoder = new SingleUtteranceNnet3Decoder(*(asr_Resource->asrShareOpt->decoder_opts), *(asr_Resource->asrShareResource->trans_model),
+		*(asr_Resource->asrShareOpt->decodable_info),
+		asr_Resource->asrShareResource->wfst, feature_pipeline);
+
+	DecoderSaveState  *decoderSaveState = new DecoderSaveState();
+	decoderSaveState->num_done = 0;
+	decoderSaveState->decoder = decoder;
+	decoderSaveState->feature_pipeline = feature_pipeline;
+
+	WaveDataInfo * waveDataInfo = new WaveDataInfo();
+	waveDataInfo->chunk_length = 400;
+	waveDataInfo->eos = false;
+	waveDataInfo->flag_end = false;
+	waveDataInfo->num_pushed = 0;
+	waveDataInfo->sample_rate = 1600;
+	waveDataInfo->traceback_period_secs = 0.40;
+
+	one_people_task.decoderSaveState = decoderSaveState;
+	one_people_task.waveDataInfo = waveDataInfo;
+
+	task_all->emplace(std::pair<std::string, ONE_CONSUMER>(userId, one_people_task));
 	return 0;
 }

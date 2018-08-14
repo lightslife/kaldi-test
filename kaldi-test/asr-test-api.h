@@ -17,7 +17,7 @@ extern "C" {
 								);
 
 	int asr_online_start_server(void *pHandle,int num_thread);
-	int asr_online_consumer_init();
+	int asr_online_consumer_init(const char *userId,void *pHandle);
 	int asr_online_consumer_decode();
 	int asr_online_consumer_finish();
 	int asr_online_stop_server();

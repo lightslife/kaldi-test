@@ -7,7 +7,6 @@
 int main()
 {
 
-
 	//初始化模型
 	void *pHandle=NULL;
 	const char*acModel = "../16k-model/final.mdl";
@@ -15,7 +14,11 @@ int main()
 	const char*decoderGraph = "../16k-model/HCLG.fst.vector";
 	asr_online_resource_init(&pHandle, acModel, wordsFile, decoderGraph);
 
+	//kaldi::Asr_Init_RESOURCE_STRU *asr_Resource = (kaldi::Asr_Init_RESOURCE_STRU*)pHandle;
+	
 	asr_online_start_server(pHandle, 2);
+
+	asr_online_consumer_init("speaker1", pHandle);
 
 
 	//模拟语音送入，可以使用两个线程分开送语音和识别

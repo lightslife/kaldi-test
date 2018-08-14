@@ -13,6 +13,8 @@
 #include <vector>
 #include <string>
 #include "ThreadPool.h"
+#include <mutex>
+
 namespace kaldi {
 
 	typedef struct AsrShareOpt {
@@ -81,7 +83,7 @@ namespace kaldi {
 		int num_done;
 	};
 	struct ONE_CONSUMER {
-		WaveDataInfo waveDataInfo;
+		WaveDataInfo *waveDataInfo;
 		DecoderSaveState *decoderSaveState;
 		std::queue<WaveSpliceData> waveData;
 	};
@@ -91,6 +93,7 @@ namespace kaldi {
 		AsrShareOpt *asrShareOpt;
 		ThreadPool *pool;
 		std::map<std::string, ONE_CONSUMER> *task_all;
+		std::mutex *mtxMap;
 		int stop; //0 stands for not need   ;      1 stands for need stop            ; 2 stands for stop done;
 	}Asr_Init_RESOURCE_STRU, *Asr_Init_RESOURCE_PST;
 
