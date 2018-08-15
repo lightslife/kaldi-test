@@ -68,7 +68,7 @@ for (int i = 0; i < 20; i++) {
 	WaveDataInfo_old waveDataInfo;
 
 	//模拟语音送入，可以使用两个线程分开送语音和识别
-	const char * wavename = "../16k-model/down42_2.wav";
+	const char * wavename = "../16k-model/test.wav";
 	FILE *fp;
 	fp = fopen(wavename, "rb");
 	fseek(fp, 0, SEEK_END);
@@ -199,6 +199,7 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 	decoderSaveState->decoder = decoder;
 	decoderSaveState->feature_pipeline = feature_pipeline;
 	decoderSaveState->last_trackback = 0.0;
+	decoderSaveState->num_seconds_decoded = 0.0;
 
 	WaveDataInfo * waveDataInfo = new WaveDataInfo();
 	waveDataInfo->chunk_length = 400;
@@ -207,7 +208,7 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 	waveDataInfo->num_pushed = 0;
 	waveDataInfo->sample_rate = 16000;
 	waveDataInfo->traceback_period_secs = 0.40;
-
+	
 	one_people_task.decoderSaveState = decoderSaveState;
 	one_people_task.waveDataInfo = waveDataInfo;
 

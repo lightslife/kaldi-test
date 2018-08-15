@@ -1082,7 +1082,7 @@ void VectorBase<double>::AddVec(const double alpha, const VectorBase<float> &v);
 
 template<typename Real>
 int  VectorBase<Real>::ReadFromSpliceData(const float *data, int length) {
-	memcpy(data_, data, length);
+	memcpy(data_, data, length*sizeof(float));
 	return 0;
 }
 

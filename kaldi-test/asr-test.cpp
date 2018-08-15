@@ -32,7 +32,7 @@ int main()
 	short *data = new short[length / 2];
 	fread(data, sizeof(short), length / 2, fp);
 
-	int length_splice = 6400;
+	int length_splice = 6000;
 	int i = 0;
 	while (i < length / 2-length_splice) {
 		asr_online_consumer_decode("speaker1",data + i, length_splice, pHandle);
