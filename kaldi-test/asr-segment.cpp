@@ -80,7 +80,7 @@ namespace kaldi {
 		int num_process = waveSpliceData.num_record;
 
 		bool to_final = false;
-		while (true) {
+		while (true) {//TODO
 			wave_part.ReadFromSpliceData(waveSpliceData.data, waveSpliceData.length);
 
 			//*more_data = wave_part.ReadFromQueue(&(waveDataInfo->waveQueue));

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <thread>
 #include <chrono>
-#include "asr-test-api.h"
+#include "asr-online-api.h"
 #include "kaldi-types.h"
 #include <iostream>
 #include "transition-model.h"
@@ -134,7 +134,7 @@ void server_asr_pool(void *pHandle) {
 
 			WaveDataInfo *&waveDataInfo = task_all[key].waveDataInfo;
 
-			if (waveDataInfo->flag_end) {
+			if (waveDataInfo->flag_end  ) { 
 				//释放资源
 				task_all.erase(iterMap);
 				break;
@@ -213,4 +213,65 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 
 	task_all->emplace(std::pair<std::string, ONE_CONSUMER>(userId, one_people_task));
 	return 0;
+}
+
+int asr_online_consumer_decode(const char *userId, short *srcdata, int length, void *pHandle) {
+	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
+	std::unique_lock<std::mutex> lock(*asr_Resource->mtxMap);
+
+	std::map<std::string, ONE_CONSUMER> &task_all = *(asr_Resource->task_all);
+	ONE_CONSUMER &this_people = task_all[userId];
+
+	int &num_record = task_all[userId].waveDataInfo->num_pushed;
+	//short to float 
+
+	float *wavedata = (float*)malloc(length * sizeof(float));
+
+	for (int i = 0; i < length; i++) {
+		wavedata[i] = (float)srcdata[i];
+	}
+	WaveSpliceData waveSpliceData;
+	waveSpliceData.data = wavedata;
+	waveSpliceData.length = length;
+	waveSpliceData.num_record = ++num_record; //from 1 2 3...
+	this_people.waveData.emplace(waveSpliceData);
+}
+
+
+int asr_online_consumer_finish(const char *userId, void *pHandle) {
+	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
+	std::unique_lock<std::mutex> lock(*asr_Resource->mtxMap);
+
+	std::map<std::string, ONE_CONSUMER> &task_all = *(asr_Resource->task_all);
+	ONE_CONSUMER &this_people = task_all[userId];
+	this_people.waveDataInfo->eos = true;
+	//TODO 发送结束标识
+
+	return 0;
+}
+
+int asr_online_stop_server(void *pHandle) {
+	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
+	std::unique_lock<std::mutex> lock(*asr_Resource->mtxMap);
+
+	int  &stop = asr_Resource->stop;
+
+	while (stop != 2) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+	return 0;
+}
+
+int asr_online_release_resource(void *pHandle) {
+	Asr_Init_RESOURCE_STRU *asr_Resource = (Asr_Init_RESOURCE_STRU *)pHandle;
+
+	if (asr_Resource->asrShareOpt != NULL) {
+		delete asr_Resource->asrShareOpt;
+		asr_Resource->asrShareOpt = NULL;
+	}
+	if (asr_Resource->asrShareResource != NULL) {
+		delete asr_Resource->asrShareResource;
+		asr_Resource->asrShareResource = NULL;
+	}
+
 }

@@ -18,10 +18,10 @@ extern "C" {
 
 	int asr_online_start_server(void *pHandle,int num_thread);
 	int asr_online_consumer_init(const char *userId,void *pHandle);
-	int asr_online_consumer_decode();
-	int asr_online_consumer_finish();
-	int asr_online_stop_server();
-	int asr_online_release_resource();
+	int asr_online_consumer_decode(const char *userId, short *srcdata, int length, void *pHandle);
+	int asr_online_consumer_finish(const char *userId, void *pHandle);
+	int asr_online_stop_server(void *pHandle);
+	int asr_online_release_resource(void *pHandle);
 
 
 #ifdef __cplusplus

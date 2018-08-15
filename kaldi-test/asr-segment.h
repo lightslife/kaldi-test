@@ -47,7 +47,11 @@ namespace kaldi {
 		int length;
 		float *data;
 		int num_record;
-
+		WaveSpliceData(){
+			length = 0;
+			data = NULL;
+			num_record = 0;
+		}
 		WaveSpliceData(const WaveSpliceData &src) {
 			this->data = (float*)malloc(length*sizeof(float));
 			memcpy(this->data, src.data, length*sizeof(float));
