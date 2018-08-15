@@ -53,13 +53,15 @@ namespace kaldi {
 			num_record = 0;
 		}
 		WaveSpliceData(const WaveSpliceData &src) {
-			this->data = (float*)malloc(length*sizeof(float));
-			memcpy(this->data, src.data, length*sizeof(float));
+			this->data = (float*)malloc(src.length*sizeof(float));
+			length = src.length;
+			num_record = src.num_record;
+			memcpy(this->data, src.data, src.length*sizeof(float));
 		}
 
 		WaveSpliceData& operator =(const WaveSpliceData& src) {
-			this->data = (float*)malloc(length * sizeof(float));
-			memcpy(this->data, src.data, length * sizeof(float));
+			this->data = (float*)malloc(src.length * sizeof(float));
+			memcpy(this->data, src.data, src.length * sizeof(float));
 		}
 
 		~WaveSpliceData() {
@@ -85,6 +87,8 @@ namespace kaldi {
 		SingleUtteranceNnet3Decoder *decoder;//something wrong.
 		OnlineNnet2FeaturePipeline *feature_pipeline;
 		int num_done;
+		float last_trackback;
+		float num_seconds_decoded;
 	};
 	struct ONE_CONSUMER {
 		WaveDataInfo *waveDataInfo;

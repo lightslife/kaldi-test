@@ -336,10 +336,10 @@
     <ClInclude Include="asr-segment.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="asr-test-api.h">
+    <ClInclude Include="ThreadPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadPool.h">
+    <ClInclude Include="asr-online-api.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -560,7 +560,7 @@
     <ClCompile Include="asr-segment.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="asr-test-api.cpp">
+    <ClCompile Include="asr-online-api.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

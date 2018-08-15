@@ -140,7 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="am-nnet-simple.h" />
-    <ClInclude Include="asr-test-api.h" />
+    <ClInclude Include="asr-online-api.h" />
     <ClInclude Include="basic-filebuf.h" />
     <ClInclude Include="cblas-function.h" />
     <ClInclude Include="common-utils.h" />
@@ -251,7 +251,7 @@
   <ItemGroup>
     <ClCompile Include="am-nnet-simple.cc" />
     <ClCompile Include="asr-segment.cpp" />
-    <ClCompile Include="asr-test-api.cpp" />
+    <ClCompile Include="asr-online-api.cpp" />
     <ClCompile Include="cblas-function.cpp" />
     <ClCompile Include="compressed-matrix.cc" />
     <ClCompile Include="cu-array.cc" />

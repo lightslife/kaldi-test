@@ -142,13 +142,12 @@ void server_asr_pool(void *pHandle) {
 
 			if (task_all[key].waveData.size() == 0) {
 				continue;
-
 			}
 
 			WaveSpliceData &wave_splice = task_all[key].waveData.front();
 			DecoderSaveState *decoder_splice = task_all[key].decoderSaveState;
 
-			if (wave_splice.num_record == decoder_splice->num_done) {
+			if (wave_splice.num_record == decoder_splice->num_done+1) {
 
 				pool.enqueue(asrSegmentSplice, asr_Resource->asrShareOpt, asr_Resource->asrShareResource, wave_splice, decoder_splice, waveDataInfo);
 
@@ -199,13 +198,14 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 	decoderSaveState->num_done = 0;
 	decoderSaveState->decoder = decoder;
 	decoderSaveState->feature_pipeline = feature_pipeline;
+	decoderSaveState->last_trackback = 0.0;
 
 	WaveDataInfo * waveDataInfo = new WaveDataInfo();
 	waveDataInfo->chunk_length = 400;
 	waveDataInfo->eos = false;
 	waveDataInfo->flag_end = false;
 	waveDataInfo->num_pushed = 0;
-	waveDataInfo->sample_rate = 1600;
+	waveDataInfo->sample_rate = 16000;
 	waveDataInfo->traceback_period_secs = 0.40;
 
 	one_people_task.decoderSaveState = decoderSaveState;
@@ -235,6 +235,7 @@ int asr_online_consumer_decode(const char *userId, short *srcdata, int length, v
 	waveSpliceData.length = length;
 	waveSpliceData.num_record = ++num_record; //from 1 2 3...
 	this_people.waveData.emplace(waveSpliceData);
+	return 0;
 }
 
 
@@ -247,6 +248,23 @@ int asr_online_consumer_finish(const char *userId, void *pHandle) {
 	this_people.waveDataInfo->eos = true;
 	//TODO 发送结束标识
 
+	int &num_record = task_all[userId].waveDataInfo->num_pushed;
+	//short to float 
+
+	float *wavedata = (float*)malloc(3* sizeof(float));
+	wavedata[0] =wavedata[1]= wavedata[2] = 0;
+ 
+	WaveSpliceData waveSpliceData;
+	waveSpliceData.data = wavedata;
+	waveSpliceData.length = 3;
+	waveSpliceData.num_record = ++num_record; //from 1 2 3...
+	this_people.waveData.emplace(waveSpliceData);
+
+
+
+
+
+
 	return 0;
 }
 
@@ -256,6 +274,7 @@ int asr_online_stop_server(void *pHandle) {
 
 	int  &stop = asr_Resource->stop;
 
+	stop = 1;
 	while (stop != 2) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
@@ -273,5 +292,5 @@ int asr_online_release_resource(void *pHandle) {
 		delete asr_Resource->asrShareResource;
 		asr_Resource->asrShareResource = NULL;
 	}
-
+	return 0;
 }

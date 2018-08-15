@@ -74,34 +74,34 @@ namespace kaldi {
 		SingleUtteranceNnet3Decoder *decoder = decoderState->decoder;
 
 		Vector<BaseFloat> wave_part = Vector<BaseFloat>(waveSpliceData.length);
-		BaseFloat last_traceback = 0.0;
-		BaseFloat num_seconds_decoded = 0.0;
+		BaseFloat &last_traceback = decoderState->last_trackback;
+		BaseFloat &num_seconds_decoded = decoderState->num_seconds_decoded;
 
+		int &num_done = decoderState->num_done;
 		int num_process = waveSpliceData.num_record;
 
 		bool to_final = false;
-		while (true) {//TODO
-			wave_part.ReadFromSpliceData(waveSpliceData.data, waveSpliceData.length);
+		wave_part.ReadFromSpliceData(waveSpliceData.data, waveSpliceData.length);
 
-			//*more_data = wave_part.ReadFromQueue(&(waveDataInfo->waveQueue));
+		//*more_data = wave_part.ReadFromQueue(&(waveDataInfo->waveQueue));
 
-			feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
-			if (num_process== waveDataInfo->num_pushed && waveDataInfo->eos) {
-				feature_pipeline->InputFinished();
-				to_final = true;
-			}
+		feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
+		if (num_process== waveDataInfo->num_pushed && waveDataInfo->eos) {
+			feature_pipeline->InputFinished();
+			to_final = true;
+		}
 
-			decoder->AdvanceDecoding();
-			num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
-			//waveDataInfo->total_time_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+		decoder->AdvanceDecoding();
+		num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+		//waveDataInfo->total_time_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 
-			if (to_final) {
-				break;
-			}
-			//endpoint
-			bool do_endpoint = true;
-			if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected(*asrShareOpt->endpoint_opts))
-				break;
+		if (!to_final) {
+		//endpoint
+		bool do_endpoint = true;
+		if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected(*asrShareOpt->endpoint_opts)) {
+			to_final = true;
+		}
+		else {
 			//partial result
 			if ((num_seconds_decoded - last_traceback > waveDataInfo->traceback_period_secs)
 				&& (decoder->NumFramesDecoded() > 0)) {
@@ -110,22 +110,27 @@ namespace kaldi {
 				std::vector<std::wstring> resultText;
 				decoder->GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
+
+				last_traceback = num_seconds_decoded;
+				}
+			}
+		}//not final 
+		else {
+			//final result
+			if (num_seconds_decoded > 0.1) {
+				decoder->FinalizeDecoding();
+				bool end_of_utterance = true;
+				std::vector<int> olabel;
+				std::vector<std::wstring> resultText;
+				decoder->GetBestPath(end_of_utterance, &olabel);
+				outputText(asrShareResource->wordSymbol, olabel, &resultText);
+				std::cout << std::endl;
+				//³¤¶Î¾²Òô
+				if (resultText.size() == 0 || waveDataInfo->eos)
+					waveDataInfo->flag_end = true;
 			}
 		}
-
-		//final result
-		if (num_seconds_decoded > 0.1) {
-			decoder->FinalizeDecoding();
-			bool end_of_utterance = true;
-			std::vector<int> olabel;
-			std::vector<std::wstring> resultText;
-			decoder->GetBestPath(end_of_utterance, &olabel);
-			outputText(asrShareResource->wordSymbol, olabel, &resultText);
-			std::cout << std::endl;
-			//³¤¶Î¾²Òô
-			if (resultText.size() == 0)
-				waveDataInfo->flag_end = true;
-		}
+		num_done++;
 		return 0;
 	}
 
