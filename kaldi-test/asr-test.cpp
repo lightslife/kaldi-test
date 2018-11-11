@@ -11,9 +11,9 @@ void asr_online_partial_callback(void *userId, stdchar* result_text) {
 	wprintf(L"partial text is: %s \r", result_text);
 }
 
-void asr_online_final_callback(void *userId, stdchar* result_text) {
+void asr_online_final_callback(void *userId, stdchar* result_text , float start_time, float end_time) {
 	setlocale(LC_ALL, "chs");
-	printf("userId is : %s", userId);
+	printf("userId is : %s. start time is %f, end time is %f", userId, start_time,end_time);
 	wprintf(L"\nfinal text is: %s \n", result_text);
 }
 
@@ -23,19 +23,20 @@ int main()
 
 	//初始化模型
 	void *pHandle=NULL;
-	const char*acModel = "../16k-model/final.mdl";
+	const char*acModel = "../8k-model/final.mdl";
 	const char*wordsFile = "words.txt";
-	const char*decoderGraph = "../16k-model/HCLG.fst.vector";
-	asr_online_resource_init(&pHandle, acModel, wordsFile, decoderGraph);
+	const char*decoderGraph = "../8k-model/HCLG.fst.vector";
+	int ret=asr_online_resource_init(&pHandle, acModel, wordsFile, decoderGraph);
+
 	//启动识别服务，参数2为线程池数量，可用作多并发情况，普通情况可设置为1.
-	asr_online_start_server(pHandle, 1);
+	ret=asr_online_start_server(pHandle, 1);
 
 	//进行某客户的识别，userId同一时刻唯一。
 	//每个客户的识别均分为，初始化，识别和结束。
-	asr_online_consumer_init("speaker1", pHandle);
+	ret=asr_online_consumer_init("speaker1", pHandle);
 
 	//模拟语音送入，可以使用两个线程分开送语音和识别
-	const char * wavename = "../16k-model/up4-1.wav";
+	const char * wavename = "../8k-model/test3.wav";
 	FILE *fp;
 	fp = fopen(wavename, "rb");
 	fseek(fp, 0, SEEK_END);

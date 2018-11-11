@@ -200,13 +200,14 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 	decoderSaveState->feature_pipeline = feature_pipeline;
 	decoderSaveState->last_trackback = 0.0;
 	decoderSaveState->num_seconds_decoded = 0.0;
+	decoderSaveState->last_sentence_end = 0.0;
 
 	WaveDataInfo * waveDataInfo = new WaveDataInfo();
 	waveDataInfo->chunk_length = 400;
 	waveDataInfo->eos = false;
 	waveDataInfo->flag_end = false;
 	waveDataInfo->num_pushed = 0;
-	waveDataInfo->sample_rate = 16000;
+	waveDataInfo->sample_rate = 8000;
 	waveDataInfo->traceback_period_secs = 0.40;
 	waveDataInfo->userId = userId;
 

@@ -90,6 +90,7 @@ namespace kaldi {
 		int num_done;
 		float last_trackback;
 		float num_seconds_decoded;
+		float last_sentence_end;
 	};
 	struct ONE_CONSUMER {
 		WaveDataInfo *waveDataInfo;

@@ -78,6 +78,7 @@ namespace kaldi {
 		Vector<BaseFloat> wave_part = Vector<BaseFloat>(waveSpliceData.length);
 		BaseFloat &last_traceback = decoderState->last_trackback;
 		BaseFloat &num_seconds_decoded = decoderState->num_seconds_decoded;
+		float &last_sentence_end = decoderState->last_sentence_end;
 
 		int &num_done = decoderState->num_done;
 		int num_process = waveSpliceData.num_record;
@@ -129,10 +130,11 @@ namespace kaldi {
 				std::vector<std::wstring> resultText;
 				decoder->GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
-				void(*fp_final)(void * userId,stdchar* result_text);
+				void(*fp_final)(void * userId,stdchar* result_text, float start_time, float end_time);
 				fp_final = asr_online_final_callback;
 				std::wstring sum = std::accumulate(resultText.begin(), resultText.end(),(std::wstring)L"");
-				fp_final((char*)waveDataInfo->userId, (stdchar*)sum.c_str());
+				fp_final((char*)waveDataInfo->userId, (stdchar*)sum.c_str(), last_sentence_end, num_seconds_decoded);
+				last_sentence_end = num_seconds_decoded;
 				//std::cout << std::endl;
 				//³¤¶Î¾²Òô
 				if (resultText.size() == 0 || waveDataInfo->eos)
@@ -195,10 +197,8 @@ namespace kaldi {
 	}
 
 	int asrSetWaveInfo(WaveDataInfo_old *waveDataInfo) {
-
-
 		waveDataInfo->chunk_length = 6000;
-		waveDataInfo->sample_rate = 16000;  //8k-model
+		waveDataInfo->sample_rate = 8000;  //8k-model
 		waveDataInfo->traceback_period_secs = 0.25;
 		return 0;
 	}

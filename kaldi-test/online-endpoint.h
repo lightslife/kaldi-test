@@ -149,7 +149,7 @@ struct OnlineEndpointConfig {
   OnlineEndpointRule rule5;
 
   OnlineEndpointConfig():
-      rule1(false, 5.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),
+      rule1(false, 2.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),
       rule2(true, 0.5, 2.0, 0.0),
       rule3(true, 1.0, 8.0, 0.0),
       rule4(true, 2.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),

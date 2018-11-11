@@ -37,7 +37,7 @@ extern "C" {
 
 	void asr_online_partial_callback(void *userId, stdchar* result_text);
 
-	void asr_online_final_callback(void *userId, stdchar* result_text);
+	void asr_online_final_callback(void *userId, stdchar* result_text,float start_time, float end_time);
 
 #ifdef __cplusplus
 }
