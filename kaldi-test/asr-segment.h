@@ -77,6 +77,7 @@ namespace kaldi {
 		BaseFloat traceback_period_secs;
 		int sample_rate;
 		int num_pushed;
+		const char *userId;
 		bool eos;//客户端主动结束
 		bool flag_end; //长静音，引擎识别结束。
 

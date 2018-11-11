@@ -5,6 +5,8 @@
 #include "online-nnet3-decoding.h"
 #include "outputText.h"
 #include "nnet-utils.h"
+#include "asr-online-api.h"
+#include <numeric>
 namespace kaldi {
 
 
@@ -110,7 +112,10 @@ namespace kaldi {
 				std::vector<std::wstring> resultText;
 				decoder->GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
-
+				void(*fp_partial)(void * userId, stdchar* result_text);
+				fp_partial = asr_online_partial_callback;
+				std::wstring sum = std::accumulate(resultText.begin(), resultText.end(), (std::wstring)L"");
+				fp_partial((char*)waveDataInfo->userId, (stdchar*)sum.c_str());
 				last_traceback = num_seconds_decoded;
 				}
 			}
@@ -124,7 +129,11 @@ namespace kaldi {
 				std::vector<std::wstring> resultText;
 				decoder->GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
-				std::cout << std::endl;
+				void(*fp_final)(void * userId,stdchar* result_text);
+				fp_final = asr_online_final_callback;
+				std::wstring sum = std::accumulate(resultText.begin(), resultText.end(),(std::wstring)L"");
+				fp_final((char*)waveDataInfo->userId, (stdchar*)sum.c_str());
+				//std::cout << std::endl;
 				//³¤¶Î¾²Òô
 				if (resultText.size() == 0 || waveDataInfo->eos)
 					waveDataInfo->flag_end = true;

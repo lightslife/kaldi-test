@@ -17,7 +17,7 @@ namespace kaldi {
 			int idState = olabel[i];
 			if (idState > 11) {
 				resultText->push_back((*wordSymbol)[idState]);
-				std::wcout << (*wordSymbol)[idState] ;
+				//std::wcout << (*wordSymbol)[idState] ;
 			}
 		}
 		std::cout <<'\r';

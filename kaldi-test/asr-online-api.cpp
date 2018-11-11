@@ -208,7 +208,8 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 	waveDataInfo->num_pushed = 0;
 	waveDataInfo->sample_rate = 16000;
 	waveDataInfo->traceback_period_secs = 0.40;
-	
+	waveDataInfo->userId = userId;
+
 	one_people_task.decoderSaveState = decoderSaveState;
 	one_people_task.waveDataInfo = waveDataInfo;
 
