@@ -138,8 +138,29 @@ namespace kaldi {
 				last_sentence_end = num_seconds_decoded;
 				//std::cout << std::endl;
 				//长段静音
-				if (resultText.size() == 0 || eos==true )
+				if (resultText.size() == 0 || eos == true) {//一句话为空，结束识别
+					if (feature_pipeline != NULL) {
+						delete feature_pipeline;
+						feature_pipeline = NULL;
+					}
+					if (decoder != NULL) {
+						delete decoder;
+						decoder = NULL;
+					}
 					waveDataInfo->flag_end = true;
+				}else { // 一句话结束，重新开始识别新的一句话
+/*					if (feature_pipeline != NULL) {
+						delete feature_pipeline;
+						feature_pipeline = new OnlineNnet2FeaturePipeline(*(asrShareOpt->feature_info));
+					}
+					if (decoder != NULL) {
+						delete decoder;
+						decoder = new SingleUtteranceNnet3Decoder(*(asrShareOpt->decoder_opts), *asrShareResource->trans_model,
+							*(asrShareOpt->decodable_info),
+							asrShareResource->wfst, feature_pipeline);
+					}			*/	
+				}// 一句话结束，重新开始识别新的一句话
+					
 			}
 		}
 		num_done++;
