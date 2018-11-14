@@ -204,7 +204,7 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 
 	WaveDataInfo * waveDataInfo = new WaveDataInfo();
 	waveDataInfo->chunk_length = 400;
-	waveDataInfo->eos = false;
+	//waveDataInfo->eos = false;
 	waveDataInfo->flag_end = false;
 	waveDataInfo->num_pushed = 0;
 	waveDataInfo->sample_rate = 8000;
@@ -236,6 +236,7 @@ int asr_online_consumer_decode(const char *userId, short *srcdata, int length, v
 	WaveSpliceData waveSpliceData;
 	waveSpliceData.data = wavedata;
 	waveSpliceData.length = length;
+	waveSpliceData.eos = false;
 	waveSpliceData.num_record = ++num_record; //from 1 2 3...
 	this_people.waveData.emplace(waveSpliceData);
 	return 0;
@@ -248,7 +249,7 @@ int asr_online_consumer_finish(const char *userId, void *pHandle) {
 
 	std::map<std::string, ONE_CONSUMER> &task_all = *(asr_Resource->task_all);
 	ONE_CONSUMER &this_people = task_all[userId];
-	this_people.waveDataInfo->eos = true;
+	//this_people.waveDataInfo->eos = true;
 	//TODO 发送结束标识
 
 	int &num_record = task_all[userId].waveDataInfo->num_pushed;
@@ -260,6 +261,7 @@ int asr_online_consumer_finish(const char *userId, void *pHandle) {
 	WaveSpliceData waveSpliceData;
 	waveSpliceData.data = wavedata;
 	waveSpliceData.length = 3;
+	waveSpliceData.eos = true;
 	waveSpliceData.num_record = ++num_record; //from 1 2 3...
 	this_people.waveData.emplace(waveSpliceData);
 

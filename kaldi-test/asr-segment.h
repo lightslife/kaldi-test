@@ -45,10 +45,12 @@ namespace kaldi {
 
 	struct WaveSpliceData {
 		int length;
+		bool eos;
 		float *data;
 		int num_record;
 		WaveSpliceData(){
 			length = 0;
+			eos = false;
 			data = NULL;
 			num_record = 0;
 		}
@@ -56,6 +58,7 @@ namespace kaldi {
 			this->data = (float*)malloc(src.length*sizeof(float));
 			length = src.length;
 			num_record = src.num_record;
+			eos = src.eos;
 			memcpy(this->data, src.data, src.length*sizeof(float));
 		}
 
@@ -78,7 +81,7 @@ namespace kaldi {
 		int sample_rate;
 		int num_pushed;
 		const char *userId;
-		bool eos;//客户端主动结束
+	//	bool eos;//客户端主动结束
 		bool flag_end; //长静音，引擎识别结束。
 
 	};

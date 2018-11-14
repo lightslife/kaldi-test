@@ -83,28 +83,32 @@ namespace kaldi {
 		int &num_done = decoderState->num_done;
 		int num_process = waveSpliceData.num_record;
 
-		bool to_final = false;
+		bool eos = waveSpliceData.eos;
 		wave_part.ReadFromSpliceData(waveSpliceData.data, waveSpliceData.length);
 
 		//*more_data = wave_part.ReadFromQueue(&(waveDataInfo->waveQueue));
 
 		feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
-		if (num_process== waveDataInfo->num_pushed && waveDataInfo->eos) {
+		if (num_process== waveDataInfo->num_pushed && eos) {
 			feature_pipeline->InputFinished();
-			to_final = true;
+			eos = true;
 		}
 
 		decoder->AdvanceDecoding();
 		num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 		//waveDataInfo->total_time_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 
-		if (!to_final) {
-		//endpoint
-		bool do_endpoint = true;
-		if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected(*asrShareOpt->endpoint_opts)) {
-			to_final = true;
+		bool vad_silence = false;
+
+		if (!eos) {
+			//endpoint
+			bool do_endpoint = true;
+			if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected(*asrShareOpt->endpoint_opts)) {
+				vad_silence = true;
+			}
 		}
-		else {
+
+		if(!eos && !vad_silence) {//not final 
 			//partial result
 			if ((num_seconds_decoded - last_traceback > waveDataInfo->traceback_period_secs)
 				&& (decoder->NumFramesDecoded() > 0)) {
@@ -119,10 +123,7 @@ namespace kaldi {
 				fp_partial((char*)waveDataInfo->userId, (stdchar*)sum.c_str());
 				last_traceback = num_seconds_decoded;
 				}
-			}
-		}//not final 
-		else {
-			//final result
+		}else {//final result
 			if (num_seconds_decoded > 0.1) {
 				decoder->FinalizeDecoding();
 				bool end_of_utterance = true;
@@ -137,7 +138,7 @@ namespace kaldi {
 				last_sentence_end = num_seconds_decoded;
 				//std::cout << std::endl;
 				//³¤¶Î¾²Òô
-				if (resultText.size() == 0 || waveDataInfo->eos)
+				if (resultText.size() == 0 || eos==true )
 					waveDataInfo->flag_end = true;
 			}
 		}
@@ -211,7 +212,7 @@ namespace kaldi {
 		OnlineEndpointConfig *endpoint_opts =new OnlineEndpointConfig();
 
 		BaseFloat chunk_length_secs = 0.18;
-		bool do_endpointing = false;
+		//bool do_endpointing = false;
 		bool online = true;
 
 		OnlineNnet2FeaturePipelineInfo *feature_info=new OnlineNnet2FeaturePipelineInfo(*feature_opts);

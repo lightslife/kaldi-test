@@ -13,7 +13,7 @@ void asr_online_partial_callback(void *userId, stdchar* result_text) {
 
 void asr_online_final_callback(void *userId, stdchar* result_text , float start_time, float end_time) {
 	setlocale(LC_ALL, "chs");
-	printf("userId is : %s. start time is %f, end time is %f", userId, start_time,end_time);
+	printf("userId is : %s. start time is %f, end time is %f\n", userId, start_time,end_time);
 	wprintf(L"\nfinal text is: %s \n", result_text);
 }
 
