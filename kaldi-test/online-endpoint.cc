@@ -127,8 +127,7 @@ bool EndpointDetected(
 	  *sil_length_acc = 0;
   }
   if (trailing_silence_frames == num_frames_decoded) {
-	  *sil_length_acc = trailing_silence_frames*frame_shift_in_seconds + *sil_length_acc;
-	  if (*sil_length_acc > config.rule1.min_trailing_silence)
+	  if (*sil_length_acc + trailing_silence_frames*frame_shift_in_seconds > config.rule1.min_trailing_silence)
 		  return true;
   }
  
