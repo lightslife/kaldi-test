@@ -73,12 +73,12 @@ void SingleUtteranceNnet3Decoder::GetBestPath(bool end_of_utterance,
 }
 
 bool SingleUtteranceNnet3Decoder::EndpointDetected(
-    const OnlineEndpointConfig &config) {
+    const OnlineEndpointConfig &config,float *sil_length_acc) {
   BaseFloat output_frame_shift =
       input_feature_frame_shift_in_seconds_ *
       decodable_.FrameSubsamplingFactor();
   return kaldi::EndpointDetected(config, trans_model_,
-                                 output_frame_shift, decoder_);
+                                 output_frame_shift, decoder_, sil_length_acc);
 }
 
 

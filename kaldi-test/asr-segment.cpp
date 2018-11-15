@@ -39,7 +39,7 @@ namespace kaldi {
 			}
 			//endpoint
 			bool do_endpoint = true;
-			if (do_endpoint && (decoder.NumFramesDecoded() > 0) &&decoder.EndpointDetected(*asrShareOpt->endpoint_opts))
+			if (do_endpoint && (decoder.NumFramesDecoded() > 0) &&decoder.EndpointDetected(*asrShareOpt->endpoint_opts,NULL))
 				break;
 			//partial result
 			if ((num_seconds_decoded - last_traceback > waveDataInfo->traceback_period_secs)
@@ -71,14 +71,15 @@ namespace kaldi {
 
 	int asrSegmentSplice(AsrShareOpt *asrShareOpt, AsrShareResource *asrShareResource, const WaveSpliceData waveSpliceData, DecoderSaveState *decoderState, WaveDataInfo *waveDataInfo) {
 
-		OnlineNnet2FeaturePipeline *feature_pipeline = decoderState->feature_pipeline;
+		OnlineNnet2FeaturePipeline *&feature_pipeline = decoderState->feature_pipeline;
 
-		SingleUtteranceNnet3Decoder *decoder = decoderState->decoder;
+		SingleUtteranceNnet3Decoder *&decoder = decoderState->decoder;
 
 		Vector<BaseFloat> wave_part = Vector<BaseFloat>(waveSpliceData.length);
 		BaseFloat &last_traceback = decoderState->last_trackback;
 		BaseFloat &num_seconds_decoded = decoderState->num_seconds_decoded;
 		float &last_sentence_end = decoderState->last_sentence_end;
+		float &sil_length_acc = decoderState->sil_length_acc;
 
 		int &num_done = decoderState->num_done;
 		int num_process = waveSpliceData.num_record;
@@ -103,7 +104,7 @@ namespace kaldi {
 		if (!eos) {
 			//endpoint
 			bool do_endpoint = true;
-			if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected(*asrShareOpt->endpoint_opts)) {
+			if (do_endpoint && (decoder->NumFramesDecoded() > 0) && decoder->EndpointDetected((*asrShareOpt->endpoint_opts),&sil_length_acc)) {
 				vad_silence = true;
 			}
 		}
@@ -149,7 +150,7 @@ namespace kaldi {
 					}
 					waveDataInfo->flag_end = true;
 				}else { // 一句话结束，重新开始识别新的一句话
-/*					if (feature_pipeline != NULL) {
+					if (feature_pipeline != NULL) {
 						delete feature_pipeline;
 						feature_pipeline = new OnlineNnet2FeaturePipeline(*(asrShareOpt->feature_info));
 					}
@@ -158,7 +159,22 @@ namespace kaldi {
 						decoder = new SingleUtteranceNnet3Decoder(*(asrShareOpt->decoder_opts), *asrShareResource->trans_model,
 							*(asrShareOpt->decodable_info),
 							asrShareResource->wfst, feature_pipeline);
-					}			*/	
+					}			
+					//重复一小段数据，防止丢字
+					bool needsubvector = (waveSpliceData.length <= 3200);
+					if (needsubvector) {
+						feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
+						decoder->AdvanceDecoding();
+						num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+					}
+					else {
+						SubVector<BaseFloat> subwave(wave_part, waveSpliceData.length-3200,3200);
+
+						feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
+						decoder->AdvanceDecoding();
+						num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+					}
+
 				}// 一句话结束，重新开始识别新的一句话
 					
 			}

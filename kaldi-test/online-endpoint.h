@@ -201,7 +201,7 @@ bool EndpointDetected(
     const OnlineEndpointConfig &config,
     const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
-    const LatticeFasterOnlineDecoder &decoder);
+    const LatticeFasterOnlineDecoder &decoder,  float *sil_length_acc);
 
 
 

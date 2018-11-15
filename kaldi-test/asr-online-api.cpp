@@ -201,6 +201,7 @@ int asr_online_consumer_init(const char *userId, void *pHandle) {
 	decoderSaveState->last_trackback = 0.0;
 	decoderSaveState->num_seconds_decoded = 0.0;
 	decoderSaveState->last_sentence_end = 0.0;
+	decoderSaveState->sil_length_acc = 0;
 
 	WaveDataInfo * waveDataInfo = new WaveDataInfo();
 	waveDataInfo->chunk_length = 400;

@@ -112,7 +112,8 @@ bool EndpointDetected(
     const OnlineEndpointConfig &config,
     const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
-    const LatticeFasterOnlineDecoder &decoder) {
+    const LatticeFasterOnlineDecoder &decoder, 
+	float *sil_length_acc) {
   if (decoder.NumFramesDecoded() == 0) return false;
 
   BaseFloat final_relative_cost = decoder.FinalRelativeCost();
@@ -122,8 +123,24 @@ bool EndpointDetected(
                                                       config.silence_phones,
                                                       decoder);
 
-  return EndpointDetected(config, num_frames_decoded, trailing_silence_frames,
+  if (trailing_silence_frames <= 0) {
+	  *sil_length_acc = 0;
+  }
+  if (trailing_silence_frames == num_frames_decoded) {
+	  *sil_length_acc = trailing_silence_frames*frame_shift_in_seconds + *sil_length_acc;
+	  if (*sil_length_acc > config.rule1.min_trailing_silence)
+		  return true;
+  }
+ 
+
+  bool ans=EndpointDetected(config, num_frames_decoded, trailing_silence_frames,
                           frame_shift_in_seconds, final_relative_cost);
+
+  if (ans == true) {
+	  *sil_length_acc = trailing_silence_frames*frame_shift_in_seconds;
+  }
+
+  return ans;
 }
 
 
