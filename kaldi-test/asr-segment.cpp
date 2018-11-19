@@ -135,6 +135,7 @@ namespace kaldi {
 				void(*fp_final)(void * userId,stdchar* result_text, float start_time, float end_time);
 				fp_final = asr_online_final_callback;
 				std::wstring sum = std::accumulate(resultText.begin(), resultText.end(),(std::wstring)L"");
+				//sum = sum + L",";
 				fp_final((char*)waveDataInfo->userId, (stdchar*)sum.c_str(), last_sentence_end, num_seconds_decoded);
 				last_sentence_end = num_seconds_decoded;
 				//std::cout << std::endl;
@@ -165,14 +166,14 @@ namespace kaldi {
 					if (needsubvector) {
 						feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
 						decoder->AdvanceDecoding();
-						num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+						//num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 					}
 					else {
 						SubVector<BaseFloat> subwave(wave_part, waveSpliceData.length-3200,3200);
 
 						feature_pipeline->AcceptWaveform(waveDataInfo->sample_rate, wave_part);
 						decoder->AdvanceDecoding();
-						num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
+						//num_seconds_decoded += 1.0 * wave_part.Dim() / waveDataInfo->sample_rate;
 					}
 
 				}// 一句话结束，重新开始识别新的一句话
