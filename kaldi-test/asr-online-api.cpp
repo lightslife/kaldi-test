@@ -22,7 +22,7 @@
 using namespace kaldi;
 typedef kaldi::int32 int32;
 typedef kaldi::int64 int64;
-template std::map<std::string, ONE_CONSUMER>;
+template class std::map<std::string, ONE_CONSUMER>;
 
 
 int test()

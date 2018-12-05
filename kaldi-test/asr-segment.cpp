@@ -3,7 +3,6 @@
 
 #include "asr-segment.h"
 #include "online-nnet3-decoding.h"
-#include "outputText.h"
 #include "nnet-utils.h"
 #include "asr-online-api.h"
 #include <numeric>
@@ -46,7 +45,7 @@ namespace kaldi {
 				&& (decoder.NumFramesDecoded() > 0)) {
 				bool end_of_utterance = true;
 				std::vector<int> olabel;
-				std::vector<std::wstring> resultText;
+				std::vector<stdstring> resultText;
 				decoder.GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
 			}
@@ -57,7 +56,7 @@ namespace kaldi {
 			decoder.FinalizeDecoding();
 			bool end_of_utterance = true;
 			std::vector<int> olabel;
-			std::vector<std::wstring> resultText;
+			std::vector<stdstring> resultText;
 			decoder.GetBestPath(end_of_utterance, &olabel);
 			outputText(asrShareResource->wordSymbol, olabel,&resultText);
 			std::cout << std::endl;
@@ -115,12 +114,13 @@ namespace kaldi {
 				&& (decoder->NumFramesDecoded() > 0)) {
 				bool end_of_utterance = true;
 				std::vector<int> olabel;
-				std::vector<std::wstring> resultText;
+				std::vector<stdstring> resultText;
 				decoder->GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
 				void(*fp_partial)(void * userId, stdchar* result_text);
 				fp_partial = asr_online_partial_callback;
-				std::wstring sum = std::accumulate(resultText.begin(), resultText.end(), (std::wstring)L"");
+				stdstring sum;
+				sum= std::accumulate(resultText.begin(), resultText.end(), sum);
 				fp_partial((char*)waveDataInfo->userId, (stdchar*)sum.c_str());
 				last_traceback = num_seconds_decoded;
 				}
@@ -129,12 +129,13 @@ namespace kaldi {
 				decoder->FinalizeDecoding();
 				bool end_of_utterance = true;
 				std::vector<int> olabel;
-				std::vector<std::wstring> resultText;
+				std::vector<stdstring> resultText;
 				decoder->GetBestPath(end_of_utterance, &olabel);
 				outputText(asrShareResource->wordSymbol, olabel, &resultText);
 				void(*fp_final)(void * userId,stdchar* result_text, float start_time, float end_time);
 				fp_final = asr_online_final_callback;
-				std::wstring sum = std::accumulate(resultText.begin(), resultText.end(),(std::wstring)L"");
+				stdstring sum;
+				sum= std::accumulate(resultText.begin(), resultText.end(), sum);
 				//sum = sum + L",";
 				fp_final((char*)waveDataInfo->userId, (stdchar*)sum.c_str(), last_sentence_end, num_seconds_decoded);
 				last_sentence_end = num_seconds_decoded;
@@ -198,7 +199,7 @@ namespace kaldi {
 	int asrLoadResource(const char* wordsName, const char*modelName, const char* wfstName, AsrShareResource *asrShareResource) {
 
 		//∂¡»Î¥ ±Ì
-		std::vector<std::wstring> *wordSymbol =new std::vector<std::wstring>();
+		std::vector<stdstring> *wordSymbol =new std::vector<stdstring>();
 		asrShareResource->wordSymbol = wordSymbol;
 		readSymbol(wordsName, asrShareResource->wordSymbol  );
 

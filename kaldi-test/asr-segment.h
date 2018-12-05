@@ -14,8 +14,12 @@
 #include <string>
 #include "ThreadPool.h"
 #include <mutex>
-
+#include "outputText.h"
 namespace kaldi {
+
+
+
+
 
 	typedef struct AsrShareOpt {
 		kaldi::OnlineNnet2FeaturePipelineInfo *feature_info;
@@ -30,7 +34,7 @@ namespace kaldi {
 		kaldi::Wfst *wfst;
 		kaldi::nnet3::AmNnetSimple *am_nnet;
 		kaldi::TransitionModel *trans_model;
-		std::vector<std::wstring> *wordSymbol;
+		std::vector<stdstring> *wordSymbol;
 	}AsrShareResource, *AsrShareResourcePst;
 
 

@@ -8,7 +8,10 @@ extern "C" {
 
 #ifdef _WIN32
 	typedef 	wchar_t stdchar;
+#else 
+	typedef 	char stdchar;
 #endif // _WIN32
+
 
 	//资源初始化
 	int asr_online_resource_init(

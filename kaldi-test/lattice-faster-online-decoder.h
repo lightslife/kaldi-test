@@ -111,16 +111,16 @@ namespace kaldi {
 		/// PruneActiveTokensFinal().
 		void FinalizeDecoding();
 
-		LatticeFasterOnlineDecoder::BestPathIterator LatticeFasterOnlineDecoder::TraceBackBestPath(
+		BestPathIterator TraceBackBestPath(
 			BestPathIterator iter, StateId *ostateId, StateId *istateId=NULL) const;
 		// Returns the number of frames decoded so far.  The value returned changes
 		// whenever we call ProcessEmitting().
 		inline int32 NumFramesDecoded() const { return active_toks_.size() - 1; }
 
 
-		bool LatticeFasterOnlineDecoder::GetBestPath(std::vector<int> *olabel,
+		bool GetBestPath(std::vector<int> *olabel,
 			bool use_final_probs) const;
-		BaseFloat LatticeFasterOnlineDecoder::FinalRelativeCost() const;
+		BaseFloat FinalRelativeCost() const;
 	private:
 		typedef int  Label;
 

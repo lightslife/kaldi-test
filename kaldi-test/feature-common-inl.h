@@ -45,8 +45,8 @@ void OfflineFeatureTpl<F>::ComputeFeatures(
 
       // Downsample the waveform.
       Vector<BaseFloat> downsampled_wave(wave);
-      DownsampleWaveForm(sample_freq, wave,
-                         new_sample_freq, &downsampled_wave);
+      //DownsampleWaveForm(sample_freq, wave,
+        //                 new_sample_freq, &downsampled_wave);
       Compute(downsampled_wave, vtln_warp, output);
     } else
       KALDI_ERR << "The waveform is allowed to get downsampled."

@@ -9,7 +9,7 @@
 namespace kaldi {
 
 
-	int outputText(std::vector<std::wstring> *wordSymbol, std::vector<int> olabel,std::vector<std::wstring> *resultText) {
+	int outputText(std::vector<stdstring> *wordSymbol, std::vector<int> olabel,std::vector<stdstring> *resultText) {
 
 		std::locale china("chs");
 		std::wcout.imbue(china);
@@ -25,13 +25,15 @@ namespace kaldi {
 	}
 
 
-	int readSymbol(const char* filename, std::vector<std::wstring> *wordSymbol) {
+	int readSymbol(const char* filename, std::vector<stdstring> *wordSymbol) {
 
 		std::string temp;
 		std::ifstream wordsFile(filename);
+
+#ifdef _WIN32
 		std::locale china("chs");
 		std::wcout.imbue(china);
-		std::wstring wtemp;
+		stdstring wtemp;
 		std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
 
 		while (std::getline(wordsFile, temp)) {
@@ -39,6 +41,12 @@ namespace kaldi {
 			wordSymbol->push_back(wtemp);
 			//std::wcout << wtemp << std::endl;
 		}
+#else 
+		while (std::getline(wordsFile, temp)) {
+			wordSymbol->push_back(temp);
+			//std::wcout << wtemp << std::endl;
+		}
+#endif
 		return 0;
 	}
 }//namespace

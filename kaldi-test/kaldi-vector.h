@@ -136,11 +136,11 @@ class VectorBase {
 
   /// Applies floor to all elements. Returns number of elements
   /// floored in floored_count if it is non-null.
-  void ApplyFloor(Real floor_val, MatrixIndexT *floored_count = nullptr);
+  void ApplyFloor(Real floor_val, MatrixIndexT *floored_count = NULL);
 
   /// Applies ceiling to all elements. Returns number of elements
   /// changed in ceiled_count if it is non-null.
-  void ApplyCeiling(Real ceil_val, MatrixIndexT *ceiled_count = nullptr);
+  void ApplyCeiling(Real ceil_val, MatrixIndexT *ceiled_count = NULL);
 
   /// Applies floor to all elements. Returns number of elements floored.
   MatrixIndexT ApplyFloor(const VectorBase<Real> &floor_vec);

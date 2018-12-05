@@ -3,6 +3,7 @@
 #ifndef  __CBLAS_FUNCTION_H__
 #define __CBLAS_FUNCTION_H__
 
+#include <cstddef>
 namespace kaldi {
 
  
