@@ -11,6 +11,7 @@ namespace kaldi {
 
 	int outputText(std::vector<stdstring> *wordSymbol, std::vector<int> olabel,std::vector<stdstring> *resultText) {
 
+#ifdef _WIN32
 		std::locale china("chs");
 		std::wcout.imbue(china);
 		for (int i = olabel.size() - 1; i >= 0; i--) {
@@ -20,7 +21,17 @@ namespace kaldi {
 				//std::wcout << (*wordSymbol)[idState] ;
 			}
 		}
-		std::cout <<'\r';
+#else
+ 
+		for (int i = olabel.size() - 1; i >= 0; i--) {
+			int idState = olabel[i];
+			if (idState > 11) {
+				resultText->push_back((*wordSymbol)[idState]);
+				//std::wcout << (*wordSymbol)[idState] ;
+			}
+		}
+#endif
+ 
 		return 0;
 	}
 

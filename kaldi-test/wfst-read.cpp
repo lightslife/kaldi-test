@@ -23,8 +23,8 @@ namespace kaldi {
 		startState = fsthead.start_;
 		numStates = fsthead.numstates_;
 		int StateSize = numStates * sizeof(State);
-		pStates = (void*) malloc(StateSize);
-
+		//pStates = (void*) malloc(StateSize);
+		pStates = new State[numStates];
 
 		for (int64 j = 0; j < fsthead.numstates_; j++) {
 			State *state = ( State*)pStates+j;

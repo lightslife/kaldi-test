@@ -7,11 +7,15 @@
 #include <iostream>
 void asr_online_partial_callback(void *userId, stdchar* result_text) {
 #ifdef _WIN32
-#else 
-#endif // DEBUG
 	//setlocale(LC_ALL, "chs");
 	//printf("userId is : %s", userId);
 	//wprintf(L"partial text is: %s \r", result_text);
+#else 
+	//setlocale(LC_ALL, "chs");
+	//printf("userId is : %s", userId);
+	printf("partial text is: %s \r", result_text);
+#endif // DEBUG
+
 }
 
 void asr_online_final_callback(void *userId, stdchar* result_text , float start_time, float end_time) {
@@ -30,6 +34,7 @@ void asr_online_final_callback(void *userId, stdchar* result_text , float start_
 	}
 
 #else 
+	printf("final text is: %s \n", result_text);
 #endif // DEBUG
 
 
