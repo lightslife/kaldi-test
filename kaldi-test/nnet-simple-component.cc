@@ -431,25 +431,74 @@ void* SigmoidComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
 //}
 
 
-//
-//void* NoOpComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
-//                              const CuMatrixBase<BaseFloat> &in,
-//                              CuMatrixBase<BaseFloat> *out) const {
-//  out->CopyFromMat(in);
-//  return NULL;
-//}
-//
-//void NoOpComponent::Backprop(const std::string &debug_info,
-//                             const ComponentPrecomputedIndexes *indexes,
-//                             const CuMatrixBase<BaseFloat> &,
-//                             const CuMatrixBase<BaseFloat> &,
-//                             const CuMatrixBase<BaseFloat> &out_deriv,
-//                             void *memo,
-//                             Component *to_update, // may be NULL; may be identical
-//                             // to "this" or different.
-//                             CuMatrixBase<BaseFloat> *in_deriv) const {
-//  in_deriv->CopyFromMat(out_deriv);
-//}
+
+void* NoOpComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                              const CuMatrixBase<BaseFloat> &in,
+                              CuMatrixBase<BaseFloat> *out) const {
+  out->CopyFromMat(in);
+  return NULL;
+}
+
+
+void NoOpComponent::Read(std::istream &is, bool binary) {
+	ExpectOneOrTwoTokens(is, binary, "<NoOpComponent>", "<Dim>");
+	ReadBasicType(is, binary, &dim_);
+
+	if (PeekToken(is, binary) == 'V') {
+		// This is the old format, from when NoOpComponent inherited from
+		// NonlinearComponent.
+		backprop_scale_ = 1.0;
+		ExpectToken(is, binary, "<ValueAvg>");
+		CuVector<BaseFloat> temp_vec;
+		temp_vec.Read(is, binary);
+		ExpectToken(is, binary, "<DerivAvg>");
+		temp_vec.Read(is, binary);
+		ExpectToken(is, binary, "<Count>");
+		BaseFloat temp_float;
+		ReadBasicType(is, binary, &temp_float);
+		if (PeekToken(is, binary) == 'O') {
+			ExpectToken(is, binary, "<OderivRms>");
+			temp_vec.Read(is, binary);
+			ExpectToken(is, binary, "<OderivCount>");
+			ReadBasicType(is, binary, &temp_float);
+		}
+		std::string token;
+		ReadToken(is, binary, &token);
+		if (token[0] != '<') {
+			// this should happen only rarely, in case we couldn't push back the
+			// '<' to the stream in PeekToken().
+			token = '<' + token;
+		}
+		if (token == "<NumDimsSelfRepaired>") {
+			ReadBasicType(is, binary, &temp_float);
+			ReadToken(is, binary, &token);
+		}
+		if (token == "<NumDimsProcessed>") {
+			ReadBasicType(is, binary, &temp_float);
+			ReadToken(is, binary, &token);
+		}
+		KALDI_ASSERT(token == "</NoOpComponent>");
+		return;
+	}
+	else {
+		ExpectToken(is, binary, "<BackpropScale>");
+		ReadBasicType(is, binary, &backprop_scale_);
+		ExpectToken(is, binary, "</NoOpComponent>");
+	}
+}
+
+
+void NoOpComponent::Backprop(const std::string &debug_info,
+                             const ComponentPrecomputedIndexes *indexes,
+                             const CuMatrixBase<BaseFloat> &,
+                             const CuMatrixBase<BaseFloat> &,
+                             const CuMatrixBase<BaseFloat> &out_deriv,
+                             void *memo,
+                             Component *to_update, // may be NULL; may be identical
+                             // to "this" or different.
+                             CuMatrixBase<BaseFloat> *in_deriv) const {
+  in_deriv->CopyFromMat(out_deriv);
+}
 //
 //void ClipGradientComponent::Read(std::istream &is, bool binary) {
 //  // might not see the "<NaturalGradientAffineComponent>" part because

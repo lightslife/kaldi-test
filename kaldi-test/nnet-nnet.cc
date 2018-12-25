@@ -728,6 +728,7 @@ void Nnet::Check(bool warn_for_orphans) const {
         const NetworkNode &src_node = nodes_[n-1];
         const Component *c = GetComponent(node.u.component_index);
         int32 src_dim, input_dim = c->InputDim();
+		int FOO = 0;
         try {
           src_dim = src_node.Dim(*this);
         } catch (...) {

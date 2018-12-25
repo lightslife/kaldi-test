@@ -26,7 +26,7 @@
 #include "nnet-simple-component.h"
 #include "nnet-normalize-component.h"
 #include "nnet-general-component.h"
-//#include "nnet-convolutional-component.h"
+#include "nnet-convolutional-component.h"
 //#include "nnet-attention-component.h"
 #include "nnet-parse.h"
 #include "nnet-computation-graph.h"
@@ -63,8 +63,8 @@ ComponentPrecomputedIndexes* ComponentPrecomputedIndexes::NewComponentPrecompute
     ans = new StatisticsPoolingComponentPrecomputedIndexes();
   //} else if (cpi_type == "BackpropTruncationComponentPrecomputedIndexes") {
   //  ans = new BackpropTruncationComponentPrecomputedIndexes();
-  //} else if (cpi_type == "TimeHeightConvolutionComponentPrecomputedIndexes") {
-  //  ans = new TimeHeightConvolutionComponent::PrecomputedIndexes();
+  } else if (cpi_type == "TimeHeightConvolutionComponentPrecomputedIndexes") {
+    ans = new TimeHeightConvolutionComponent::PrecomputedIndexes();
   //} else if (cpi_type == "RestrictedAttentionComponentPrecomputedIndexes") {
   //  ans = new RestrictedAttentionComponent::PrecomputedIndexes();
   } else if (cpi_type == "GeneralDropoutComponentPrecomputedIndexes") {
@@ -127,14 +127,17 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new FixedScaleComponent();
   //} else if (component_type == "FixedBiasComponent") {
   //  ans = new FixedBiasComponent();
-  //} else if (component_type == "NoOpComponent") {
-  //  ans = new NoOpComponent();
+  } else if (component_type == "NoOpComponent") {
+    ans = new NoOpComponent();
   //} else if (component_type == "ClipGradientComponent") {
   //  ans = new ClipGradientComponent();
   //} else if (component_type == "ElementwiseProductComponent") {
   //  ans = new ElementwiseProductComponent();
   //} else if (component_type == "ConvolutionComponent") {
   //  ans = new ConvolutionComponent();
+  }
+  else if (component_type == "TdnnComponent") {
+	  ans = new TdnnComponent();
   //} else if (component_type == "MaxpoolingComponent") {
   //  ans = new MaxpoolingComponent();
   //} else if (component_type == "PermuteComponent") {
@@ -161,17 +164,17 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   //  ans = new DropoutComponent();
   } else if (component_type == "DropoutMaskComponent") {
     ans = new DropoutMaskComponent();
-  //} else if (component_type == "GeneralDropoutComponent") {
-  //  ans = new GeneralDropoutComponent();
+  } else if (component_type == "GeneralDropoutComponent") {
+    ans = new GeneralDropoutComponent();
   } else if (component_type == "BackpropTruncationComponent") {
     ans = new BackpropTruncationComponent();
   } else if (component_type == "LstmNonlinearityComponent") {
     ans = new LstmNonlinearityComponent();
   } else if (component_type == "BatchNormComponent") {
     ans = new BatchNormComponent();
-  //} else if (component_type == "TimeHeightConvolutionComponent") {
-  //  ans = new TimeHeightConvolutionComponent();
-  //} else if (component_type == "RestrictedAttentionComponent") {
+  } else if (component_type == "TimeHeightConvolutionComponent") {
+    ans = new TimeHeightConvolutionComponent();
+  } else if (component_type == "RestrictedAttentionComponent") {
   //  ans = new RestrictedAttentionComponent();
   //} else if (component_type == "SumBlockComponent") {
   //  ans = new SumBlockComponent();

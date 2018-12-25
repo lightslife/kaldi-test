@@ -342,6 +342,12 @@
     <ClInclude Include="asr-online-api.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="nnet-convolutional-component.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="convolution.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -561,6 +567,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="asr-online-api.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-convolutional-component.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="convolution.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="nnet-tdnn-component.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

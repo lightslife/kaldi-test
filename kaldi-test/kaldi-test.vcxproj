@@ -150,6 +150,7 @@
     <ClInclude Include="compressed-matrix.h" />
     <ClInclude Include="const-integer-set-inl.h" />
     <ClInclude Include="const-integer-set.h" />
+    <ClInclude Include="convolution.h" />
     <ClInclude Include="cu-array-inl.h" />
     <ClInclude Include="cu-array.h" />
     <ClInclude Include="cu-common.h" />
@@ -211,6 +212,7 @@
     <ClInclude Include="nnet-computation-graph.h" />
     <ClInclude Include="nnet-computation.h" />
     <ClInclude Include="nnet-compute.h" />
+    <ClInclude Include="nnet-convolutional-component.h" />
     <ClInclude Include="nnet-descriptor.h" />
     <ClInclude Include="nnet-general-component.h" />
     <ClInclude Include="nnet-graph.h" />
@@ -257,6 +259,7 @@
     <ClCompile Include="asr-online-api.cpp" />
     <ClCompile Include="cblas-function.cpp" />
     <ClCompile Include="compressed-matrix.cc" />
+    <ClCompile Include="convolution.cc" />
     <ClCompile Include="cu-array.cc" />
     <ClCompile Include="cu-math.cc" />
     <ClCompile Include="cu-matrix.cc" />
@@ -294,6 +297,7 @@
     <ClCompile Include="nnet-computation-graph.cc" />
     <ClCompile Include="nnet-computation.cc" />
     <ClCompile Include="nnet-compute.cc" />
+    <ClCompile Include="nnet-convolutional-component.cc" />
     <ClCompile Include="nnet-descriptor.cc" />
     <ClCompile Include="nnet-general-component.cc" />
     <ClCompile Include="nnet-graph.cc" />
@@ -303,6 +307,7 @@
     <ClCompile Include="nnet-optimize.cc" />
     <ClCompile Include="nnet-parse.cc" />
     <ClCompile Include="nnet-simple-component.cc" />
+    <ClCompile Include="nnet-tdnn-component.cc" />
     <ClCompile Include="nnet-utils.cc" />
     <ClCompile Include="online-endpoint.cc" />
     <ClCompile Include="online-feature.cc" />

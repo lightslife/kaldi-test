@@ -225,6 +225,7 @@ namespace kaldi {
 			bool binary;
 			Input ki(modelName, &binary);
 			trans_model->Read(ki.Stream(), binary);
+
 			am_nnet->Read(ki.Stream(), binary);
 			SetBatchnormTestMode(true, &(am_nnet->GetNnet()));
 			SetDropoutTestMode(true, &(am_nnet->GetNnet()));
