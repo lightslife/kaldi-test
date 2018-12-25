@@ -17,7 +17,8 @@ namespace kaldi {
 		for (int i = olabel.size() - 1; i >= 0; i--) {
 			int idState = olabel[i];
 			if (idState > 11) {
-				resultText->push_back((*wordSymbol)[idState]);
+				stdstring temp = (*wordSymbol)[idState] + L" ";
+				resultText->push_back(temp);
 				//std::wcout << (*wordSymbol)[idState] ;
 			}
 		}
@@ -26,7 +27,7 @@ namespace kaldi {
 		for (int i = olabel.size() - 1; i >= 0; i--) {
 			int idState = olabel[i];
 			if (idState > 11) {
-				resultText->push_back((*wordSymbol)[idState]);
+				resultText->push_back((*wordSymbol)[idState] + " ");
 				//std::wcout << (*wordSymbol)[idState] ;
 			}
 		}

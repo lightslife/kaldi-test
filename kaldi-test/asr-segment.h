@@ -99,6 +99,7 @@ namespace kaldi {
 		float num_seconds_decoded;
 		float last_sentence_end;
 		float sil_length_acc;
+		std::vector<stdstring> waveFinalResult;
 	};
 	struct ONE_CONSUMER {
 		WaveDataInfo *waveDataInfo;

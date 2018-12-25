@@ -42,6 +42,8 @@ extern "C" {
 
 	void asr_online_final_callback(void *userId, stdchar* result_text,float start_time, float end_time);
 
+	void asr_online_wave_final_callback(void *userId, stdchar* result_text);
+
 #ifdef __cplusplus
 }
 #endif

@@ -136,8 +136,20 @@ namespace kaldi {
 				fp_final = asr_online_final_callback;
 				stdstring sum;
 				sum= std::accumulate(resultText.begin(), resultText.end(), sum);
+				(decoderState->waveFinalResult).push_back(sum);
+
 				//sum = sum + L",";
 				fp_final((char*)waveDataInfo->userId, (stdchar*)sum.c_str(), last_sentence_end, num_seconds_decoded);
+
+				//最终的识别结果
+				if (eos) {
+					void(*fp_wave_final)(void * userId, stdchar* result_text);
+					fp_wave_final = asr_online_wave_final_callback;
+					stdstring sum_last;
+					sum_last = std::accumulate(decoderState->waveFinalResult.begin(), decoderState->waveFinalResult.end(), sum_last);
+					fp_wave_final((char*)waveDataInfo->userId, (stdchar*)sum_last.c_str());
+				}
+
 				last_sentence_end = num_seconds_decoded;
 				//std::cout << std::endl;
 				//长段静音
