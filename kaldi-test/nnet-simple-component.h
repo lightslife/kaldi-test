@@ -1157,6 +1157,8 @@ class NoOpComponent: public NonlinearComponent {
   virtual int32 Properties() const {
     return kSimpleComponent|kPropagateInPlace;
   }
+  virtual int32 InputDim() const { return dim_; }
+  virtual int32 OutputDim() const { return dim_; }
   virtual Component* Copy() const { return new NoOpComponent(*this); }
   virtual void Read(std::istream &is, bool binary);
   virtual void* Propagate(const ComponentPrecomputedIndexes *indexes,
@@ -1170,7 +1172,7 @@ class NoOpComponent: public NonlinearComponent {
                         void *memo,
                         Component *to_update,
                         CuMatrixBase<BaseFloat> *in_deriv) const;
- private:
+ 
 private:
 	int32 dim_;
 	BaseFloat backprop_scale_;

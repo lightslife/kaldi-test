@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
 
 	//初始化模型
 	void *pHandle=NULL;
-	/*std::string acModel = modelDir+"/final.mdl";*/
-	std::string acModel = "../cnn/final.mdl";
+	std::string acModel = modelDir+"/final.mdl";
+	//std::string acModel = "../cnn/final.mdl";
 	std::string wordsFile = modelDir+"/words.txt";
 	std::string decoderGraph = modelDir+"/HCLG.fst.vector";
 	int ret=asr_online_resource_init(&pHandle, acModel.c_str(), wordsFile.c_str(), decoderGraph.c_str());
